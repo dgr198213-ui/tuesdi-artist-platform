@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, InsertArtist, artists, InsertEvent, events, InsertInquiry, inquiries } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,78 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Artists queries
+export async function getArtistByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(artists).where(eq(artists.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getArtistById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(artists).where(eq(artists.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function listArtists(limit: number = 10, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(artists).limit(limit).offset(offset);
+}
+
+export async function createArtist(artist: InsertArtist) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(artists).values(artist);
+  return result;
+}
+
+// Events queries
+export async function getEventById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(events).where(eq(events.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function listEvents(limit: number = 10, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(events).limit(limit).offset(offset);
+}
+
+export async function listEventsByArtist(artistId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(events).where(eq(events.artistId, artistId));
+}
+
+export async function createEvent(event: InsertEvent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(events).values(event);
+  return result;
+}
+
+// Inquiries queries
+export async function createInquiry(inquiry: InsertInquiry) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(inquiries).values(inquiry);
+  return result;
+}
+
+export async function listInquiriesByArtist(artistId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return await db.select().from(inquiries).where(eq(inquiries.artistId, artistId));
+}
+
+export async function getInquiryById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(inquiries).where(eq(inquiries.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}

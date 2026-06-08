@@ -1,50 +1,59 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { useState } from "react";
-import { Search, Calendar, MapPin, Music2 } from "lucide-react";
+import { useLocation } from "wouter";
+import { Search, Calendar, MapPin } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 export default function Eventos() {
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const categories = ["Todos", "Música en Vivo", "DJ", "Teatro", "Danza", "Otros"];
-
-  const events = [
-    {
-      id: 1,
-      title: "Concierto de Luna Martínez",
-      date: "2024-06-15",
-      time: "20:00",
-      venue: "Teatro Principal",
-      city: "Madrid",
-      category: "Música en Vivo",
-      image: "https://via.placeholder.com/300x200",
-      price: "25€",
-    },
-    {
-      id: 2,
-      title: "Noche de DJ Carlos",
-      date: "2024-06-16",
-      time: "22:00",
-      venue: "Club Nocturno",
-      city: "Barcelona",
-      category: "DJ",
-      image: "https://via.placeholder.com/300x200",
-      price: "15€",
-    },
-    {
-      id: 3,
-      title: "The Rock Stars en Vivo",
-      date: "2024-06-17",
-      time: "21:00",
-      venue: "Auditorio Municipal",
-      city: "Valencia",
-      category: "Música en Vivo",
-      image: "https://via.placeholder.com/300x200",
-      price: "30€",
-    },
+  const cities = [
+    "Todas",
+    "Madrid",
+    "Barcelona",
+    "Valencia",
+    "Sevilla",
+    "Bilbao",
+    "Málaga",
   ];
+
+  // Query events with filters
+  const { data: events = [], isLoading } = trpc.events.list.useQuery({
+    limit: 50,
+    offset: 0,
+    city: selectedCity && selectedCity !== "Todas" ? selectedCity : undefined,
+    search: searchTerm || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  });
+
+  const filteredEvents = events.filter((event) => {
+    if (selectedCity && selectedCity !== "Todas" && event.city !== selectedCity) {
+      return false;
+    }
+    if (
+      searchTerm &&
+      !event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !event.description?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !event.venue?.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
+    if (startDate && event.eventDate < startDate) {
+      return false;
+    }
+    if (endDate && event.eventDate > endDate) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,62 +76,127 @@ export default function Eventos() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Category Filter */}
-        <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
-          {categories.map((cat) => (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(cat)}
-              className={selectedCategory === cat ? "bg-primary text-primary-foreground" : "border-border"}
-            >
-              {cat}
-            </Button>
-          ))}
+        {/* Filters */}
+        <div className="mb-8 space-y-4">
+          {/* City Filter */}
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Ciudad</h3>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {cities.map((city) => (
+                <Button
+                  key={city}
+                  variant={selectedCity === city ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCity(city)}
+                  className={
+                    selectedCity === city
+                      ? "bg-primary text-primary-foreground"
+                      : "border-border"
+                  }
+                >
+                  {city}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Date Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-semibold text-foreground block mb-2">
+                Desde
+              </label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-input border-border"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-foreground block mb-2">
+                Hasta
+              </label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-input border-border"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Events List */}
-        <div className="space-y-4">
-          {events.map((event) => (
-            <Card key={event.id} className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-colors cursor-pointer">
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-48 h-48 md:h-auto bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden flex-shrink-0">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform"
-                  />
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center items-center min-h-96">
+            <Spinner />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && filteredEvents.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-lg">
+              No se encontraron eventos con los filtros seleccionados
+            </p>
+          </div>
+        )}
+
+        {/* Events Grid */}
+        {!isLoading && filteredEvents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
+              <Card
+                key={event.id}
+                className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-colors cursor-pointer group"
+                onClick={() => setLocation(`/eventos/${event.id}`)}
+              >
+                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
+                  {event.imageUrl && (
+                    <img
+                      src={event.imageUrl}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  )}
                 </div>
-                <div className="flex-1 p-6 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-foreground">{event.title}</h3>
-                      <span className="text-xs bg-secondary/20 text-secondary-foreground px-3 py-1 rounded">
-                        {event.category}
+                <div className="p-4">
+                  <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
+                    {event.title}
+                  </h3>
+                  <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {event.eventDate} {event.eventTime && `• ${event.eventTime}`}
                       </span>
                     </div>
-                    <p className="text-muted-foreground mb-4">{event.venue}</p>
-                    <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {event.date} • {event.time}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {event.city}
-                      </div>
-                      <div className="font-semibold text-primary">{event.price}</div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>{event.venue}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      <span>{event.city}</span>
                     </div>
                   </div>
-                  <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary/90">
-                    Ver Detalles
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    {event.price && (
+                      <span className="font-semibold text-primary">{event.price}</span>
+                    )}
+                    <Button
+                      size="sm"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Ver Evento
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
