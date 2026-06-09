@@ -1,24 +1,45 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { getLoginUrl } from "@/const";
 import { Music2 } from "lucide-react";
 
 export default function Login() {
-  const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  if (isAuthenticated) {
-    setLocation("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setLocation("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [setLocation]);
 
-  const handleOAuthLogin = () => {
-    window.location.href = getLoginUrl();
+  const handleLogin = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        setLocation("/dashboard");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,12 +84,27 @@ export default function Login() {
               />
             </div>
 
-            {/* OAuth Button */}
+            {/* Password Input */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Contraseña
+              </label>
+              <Input
+                type="password"
+                placeholder="********"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* Login Button */}
             <Button
-              onClick={handleOAuthLogin}
+              onClick={handleLogin}
+              disabled={isLoading}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-2 rounded transition-all"
             >
-              Continuar con Manus
+              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </Button>
 
             {/* Divider */}

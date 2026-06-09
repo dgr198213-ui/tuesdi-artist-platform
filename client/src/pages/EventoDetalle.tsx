@@ -1,39 +1,82 @@
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
-import { useRoute } from "wouter";
+import { useState, useEffect } from "react";
+import { useRoute, useLocation } from "wouter";
 import { Calendar, MapPin, Users, Share2, Heart } from "lucide-react";
 
 export default function EventoDetalle() {
   const [route, params] = useRoute("/eventos/:id");
+  const [, setLocation] = useLocation();
   const [liked, setLiked] = useState(false);
+  const [event, setEvent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const event = {
-    id: params?.id,
-    title: "Concierto de Luna Martínez",
-    date: "2024-06-15",
-    time: "20:00",
-    venue: "Teatro Principal",
-    city: "Madrid",
-    country: "España",
-    category: "Música en Vivo",
-    image: "https://via.placeholder.com/800x400",
-    description: "Un concierto íntimo con Luna Martínez, artista ganadora de múltiples premios. Disfruta de sus mejores canciones en vivo.",
-    price: "25€",
-    artist: {
-      name: "Luna Martínez",
-      verified: true,
-      image: "https://via.placeholder.com/100",
-    },
-    attendees: 234,
-  };
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!params?.id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("events")
+          .select("*, artists(name, verified, avatar_url)")
+          .eq("id", params.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching event:", error);
+        } else {
+          setEvent(data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [params?.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <Button
+              variant="ghost"
+              className="text-primary hover:bg-primary/10"
+              onClick={() => setLocation("/eventos")}
+            >
+              ← Volver
+            </Button>
+          </div>
+        </div>
+        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
+          <p className="text-muted-foreground">Evento no encontrado</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <Button variant="ghost" className="text-primary hover:bg-primary/10">
+          <Button
+            variant="ghost"
+            className="text-primary hover:bg-primary/10"
+            onClick={() => setLocation("/eventos")}
+          >
             ← Volver
           </Button>
         </div>
@@ -43,7 +86,7 @@ export default function EventoDetalle() {
         {/* Hero Image */}
         <div className="relative h-96 rounded-lg overflow-hidden mb-8 bg-gradient-to-br from-primary/20 to-secondary/20">
           <img
-            src={event.image}
+            src={event.image_url}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -85,7 +128,7 @@ export default function EventoDetalle() {
                   <Calendar className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-sm text-muted-foreground">Fecha</p>
-                    <p className="font-semibold text-foreground">{event.date} • {event.time}</p>
+                    <p className="font-semibold text-foreground">{event.event_date} • {event.event_time}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -100,7 +143,7 @@ export default function EventoDetalle() {
                 <Users className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Asistentes</p>
-                  <p className="font-semibold text-foreground">{event.attendees} personas interesadas</p>
+                  <p className="font-semibold text-foreground">{event.attendees || 0} personas interesadas</p>
                 </div>
               </div>
             </Card>
@@ -112,30 +155,35 @@ export default function EventoDetalle() {
             </Card>
 
             {/* Artist Info */}
-            <Card className="bg-card/50 border-border p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Artista</h2>
-              <div className="flex items-center gap-4">
-                <img
-                  src={event.artist.image}
-                  alt={event.artist.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-foreground">{event.artist.name}</h3>
-                    {event.artist.verified && (
-                      <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">
-                        Verificado
-                      </span>
-                    )}
+            {event.artists && (
+              <Card className="bg-card/50 border-border p-6">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Artista</h2>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={event.artists.avatar_url}
+                    alt={event.artists.name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground">{event.artists.name}</h3>
+                      {event.artists.verified && (
+                        <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">
+                          Verificado
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Artista</p>
                   </div>
-                  <p className="text-sm text-muted-foreground">Cantautora</p>
+                  <Button
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => setLocation(`/artista/${event.artist_id}`)}
+                  >
+                    Ver Perfil
+                  </Button>
                 </div>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Ver Perfil
-                </Button>
-              </div>
-            </Card>
+              </Card>
+            )}
           </div>
 
           {/* Right Column - Booking */}

@@ -1,12 +1,16 @@
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Calendar, MapPin, DollarSign, CheckCircle2 } from "lucide-react";
 
 export default function PublicarEvento() {
+  const [, setLocation] = useLocation();
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -34,6 +38,62 @@ export default function PublicarEvento() {
 
   const handlePrev = () => {
     if (step > 1) setStep(step - 1);
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        alert("Debes estar autenticado");
+        return;
+      }
+
+      // Get artist ID
+      const { data: artistData } = await supabase
+        .from("artists")
+        .select("id")
+        .eq("user_id", session.user.id)
+        .single();
+
+      if (!artistData) {
+        alert("No se encontró tu perfil de artista");
+        return;
+      }
+
+      // Insert event
+      const { data, error } = await supabase
+        .from("events")
+        .insert([
+          {
+            title: formData.title,
+            description: formData.description,
+            event_date: formData.date,
+            event_time: formData.time,
+            venue: formData.venue,
+            city: formData.city,
+            country: formData.country,
+            price: formData.price,
+            contact_email: formData.contactEmail,
+            contact_phone: formData.contactPhone,
+            artist_id: artistData.id,
+            status: "published",
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Error creating event:", error);
+        alert("Error al crear el evento");
+      } else {
+        setLocation("/exito-publicacion");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al crear el evento");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -282,8 +342,12 @@ export default function PublicarEvento() {
               Siguiente
             </Button>
           ) : (
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              Publicar Evento
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isSubmitting ? "Publicando..." : "Publicar Evento"}
             </Button>
           )}
         </div>

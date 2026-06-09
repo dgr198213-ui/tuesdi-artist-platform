@@ -1,28 +1,46 @@
-import { useAuth } from "@/_core/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { getLoginUrl } from "@/const";
 import { Music2 } from "lucide-react";
 
 export default function Registro() {
-  const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
+    password: "",
     isArtist: false,
   });
 
-  if (isAuthenticated) {
-    setLocation("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setLocation("/dashboard");
+      }
+    };
+    checkAuth();
+  }, [setLocation]);
 
-  const handleOAuthSignup = () => {
-    window.location.href = getLoginUrl();
+  const handleSignup = async () => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        alert(error.message);
+      } else {
+        alert("Revisa tu correo para confirmar el registro");
+        setLocation("/login");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -53,22 +71,6 @@ export default function Registro() {
           </div>
 
           <div className="space-y-4">
-            {/* Name Input */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Nombre Completo
-              </label>
-              <Input
-                type="text"
-                placeholder="Tu nombre"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
             {/* Email Input */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
@@ -80,6 +82,22 @@ export default function Registro() {
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
+                }
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+              />
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Contraseña
+              </label>
+              <Input
+                type="password"
+                placeholder="********"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
                 }
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
               />
@@ -101,12 +119,12 @@ export default function Registro() {
               </label>
             </div>
 
-            {/* OAuth Button */}
+            {/* Signup Button */}
             <Button
-              onClick={handleOAuthSignup}
+              onClick={handleSignup}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-2 rounded transition-all"
             >
-              Registrarse con Manus
+              Registrarse
             </Button>
 
             {/* Divider */}

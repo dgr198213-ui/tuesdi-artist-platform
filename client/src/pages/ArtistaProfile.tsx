@@ -1,57 +1,87 @@
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoute } from "wouter";
+import { useEffect, useState } from "react";
 import { Mail, Instagram, Music, Globe, MapPin, Star } from "lucide-react";
 
 export default function ArtistaProfile() {
   const [route, params] = useRoute("/artista/:id");
+  const [artist, setArtist] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const artist = {
-    id: params?.id,
-    name: "Luna Martínez",
-    category: "Cantautor/a",
-    bio: "Cantautora independiente con más de 10 años de experiencia en la música en vivo. Especializada en géneros acústicos y folk.",
-    city: "Madrid",
-    country: "España",
-    verified: true,
-    rating: 4.8,
-    reviews: 24,
-    avatar: "https://via.placeholder.com/150",
-    cover: "https://via.placeholder.com/1200x300",
-    photos: [
-      "https://via.placeholder.com/300",
-      "https://via.placeholder.com/300",
-      "https://via.placeholder.com/300",
-    ],
-    socials: {
-      instagram: "https://instagram.com",
-      spotify: "https://spotify.com",
-      website: "https://example.com",
-    },
-    priceFrom: "300€",
-    upcomingEvents: [
-      {
-        id: 1,
-        title: "Concierto en Vivo",
-        date: "2024-06-15",
-        venue: "Teatro Principal",
-      },
-      {
-        id: 2,
-        title: "Sesión Acústica",
-        date: "2024-06-22",
-        venue: "Café Cultural",
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchArtist = async () => {
+      if (!params?.id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("artists")
+          .select("*")
+          .eq("id", params.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching artist:", error);
+        } else {
+          setArtist(data);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchEvents = async () => {
+      if (!params?.id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from("events")
+          .select("*")
+          .eq("artist_id", params.id)
+          .gte("event_date", new Date().toISOString().split("T")[0])
+          .limit(10);
+
+        if (error) {
+          console.error("Error fetching events:", error);
+        } else {
+          setEvents(data || []);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchArtist();
+    fetchEvents();
+  }, [params?.id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!artist) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Artista no encontrado</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
       {/* Cover Image */}
       <div className="relative h-64 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
         <img
-          src={artist.cover}
+          src={artist.cover_url}
           alt="Cover"
           className="w-full h-full object-cover"
         />
@@ -61,7 +91,7 @@ export default function ArtistaProfile() {
       <div className="max-w-4xl mx-auto px-4 -mt-24 relative z-10 mb-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
           <img
-            src={artist.avatar}
+            src={artist.avatar_url}
             alt={artist.name}
             className="w-32 h-32 rounded-full border-4 border-card object-cover"
           />
@@ -78,12 +108,12 @@ export default function ArtistaProfile() {
             <div className="flex items-center gap-4 mb-4 text-sm">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-primary text-primary" />
-                <span className="font-semibold text-foreground">{artist.rating}</span>
-                <span className="text-muted-foreground">({artist.reviews} reseñas)</span>
+                <span className="font-semibold text-foreground">{artist.rating || 0}</span>
+                <span className="text-muted-foreground">({artist.reviews || 0} reseñas)</span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                {artist.city}, {artist.country}
+                {artist.city}, {artist.country || "España"}
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -97,7 +127,7 @@ export default function ArtistaProfile() {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground mb-1">Desde</p>
-            <p className="text-2xl font-bold text-primary">{artist.priceFrom}</p>
+            <p className="text-2xl font-bold text-primary">{artist.price_from || "Consultar"}</p>
           </div>
         </div>
       </div>
@@ -119,45 +149,78 @@ export default function ArtistaProfile() {
               
               <h3 className="text-lg font-semibold text-foreground mb-4">Enlaces</h3>
               <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="border-border hover:bg-muted">
-                  <Instagram className="w-4 h-4 mr-2" />
-                  Instagram
-                </Button>
-                <Button variant="outline" size="sm" className="border-border hover:bg-muted">
-                  <Music className="w-4 h-4 mr-2" />
-                  Spotify
-                </Button>
-                <Button variant="outline" size="sm" className="border-border hover:bg-muted">
-                  <Globe className="w-4 h-4 mr-2" />
-                  Sitio Web
-                </Button>
+                {artist.instagram_url && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-border hover:bg-muted"
+                    onClick={() => window.open(artist.instagram_url)}
+                  >
+                    <Instagram className="w-4 h-4 mr-2" />
+                    Instagram
+                  </Button>
+                )}
+                {artist.spotify_url && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-border hover:bg-muted"
+                    onClick={() => window.open(artist.spotify_url)}
+                  >
+                    <Music className="w-4 h-4 mr-2" />
+                    Spotify
+                  </Button>
+                )}
+                {artist.website_url && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-border hover:bg-muted"
+                    onClick={() => window.open(artist.website_url)}
+                  >
+                    <Globe className="w-4 h-4 mr-2" />
+                    Sitio Web
+                  </Button>
+                )}
               </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="gallery" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {artist.photos.map((photo, idx) => (
-                <div key={idx} className="relative h-48 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 hover:border-primary/50 transition-colors cursor-pointer group">
-                  <img
-                    src={photo}
-                    alt={`Foto ${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                  />
-                </div>
-              ))}
-            </div>
+            {artist.gallery_urls && artist.gallery_urls.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {artist.gallery_urls.map((photo: string, idx: number) => (
+                  <div key={idx} className="relative h-48 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20 hover:border-primary/50 transition-colors cursor-pointer group">
+                    <img
+                      src={photo}
+                      alt={`Foto ${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-card/50 border-border p-6">
+                <p className="text-muted-foreground">No hay fotos disponibles</p>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="events" className="mt-6">
-            <div className="space-y-4">
-              {artist.upcomingEvents.map((event) => (
-                <Card key={event.id} className="bg-card/50 border-border p-4 hover:border-primary/50 transition-colors cursor-pointer">
-                  <h3 className="font-semibold text-foreground">{event.title}</h3>
-                  <p className="text-sm text-muted-foreground">{event.date} • {event.venue}</p>
-                </Card>
-              ))}
-            </div>
+            {events.length > 0 ? (
+              <div className="space-y-4">
+                {events.map((event) => (
+                  <Card key={event.id} className="bg-card/50 border-border p-4 hover:border-primary/50 transition-colors cursor-pointer">
+                    <h3 className="font-semibold text-foreground">{event.title}</h3>
+                    <p className="text-sm text-muted-foreground">{event.event_date} • {event.venue}</p>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-card/50 border-border p-6">
+                <p className="text-muted-foreground">No hay eventos próximos</p>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6">

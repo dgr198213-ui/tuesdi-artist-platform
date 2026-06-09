@@ -1,17 +1,19 @@
+import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Search, MapPin } from "lucide-react";
-import { trpc } from "@/lib/trpc";
 
 export default function ExplorarArtistas() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [selectedCity, setSelectedCity] = useState("");
+  const [artists, setArtists] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const categories = [
     "Todos",
@@ -33,31 +35,45 @@ export default function ExplorarArtistas() {
     "Todas",
   ];
 
-  // Query artists with filters
-  const { data: artists = [], isLoading } = trpc.artists.list.useQuery({
-    limit: 50,
-    offset: 0,
-    category: selectedCategory !== "Todos" ? selectedCategory : undefined,
-    city: selectedCity && selectedCity !== "Todas" ? selectedCity : undefined,
-    search: searchTerm || undefined,
-  });
+  // Fetch artists with filters
+  useEffect(() => {
+    const fetchArtists = async () => {
+      setIsLoading(true);
+      try {
+        let query = supabase.from("artists").select("*");
 
-  const filteredArtists = artists.filter((artist) => {
-    if (selectedCategory !== "Todos" && artist.category !== selectedCategory) {
-      return false;
-    }
-    if (selectedCity && selectedCity !== "Todas" && artist.city !== selectedCity) {
-      return false;
-    }
-    if (
-      searchTerm &&
-      !artist.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !artist.bio?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) {
-      return false;
-    }
-    return true;
-  });
+        if (selectedCategory !== "Todos") {
+          query = query.eq("category", selectedCategory);
+        }
+
+        if (selectedCity && selectedCity !== "Todas") {
+          query = query.eq("city", selectedCity);
+        }
+
+        if (searchTerm) {
+          query = query.or(
+            `name.ilike.%${searchTerm}%,bio.ilike.%${searchTerm}%`
+          );
+        }
+
+        const { data, error } = await query.limit(50);
+
+        if (error) {
+          console.error("Error fetching artists:", error);
+          setArtists([]);
+        } else {
+          setArtists(data || []);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setArtists([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArtists();
+  }, [searchTerm, selectedCategory, selectedCity]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,7 +148,7 @@ export default function ExplorarArtistas() {
         )}
 
         {/* Empty State */}
-        {!isLoading && filteredArtists.length === 0 && (
+        {!isLoading && artists.length === 0 && (
           <div className="text-center py-16">
             <p className="text-muted-foreground text-lg">
               No se encontraron artistas con los filtros seleccionados
@@ -141,18 +157,18 @@ export default function ExplorarArtistas() {
         )}
 
         {/* Artists Grid */}
-        {!isLoading && filteredArtists.length > 0 && (
+        {!isLoading && artists.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredArtists.map((artist) => (
+            {artists.map((artist) => (
               <Card
                 key={artist.id}
                 className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-colors cursor-pointer group"
                 onClick={() => setLocation(`/artista/${artist.id}`)}
               >
                 <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-                  {artist.avatarUrl && (
+                  {artist.avatar_url && (
                     <img
-                      src={artist.avatarUrl}
+                      src={artist.avatar_url}
                       alt={artist.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
