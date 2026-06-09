@@ -53,66 +53,41 @@
   --chart-3: #7ba3ff;
   --chart-4: #9eb9ff;
   --chart-5: #c1ceff;
-  --radius: 0.25rem;
-  --background: #e2e2e8;
-  --foreground: #111318;
-  --card: #f5f5f5;
-  --card-foreground: #111318;
-  --popover: #ffffff;
-  --popover-foreground: #111318;
-  --secondary: #e6feff;
-  --secondary-foreground: #003739;
-  --muted: #e2e2e8;
-  --muted-foreground: #8c90a0;
-  --accent: #e6feff;
-  --accent-foreground: #003739;
-  --destructive: #ffb4ab;
-  --destructive-foreground: #690005;
-  --border: #e2e2e8;
-  --input: #e2e2e8;
-  --ring: #b0c6ff;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #111318;
-  --sidebar-accent: #e6feff;
-  --sidebar-accent-foreground: #003739;
-  --sidebar-border: #e2e2e8;
-  --sidebar-ring: #b0c6ff;
+  --radius: 16px;
+  --background: #050816;
+  --foreground: #FFFFFF;
+  --card: #111827;
+  --card-foreground: #FFFFFF;
+  --popover: #111827;
+  --popover-foreground: #FFFFFF;
+  --primary: #008CFF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #00D4FF;
+  --secondary-foreground: #050816;
+  --muted: #0F172A;
+  --muted-foreground: #CBD5E1;
+  --accent: #00D4FF;
+  --accent-foreground: #050816;
+  --destructive: #ff4444;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: #0F172A;
+  --ring: #008CFF;
+  --sidebar: #0F172A;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-accent: #00D4FF;
+  --sidebar-accent-foreground: #050816;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #008CFF;
 }
 
-.dark {
-  /* Stitch Dark Theme */
-  --primary: #b0c6ff;
-  --primary-foreground: #002d6e;
-  --sidebar-primary: #b0c6ff;
-  --sidebar-primary-foreground: #002d6e;
-  --background: #111318;
-  --foreground: #e2e2e8;
-  --card: #1e2024;
-  --card-foreground: #e2e2e8;
-  --popover: #282a2e;
-  --popover-foreground: #e2e2e8;
-  --secondary: #63f7ff;
-  --secondary-foreground: #002021;
-  --muted: #333539;
-  --muted-foreground: #c2c6d7;
-  --accent: #00f4fe;
-  --accent-foreground: #002021;
-  --destructive: #ffb4ab;
-  --destructive-foreground: #690005;
-  --border: #333539;
-  --input: #1a1c20;
-  --ring: #b0c6ff;
-  --chart-1: #b0c6ff;
-  --chart-2: #558dff;
-  --chart-3: #7ba3ff;
-  --chart-4: #9eb9ff;
-  --chart-5: #c1ceff;
-  --sidebar: #1e2024;
-  --sidebar-foreground: #e2e2e8;
-  --sidebar-accent: #00f4fe;
-  --sidebar-accent-foreground: #002021;
-  --sidebar-border: #333539;
-  --sidebar-ring: #b0c6ff;
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
 }
 
 @layer base {

@@ -88,50 +88,47 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background font-sans">
       {/* Navigation Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Tuesdi Logo" className="w-10 h-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
+      <header className="border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="/explorar-artistas" className="text-foreground hover:text-primary transition-colors">
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="/explorar-artistas" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider">
               Artistas
             </a>
-            <a href="/eventos" className="text-foreground hover:text-primary transition-colors">
+            <a href="/eventos" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider">
               Eventos
             </a>
-            <a href="/precios" className="text-foreground hover:text-primary transition-colors">
+            <a href="/precios" className="text-sm font-semibold text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider">
               Precios
             </a>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {isAuthenticated ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="border-border hover:bg-muted"
-                  onClick={() => setLocation("/dashboard")}
-                >
-                  Panel
-                </Button>
-              </>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-primary text-primary hover:bg-primary/10 px-6"
+                onClick={() => setLocation("/dashboard")}
+              >
+                Mi Panel
+              </Button>
             ) : (
               <>
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="border-border hover:bg-muted"
+                  className="text-foreground hover:text-primary"
                   onClick={() => setLocation("/login")}
                 >
                   Acceso
                 </Button>
                 <Button
                   size="sm"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="bg-primary text-white hover:bg-primary/90 rounded-full px-6 shadow-lg shadow-primary/20"
                   onClick={() => setLocation("/registro")}
                 >
                   Registro
@@ -143,121 +140,118 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
+      <section className="relative py-24 md:py-40 overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
           <img 
             src="/hero-bg.jpg" 
             alt="Concert Background" 
-            className="w-full h-full object-cover opacity-30"
+            className="w-full h-full object-cover opacity-40"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/60 to-background"></div>
         </div>
-        {/* Background gradients */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
-        </div>
-
+        
         <div className="relative max-w-7xl mx-auto px-4 z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm text-primary font-medium">Descubre artistas y eventos únicos</span>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8 backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 text-secondary" />
+              <span className="text-xs text-secondary font-bold uppercase tracking-widest">Tu Escenario Digital</span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-              La plataforma de <span className="text-primary">artistas</span> y <span className="text-secondary">eventos</span>
+            <h2 className="text-5xl md:text-7xl font-extrabold text-white mb-8 leading-[1.1] tracking-tight max-w-4xl mx-auto">
+              Tu escaparate digital para <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">artistas y eventos.</span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Conecta con artistas talentosos, descubre eventos increíbles y vive experiencias musicales inolvidables.
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
+              Muestra tu talento, descubre oportunidades y conecta directamente sin intermediarios.
             </p>
-          </div>
 
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto mb-12">
-            <div className="relative flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Busca artistas, eventos o géneros..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-12 bg-card/50 border-border text-foreground placeholder:text-muted-foreground py-3"
-                />
-              </div>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-6">
-                Buscar
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Button
+                size="lg"
+                className="bg-primary text-white hover:bg-primary/90 rounded-full px-10 h-14 text-lg font-bold shadow-xl shadow-primary/25 transition-all hover:scale-105"
+                onClick={() => setLocation("/registro")}
+              >
+                Crear perfil gratis
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/5 rounded-full px-10 h-14 text-lg font-bold backdrop-blur-sm transition-all hover:scale-105"
+                onClick={() => setLocation("/publicar-evento")}
+              >
+                Publicar evento
               </Button>
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setLocation("/explorar-artistas")}
-            >
-              Explorar Artistas
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-border hover:bg-muted"
-              onClick={() => setLocation("/eventos")}
-            >
-              Ver Eventos
-            </Button>
+          {/* Search Bar */}
+          <div className="max-w-3xl mx-auto">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex items-center bg-card border border-white/10 rounded-2xl overflow-hidden p-2">
+                <Search className="ml-4 w-6 h-6 text-muted-foreground" />
+                <Input
+                  placeholder="Busca artistas, eventos o géneros..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 bg-transparent border-none text-white placeholder:text-muted-foreground py-6 text-lg focus-visible:ring-0"
+                />
+                <Button className="bg-primary text-white hover:bg-primary/90 px-8 h-12 rounded-xl font-bold ml-2">
+                  Buscar
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Featured Events */}
-      <section className="py-16 md:py-24 border-t border-border relative z-10">
+      <section className="py-24 border-t border-white/5 relative z-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex items-end justify-between mb-16">
             <div>
-              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Eventos Destacados</h3>
-              <p className="text-muted-foreground">Los mejores eventos de la semana</p>
+              <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Eventos Destacados</h3>
+              <p className="text-muted-foreground text-lg">Los mejores eventos de la semana en la plataforma</p>
             </div>
             <Button
-              variant="outline"
-              className="border-border hover:bg-muted hidden md:flex"
+              variant="link"
+              className="text-primary font-bold text-lg hidden md:flex items-center gap-2"
               onClick={() => setLocation("/eventos")}
             >
-              Ver Todos
-              <ArrowRight className="w-4 h-4 ml-2" />
+              Ver todos los eventos
+              <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredEvents.map((event) => (
               <Card
                 key={event.id}
-                className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
+                className="bg-card border-white/5 overflow-hidden hover:border-primary/50 transition-all duration-300 cursor-pointer group rounded-3xl"
                 onClick={() => setLocation(`/eventos/${event.id}`)}
               >
-                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
+                <div className="relative h-56 overflow-hidden">
                   <img
                     src={event.image}
                     alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                </div>
-                <div className="p-4">
-                  <h4 className="font-semibold text-foreground mb-2">{event.title}</h4>
-                  <p className="text-sm text-muted-foreground mb-3">{event.artist}</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <Calendar className="w-4 h-4" />
-                    {event.date}
+                  <div className="absolute top-4 right-4 bg-background/80 backdrop-blur-md px-4 py-1 rounded-full text-primary font-bold text-sm">
+                    {event.price}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
+                </div>
+                <div className="p-6">
+                  <h4 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">{event.title}</h4>
+                  <p className="text-sm text-muted-foreground mb-4 font-medium">{event.artist}</p>
+                  <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      {event.date}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary" />
                       {event.city}
                     </div>
-                    <span className="font-semibold text-primary">{event.price}</span>
                   </div>
                 </div>
               </Card>
@@ -267,52 +261,50 @@ export default function Home() {
       </section>
 
       {/* Featured Artists */}
-      <section className="py-16 md:py-24 border-t border-border relative z-10">
+      <section className="py-24 border-t border-white/5 relative z-10 bg-white/[0.02]">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex items-end justify-between mb-16">
             <div>
-              <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-2">Artistas Destacados</h3>
-              <p className="text-muted-foreground">Talento en la plataforma</p>
+              <h3 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Artistas Destacados</h3>
+              <p className="text-muted-foreground text-lg">Talento emergente en Tu Escenario Digital</p>
             </div>
             <Button
-              variant="outline"
-              className="border-border hover:bg-muted hidden md:flex"
+              variant="link"
+              className="text-primary font-bold text-lg hidden md:flex items-center gap-2"
               onClick={() => setLocation("/explorar-artistas")}
             >
-              Ver Todos
-              <ArrowRight className="w-4 h-4 ml-2" />
+              Explorar todos los artistas
+              <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredArtists.map((artist) => (
               <Card
                 key={artist.id}
-                className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
+                className="bg-card border-white/5 overflow-hidden hover:border-primary/50 transition-all duration-300 cursor-pointer group rounded-3xl"
                 onClick={() => setLocation(`/artista/${artist.id}`)}
               >
-                <div className="relative h-40 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <img
                     src={artist.image}
                     alt={artist.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
+                  {artist.verified && (
+                    <div className="absolute top-4 left-4 bg-secondary text-background p-1.5 rounded-full shadow-lg">
+                      <Sparkles size={16} />
+                    </div>
+                  )}
                 </div>
-                <div className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h4 className="font-semibold text-foreground">{artist.name}</h4>
-                    {artist.verified && (
-                      <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{artist.category}</p>
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
+                <div className="p-6 text-center">
+                  <h4 className="text-2xl font-bold text-white mb-1 group-hover:text-primary transition-colors">{artist.name}</h4>
+                  <p className="text-sm text-primary font-bold mb-4 uppercase tracking-widest text-xs">{artist.category}</p>
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-6">
                     <MapPin className="w-4 h-4" />
                     {artist.city}
                   </div>
-                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm">
+                  <Button className="w-full bg-white/5 hover:bg-primary hover:text-white text-white border-white/10 rounded-2xl transition-all font-bold">
                     Ver Perfil
                   </Button>
                 </div>
@@ -323,63 +315,66 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 border-t border-border relative z-10">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">¿Eres un artista?</h3>
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Publica tus eventos, conecta con tu audiencia y crece tu carrera artística en Tuesdi.
+      <section className="py-32 relative z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-primary/10 -skew-y-3 origin-right"></div>
+        <div className="relative max-w-4xl mx-auto px-4 text-center">
+          <h3 className="text-4xl md:text-6xl font-extrabold text-white mb-8 tracking-tight">¿Eres un artista?</h3>
+          <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
+            Visibilidad para artistas. Oportunidades para eventos. Sin intermediarios. Únete hoy a la mayor red de talento digital.
           </p>
           <Button
             size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            className="bg-primary text-white hover:bg-primary/90 rounded-full px-12 h-16 text-xl font-bold shadow-2xl shadow-primary/30 transition-all hover:scale-105"
             onClick={() => setLocation(isAuthenticated ? "/publicar-evento" : "/registro")}
           >
             Comenzar Ahora
-            <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card/50 backdrop-blur-sm py-12 relative z-10">
+      <footer className="border-t border-white/5 bg-background py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <img src="/logo.png" alt="Tuesdi Logo" className="w-8 h-8 object-contain" />
-                <span className="font-bold text-foreground">Tuesdi</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div className="col-span-1 md:col-span-1">
+              <div className="flex items-center gap-2 mb-6">
+                <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 object-contain" />
               </div>
-              <p className="text-sm text-muted-foreground">
-                Plataforma de artistas y eventos
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                La plataforma donde artistas y eventos ganan visibilidad y se conectan sin intermediarios.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Plataforma</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/explorar-artistas" className="hover:text-primary">Artistas</a></li>
-                <li><a href="/eventos" className="hover:text-primary">Eventos</a></li>
-                <li><a href="/precios" className="hover:text-primary">Precios</a></li>
+              <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Plataforma</h4>
+              <ul className="space-y-4 text-sm text-muted-foreground">
+                <li><a href="/explorar-artistas" className="hover:text-primary transition-colors">Artistas</a></li>
+                <li><a href="/eventos" className="hover:text-primary transition-colors">Eventos</a></li>
+                <li><a href="/precios" className="hover:text-primary transition-colors">Precios</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Términos</a></li>
-                <li><a href="#" className="hover:text-primary">Privacidad</a></li>
-                <li><a href="#" className="hover:text-primary">Contacto</a></li>
+              <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Legal</h4>
+              <ul className="space-y-4 text-sm text-muted-foreground">
+                <li><a href="#" className="hover:text-primary transition-colors">Términos de servicio</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Política de privacidad</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Contacto</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Síguenos</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Instagram</a></li>
-                <li><a href="#" className="hover:text-primary">Twitter</a></li>
-                <li><a href="#" className="hover:text-primary">Facebook</a></li>
-              </ul>
+              <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Síguenos</h4>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
+                  <Music2 size={20} />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
+                  <Sparkles size={20} />
+                </a>
+              </div>
             </div>
           </div>
-          <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Tuesdi. Todos los derechos reservados.
+          <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground font-medium uppercase tracking-widest">
+            <p>© {new Date().getFullYear()} TUESDI — Tu Escenario Digital.</p>
+            <p>Hecho con pasión por la música.</p>
           </div>
         </div>
       </footer>
