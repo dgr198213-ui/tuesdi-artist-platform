@@ -37,7 +37,7 @@ export default function Home() {
       artist: "Luna Martínez",
       date: "2024-06-15",
       city: "Madrid",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80",
       price: "25€",
     },
     {
@@ -46,7 +46,7 @@ export default function Home() {
       artist: "DJ Carlos",
       date: "2024-06-16",
       city: "Barcelona",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80",
       price: "15€",
     },
     {
@@ -55,7 +55,7 @@ export default function Home() {
       artist: "The Rock Stars",
       date: "2024-06-17",
       city: "Valencia",
-      image: "https://via.placeholder.com/300x200",
+      image: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&w=600&q=80",
       price: "30€",
     },
   ];
@@ -66,7 +66,7 @@ export default function Home() {
       name: "Luna Martínez",
       category: "Cantautor/a",
       city: "Madrid",
-      image: "https://via.placeholder.com/150",
+      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=300&q=80",
       verified: true,
     },
     {
@@ -74,7 +74,7 @@ export default function Home() {
       name: "DJ Carlos",
       category: "DJ / Productor",
       city: "Barcelona",
-      image: "https://via.placeholder.com/150",
+      image: "https://images.unsplash.com/photo-1520872024865-3ff2805d8bb3?auto=format&fit=crop&w=300&q=80",
       verified: false,
     },
     {
@@ -82,7 +82,7 @@ export default function Home() {
       name: "The Rock Stars",
       category: "Banda de Rock",
       city: "Valencia",
-      image: "https://via.placeholder.com/150",
+      image: "https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&w=300&q=80",
       verified: true,
     },
   ];
@@ -93,7 +93,7 @@ export default function Home() {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Music2 className="w-8 h-8 text-primary" />
+            <img src="/logo.png" alt="Tuesdi Logo" className="w-10 h-10 object-contain" />
             <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
           </div>
           <nav className="hidden md:flex items-center gap-6">
@@ -144,13 +144,22 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/hero-bg.jpg" 
+            alt="Concert Background" 
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background"></div>
+        </div>
         {/* Background gradients */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4">
+        <div className="relative max-w-7xl mx-auto px-4 z-10">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -205,7 +214,7 @@ export default function Home() {
       </section>
 
       {/* Featured Events */}
-      <section className="py-16 md:py-24 border-t border-border">
+      <section className="py-16 md:py-24 border-t border-border relative z-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -258,7 +267,7 @@ export default function Home() {
       </section>
 
       {/* Featured Artists */}
-      <section className="py-16 md:py-24 border-t border-border">
+      <section className="py-16 md:py-24 border-t border-border relative z-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <div>
@@ -314,7 +323,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 border-t border-border">
+      <section className="py-16 md:py-24 border-t border-border relative z-10">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-6">¿Eres un artista?</h3>
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -332,12 +341,12 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card/50 backdrop-blur-sm py-12">
+      <footer className="border-t border-border bg-card/50 backdrop-blur-sm py-12 relative z-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Music2 className="w-6 h-6 text-primary" />
+                <img src="/logo.png" alt="Tuesdi Logo" className="w-8 h-8 object-contain" />
                 <span className="font-bold text-foreground">Tuesdi</span>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -370,7 +379,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; 2024 Tuesdi. Todos los derechos reservados.</p>
+            © {new Date().getFullYear()} Tuesdi. Todos los derechos reservados.
           </div>
         </div>
       </footer>
