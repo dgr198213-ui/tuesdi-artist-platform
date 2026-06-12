@@ -12,12 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/sonner";
+import { toast } from "sonner"; // <-- CAMBIO 1: Importación directa desde la librería original
 import { Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 
 export default function Contacto() {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -25,6 +24,8 @@ export default function Contacto() {
     subject: "",
     message: "",
   });
+
+  // CAMBIO 2: Se ha eliminado la línea "const { toast } = useToast();" porque Sonner no la necesita.
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,18 +35,17 @@ export default function Contacto() {
       // Simulación de envío - En producción conectar con Edge Function de Resend
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      toast({
-        title: "Mensaje enviado",
-        description:
-          "Gracias por contactarnos. Te responderemos lo antes posible.",
+      // Sonner funciona llamando a toast() directamente
+      toast("Mensaje enviado", {
+        description: "Gracias por contactarnos. Te responderemos lo antes posible.",
       });
 
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "No hemos podido enviar tu mensaje. Inténtalo de nuevo.",
-        variant: "destructive",
+        // En Sonner, en lugar de variant: "destructive", se suele usar un estilo visual o simplemente un toast normal. 
+        // Si tienes configurado el estilo destructivo en tu Toaster global, lo cogerá.
       });
     } finally {
       setIsSubmitting(false);
@@ -230,7 +230,7 @@ export default function Contacto() {
                     </Label>
                     <Input
                       id="subject"
-                      placeholder="¿Sobre qué quieres联系我们?"
+                      placeholder="¿Sobre qué quieres contactarnos?"
                       value={formData.subject}
                       onChange={(e) =>
                         setFormData({ ...formData, subject: e.target.value })
