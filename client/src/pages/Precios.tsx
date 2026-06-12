@@ -8,43 +8,59 @@ export default function Precios() {
 
   const plans = [
     {
-      name: "Básico",
-      price: "9,99€",
+      name: "Beta",
+      price: "0€",
       period: "/mes",
-      description: "Ideal para artistas emergentes que buscan visibilidad inicial.",
+      description: "Tu perfil público en TUESDI, sin coste.",
       features: [
-        "Perfil de artista verificado",
-        "Publicación de hasta 3 eventos",
-        "Galería de fotos básica",
-        "Enlaces a redes sociales",
-        "Botón de contacto directo",
+        "Perfil público de artista",
+        "1 fotografía",
+        "Biografía",
+        "Categoría y ciudad",
+        "Caché orientativo",
+        "Formulario de contacto privado",
+        "Métricas básicas (visitas, solicitudes)",
       ],
-      buttonText: "Empezar con Básico",
-      stripePriceId: "price_1ThBhZQxrnRxh3YdDAV5YJI1",
+      buttonText: "Crear Perfil Gratis",
       highlighted: false,
     },
     {
-      name: "Premium",
-      price: "19,99€",
+      name: "Standard",
+      price: "6€",
       period: "/mes",
-      description: "Para artistas profesionales que quieren destacar al máximo.",
+      description: "Más contenido y mejor posicionamiento en el directorio.",
       features: [
-        "Todo lo del plan Básico",
-        "Publicación de eventos ilimitados",
-        "Galería de fotos y videos premium",
-        "Posicionamiento destacado en búsquedas",
-        "Estadísticas detalladas de visitas",
-        "Soporte prioritario 24/7",
+        "Todo lo del plan Beta",
+        "3 fotografías",
+        "1 vídeo",
+        "Mejor posicionamiento en búsquedas",
+        "Métricas ampliadas (evolución semanal, histórico)",
       ],
-      buttonText: "Pasar a Premium",
-      stripePriceId: "price_1ThBhaQxrnRxh3YdLNC1MhaQ",
+      buttonText: "Pasar a Standard",
+      highlighted: false,
+    },
+    {
+      name: "Pro",
+      price: "9,99€",
+      period: "/mes",
+      description: "Máxima visibilidad y analítica avanzada para profesionales.",
+      features: [
+        "Todo lo del plan Standard",
+        "3 fotografías",
+        "3 vídeos",
+        "Prioridad interna en el directorio",
+        "Distintivo Pro",
+        "Analítica avanzada y tendencias",
+      ],
+      buttonText: "Pasar a Pro",
       highlighted: true,
     },
   ];
 
-  const handleSubscribe = (priceId: string) => {
-    // En una app real, esto redirigiría a Stripe Checkout
-    console.log("Subscribing to:", priceId);
+  const handleSubscribe = (planName: string) => {
+    // La gestión de suscripciones via Stripe se conectará en una fase posterior.
+    // Por ahora, redirige al registro para crear el perfil de artista.
+    console.log("Selected plan:", planName);
     setLocation("/registro");
   };
 
@@ -84,13 +100,13 @@ export default function Precios() {
         <div className="max-w-7xl mx-auto px-4 py-20 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">Planes para Artistas</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Elige el plan que mejor se adapte a tu carrera y empieza a brillar en Tu Escenario Digital.
+            Empieza gratis con el plan Beta y crece a tu ritmo. Sin comisiones, sin intermediarios.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <Card
               key={plan.name}
@@ -125,7 +141,7 @@ export default function Precios() {
                       : "bg-white/5 text-white hover:bg-white/10 border-white/10"
                   }`}
                   variant={plan.highlighted ? "default" : "outline"}
-                  onClick={() => handleSubscribe(plan.stripePriceId)}
+                  onClick={() => handleSubscribe(plan.name)}
                 >
                   {plan.buttonText}
                 </Button>
@@ -164,15 +180,15 @@ export default function Precios() {
             <div className="w-16 h-16 bg-accent/10 rounded-3xl flex items-center justify-center mx-auto text-accent">
               <Star className="w-8 h-8" />
             </div>
-            <h4 className="text-xl font-bold text-white">Soporte 24/7</h4>
-            <p className="text-muted-foreground">Nuestro equipo está siempre disponible para ayudarte a sacar el máximo partido a tu perfil.</p>
+            <h4 className="text-xl font-bold text-white">Métricas Reales</h4>
+            <p className="text-muted-foreground">Sin datos falsos: visitas, solicitudes y tendencias reales sobre tu perfil.</p>
           </div>
         </div>
       </div>
 
       <footer className="py-12 border-t border-white/5 text-center">
         <p className="text-sm text-muted-foreground">
-          &copy; 2024 TUESDI — Tu Escenario Digital. Todos los derechos reservados.
+          &copy; 2026 TUESDI — Tu Escenario Digital. Todos los derechos reservados.
         </p>
       </footer>
     </div>

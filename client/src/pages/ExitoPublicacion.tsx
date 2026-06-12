@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, Share2, ArrowRight } from "lucide-react";
+import { Mail, Share2, Home as HomeIcon } from "lucide-react";
 import { useLocation, useSearch } from "wouter";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -30,20 +30,17 @@ export default function ExitoPublicacion() {
   }, [search]);
 
   const handleShare = async () => {
-    const shareUrl = event
-      ? `${window.location.origin}/eventos/${event.id}`
-      : window.location.origin;
     const shareData = {
       title: event?.title || "Evento en TUESDI",
-      text: `Mira mi evento en TUESDI: ${event?.title || ""}`,
-      url: shareUrl,
+      text: `Estoy publicando mi evento "${event?.title || ""}" en TUESDI`,
+      url: window.location.origin,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(window.location.origin);
         alert("Enlace copiado al portapapeles");
       }
     } catch (error) {
@@ -61,68 +58,60 @@ export default function ExitoPublicacion() {
 
       <div className="relative w-full max-w-md">
         <Card className="bg-card/50 backdrop-blur-sm border-border p-8 text-center">
-          {/* Success Icon */}
+          {/* Icon */}
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg"></div>
-              <CheckCircle2 className="w-24 h-24 text-primary relative" />
+              <Mail className="w-20 h-20 text-primary relative" />
             </div>
           </div>
 
           {/* Title */}
-          <div className="flex items-center justify-center gap-2 mb-6 cursor-pointer" onClick={() => setLocation("/")}>
-            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 object-contain" />
-          </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            ¡Escenario Preparado!
+            ¡Ya casi está!
           </h1>
           <p className="text-muted-foreground mb-8">
-            Tu evento ha sido publicado exitosamente y ya brilla en Tu Escenario Digital.
+            Hemos enviado un <strong>Magic Link</strong> a tu correo
+            {event?.promoter_email ? <> (<strong>{event.promoter_email}</strong>)</> : ""}.
+            Haz clic en el enlace para confirmar y publicar tu evento. El enlace caduca en 30 minutos.
           </p>
 
           {/* Event Info */}
-          <Card className="bg-muted/20 border-border p-4 mb-8 text-left">
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Título del Evento</p>
-                <p className="font-semibold text-foreground">{event?.title || "—"}</p>
+          {event && (
+            <Card className="bg-muted/20 border-border p-4 mb-8 text-left">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Título del Evento</p>
+                  <p className="font-semibold text-foreground">{event.title}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Fecha</p>
+                  <p className="font-semibold text-foreground">
+                    {event.event_date}{event.event_time ? ` • ${event.event_time}` : ""}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Ubicación</p>
+                  <p className="font-semibold text-foreground">{event.venue}, {event.city}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Estado</p>
+                  <p className="font-semibold text-amber-500">Pendiente de confirmación</p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Fecha</p>
-                <p className="font-semibold text-foreground">
-                  {event?.event_date || "—"}{event?.event_time ? ` • ${event.event_time}` : ""}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground mb-1">Ubicación</p>
-                <p className="font-semibold text-foreground">
-                  {event ? `${event.venue}, ${event.city}` : "—"}
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Action Buttons */}
-          <div className="space-y-3 mb-6">
-            <Button
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setLocation(event ? `/eventos/${event.id}` : "/eventos")}
-            >
-              Ver Evento Publicado
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+          <div className="space-y-2">
             <Button
               variant="outline"
               className="w-full border-border hover:bg-muted"
               onClick={handleShare}
             >
               <Share2 className="w-4 h-4 mr-2" />
-              Compartir Evento
+              Compartir TUESDI
             </Button>
-          </div>
-
-          {/* Additional Actions */}
-          <div className="space-y-2 border-t border-border pt-6">
             <Button
               variant="ghost"
               className="w-full text-primary hover:bg-primary/10"
@@ -133,16 +122,17 @@ export default function ExitoPublicacion() {
             <Button
               variant="ghost"
               className="w-full text-foreground hover:bg-muted"
-              onClick={() => setLocation("/dashboard")}
+              onClick={() => setLocation("/")}
             >
-              Ir al Panel de Control
+              <HomeIcon className="w-4 h-4 mr-2" />
+              Ir al Inicio
             </Button>
           </div>
         </Card>
 
         {/* Tips */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>💡 Consejo: Comparte tu evento en redes sociales para llegar a más personas</p>
+          <p>💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.</p>
         </div>
       </div>
     </div>

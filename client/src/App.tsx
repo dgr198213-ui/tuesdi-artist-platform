@@ -13,9 +13,17 @@ import Eventos from "./pages/Eventos";
 import EventoDetalle from "./pages/EventoDetalle";
 import ArtistaProfile from "./pages/ArtistaProfile";
 import PublicarEvento from "./pages/PublicarEvento";
+import ConfirmarEvento from "./pages/ConfirmarEvento";
 import Precios from "./pages/Precios";
 import ExitoPublicacion from "./pages/ExitoPublicacion";
 import ProtectedRoute from "./components/ProtectedRoute";
+
+// Páginas Legales
+import TerminosServicio from "./pages/TerminosServicio";
+import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
+import AvisoLegal from "./pages/AvisoLegal";
+import PoliticaCookies from "./pages/PoliticaCookies";
+import QuienesSomos from "./pages/QuienesSomos";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,9 +37,18 @@ function Router() {
       <Route path={"/eventos"} component={Eventos} />
       <Route path={"/eventos/:id"} component={EventoDetalle} />
       <Route path={"/artista/:id"} component={ArtistaProfile} />
-      <Route path={"/publicar-evento"} component={ProtectedRoute(PublicarEvento)} />
+      <Route path={"/publicar-evento"} component={PublicarEvento} />
+      <Route path={"/confirmar-evento/:token"} component={ConfirmarEvento} />
       <Route path={"/precios"} component={Precios} />
-      <Route path={"/exito-publicacion"} component={ProtectedRoute(ExitoPublicacion)} />
+      <Route path={"/exito-publicacion"} component={ExitoPublicacion} />
+
+      {/* Páginas Legales */}
+      <Route path={"/terminos"} component={TerminosServicio} />
+      <Route path={"/privacidad"} component={PoliticaPrivacidad} />
+      <Route path={"/aviso-legal"} component={AvisoLegal} />
+      <Route path={"/cookies"} component={PoliticaCookies} />
+      <Route path={"/quienes-somos"} component={QuienesSomos} />
+
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

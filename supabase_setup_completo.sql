@@ -3,9 +3,14 @@
 -- Ejecutar completo en Supabase -> SQL Editor -> New query -> Run
 -- Es seguro re-ejecutarlo (usa IF NOT EXISTS)
 --
--- NOTA: price se mantiene NUMERIC (el formulario actual envía
--- parseFloat(formData.price), por lo que NUMERIC es correcto).
+-- FASE 1: El formulario anónimo de Publicar Evento (Magic Link)
+-- envía "price" como texto libre ("15€" o "Entrada libre"),
+-- por lo que la columna debe ser TEXT, no NUMERIC.
 -- ============================================================
+
+-- 0. CRÍTICO: price como texto libre (formulario anónimo + Magic Link)
+ALTER TABLE public.events
+  ALTER COLUMN price TYPE TEXT USING price::TEXT;
 
 -- 1. events: columnas que el frontend lee/escribe y que pueden faltar
 ALTER TABLE public.events ADD COLUMN IF NOT EXISTS artist_id UUID REFERENCES public.artists(id);
@@ -55,3 +60,22 @@ CREATE TABLE IF NOT EXISTS public.inquiries (
 --    de contacto (usuario no autenticado) pueda insertar mensajes,
 --    igual que en artists/events.
 ALTER TABLE public.inquiries DISABLE ROW LEVEL SECURITY;
+
+-- 5. CRÍTICO: tabla magic_links — necesaria para create-magic-link /
+--    confirm-event (flujo de confirmación de eventos por email).
+CREATE TABLE IF NOT EXISTS public.magic_links (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id UUID NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL,
+  email TEXT NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_magic_links_token_hash ON public.magic_links (token_hash);
+CREATE INDEX IF NOT EXISTS idx_magic_links_event_id ON public.magic_links (event_id);
+
+-- RLS activado y SIN policies: solo el service_role (Edge Functions)
+-- puede leer/escribir. El cliente no necesita acceso directo.
+ALTER TABLE public.magic_links ENABLE ROW LEVEL SECURITY;
