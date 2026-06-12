@@ -1,16 +1,20 @@
-TUESDI · Tu Escenario Digital
+TUESDI
 
-Versión 2.0 Consolidada
+Tu Escenario Digital
 
-Autor: Daniel
+Versión 3.0 Consolidada
 
-Estado: Documento Estratégico Maestro
+Autor: Daniel García
+
+Estado: Documento Maestro Oficial
+
+Fecha de consolidación: Junio 2026
 
 ---
 
-1. DEFINICIÓN DE MARCA
+1. IDENTIDAD DE MARCA
 
-Nombre Oficial
+Nombre
 
 TUESDI
 
@@ -18,55 +22,58 @@ Significado
 
 Tu Escenario Digital
 
-Eslogan Oficial
+Claim Oficial
 
 Tu Escenario Digital
 
-Mensaje Corporativo
+Propuesta de Valor
 
 Visibilidad para artistas.
+
 Oportunidades para eventos.
+
 Sin intermediarios.
 
----
+Posicionamiento
 
-2. MISIÓN
+TUESDI es una plataforma de visibilidad artística diseñada para que los artistas dispongan de un perfil profesional público donde mostrar su trabajo y recibir solicitudes de contacto de forma privada y segura.
 
-Proporcionar a los artistas una presencia digital profesional donde mostrar su trabajo y recibir solicitudes de contacto de forma segura.
-
-Facilitar a los organizadores la difusión gratuita de eventos culturales y artísticos.
+Paralelamente ofrece un directorio público de eventos culturales y artísticos.
 
 ---
 
-3. VISIÓN
+2. QUÉ ES TUESDI
 
-Convertirse en el principal escaparate digital para artistas y eventos del mercado hispanohablante.
+TUESDI es:
 
----
-
-4. POSICIONAMIENTO
-
-TUESDI es una plataforma de visibilidad artística.
-
-No es:
-
-- Agencia artística
-- Marketplace
-- Plataforma de contratación
-- Gestor de reservas
-- Pasarela de pagos
-- Red social
-- Sistema de mensajería
-
-La plataforma actúa exclusivamente como escaparate digital y canal de descubrimiento.
+- Un escaparate digital.
+- Un directorio de artistas.
+- Un directorio de eventos.
+- Una plataforma de visibilidad.
+- Un sistema de descubrimiento de talento.
 
 ---
 
-5. VALORES
+3. QUÉ NO ES TUESDI
+
+TUESDI no es:
+
+- Una agencia artística.
+- Un marketplace.
+- Una plataforma de contratación.
+- Una red social.
+- Una plataforma de reservas.
+- Un gestor de pagos.
+- Un intermediario comercial.
+- Un sistema de mensajería instantánea.
+
+---
+
+4. PRINCIPIOS FUNDAMENTALES
 
 Visibilidad
 
-Ayudar a los artistas a ser encontrados.
+Facilitar que los artistas sean descubiertos.
 
 Privacidad
 
@@ -74,37 +81,41 @@ Proteger los datos personales.
 
 Libertad
 
-Sin intermediarios ni comisiones.
+No intervenir en acuerdos entre usuarios.
 
 Simplicidad
 
-Experiencia clara y accesible.
+Experiencia sencilla y clara.
 
 Transparencia
 
-Métricas reales y funcionamiento claro.
+Métricas reales y verificables.
 
 ---
 
-6. IDENTIDAD VISUAL
+5. IDENTIDAD VISUAL
 
-Marca Principal
+Estética
 
-TUESDI
+Oscura.
 
-Firma
+Profesional.
 
-Tu Escenario Digital
+Inspirada en escenarios y espectáculos en vivo.
+
+Alto contraste.
+
+Iluminación azul y cian.
 
 ---
 
-Paleta
+Colores Corporativos
 
-Negro principal
+Negro
 
 #000000
 
-Azul corporativo
+Azul Principal
 
 #0081FF
 
@@ -130,22 +141,12 @@ Inter
 
 ---
 
-Estilo
-
-- Oscuro
-- Alto contraste
-- Inspiración escenarios en vivo
-- Iluminación azul/cian
-- Diseño moderno
-
----
-
-7. PÚBLICO OBJETIVO
+6. PÚBLICO OBJETIVO
 
 Artistas
 
-- Músicos
 - Cantantes
+- Músicos
 - DJs
 - Bandas
 - Magos
@@ -154,30 +155,28 @@ Artistas
 - Bailarines
 - Performers
 
-Mayores de edad.
-
 ---
 
 Organizadores
 
-- Salas
 - Promotores
+- Salas
 - Festivales
 - Asociaciones
 - Ayuntamientos
-- Organizadores culturales
+- Entidades culturales
 
 ---
 
-8. ESTRUCTURA DE LA PLATAFORMA
+7. ESTRUCTURA DEL PRODUCTO
 
-La plataforma se divide en dos ecosistemas independientes.
+TUESDI se divide en dos ecosistemas completamente independientes.
 
 ---
 
 Ecosistema Artistas
 
-Núcleo principal del producto.
+Núcleo principal del negocio.
 
 Objetivo:
 
@@ -195,7 +194,7 @@ Difundir oportunidades.
 
 ---
 
-9. ARQUITECTURA DE PÁGINAS
+8. ESTRUCTURA DE PÁGINAS
 
 Públicas
 
@@ -205,7 +204,7 @@ Home
 
 /artistas
 
-Directorio general
+Directorio general de artistas
 
 /artista/:slug
 
@@ -249,105 +248,107 @@ Privadas
 
 ---
 
-10. HOME
+9. HOME
 
 Objetivo:
 
-Explicar el producto en menos de 10 segundos.
+Explicar TUESDI en menos de 10 segundos.
 
 ---
 
-Sección Hero
+Hero
 
-Título
+Título:
 
-Tu escaparate digital para artistas y eventos.
+Tu escaparate digital para artistas.
 
-Subtítulo
+Subtítulo:
 
 Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales.
 
-Botones
+Botones:
 
-Crear perfil
+Crear Perfil
 
-Ver artistas
+Ver Artistas
 
 ---
 
 Secciones
 
-Artistas destacados
+Artistas destacados.
 
-Eventos recientes
+Eventos recientes.
 
-Cómo funciona
+Cómo funciona.
 
-Planes
+Planes.
 
-Preguntas frecuentes
+Preguntas frecuentes.
 
-CTA final
+CTA final.
 
 ---
 
-11. DIRECTORIO DE ARTISTAS
+10. DIRECTORIO DE ARTISTAS
 
-URL
+URL:
 
 /artistas
 
 ---
 
-Objetivo
+Funciones
 
-Descubrir talento.
+Buscador.
+
+Filtros.
+
+Exploración visual.
+
+Paginación.
 
 ---
 
 Filtros
 
-Nombre
+Nombre.
 
-Categoría
+Categoría.
 
-Ciudad
+Ciudad.
 
 ---
 
 Tarjetas
 
-Medidas recomendadas:
+Fotografía principal.
 
-Desktop
+Nombre artístico.
 
-320x420 px
+Categoría.
 
-Móvil
+Ciudad.
 
-100% ancho
+Caché orientativo.
 
----
-
-Contenido:
-
-Foto principal
-
-Nombre artístico
-
-Categoría
-
-Ciudad
-
-Caché orientativo
-
-Botón Ver perfil
+Botón Ver Perfil.
 
 ---
 
-12. PERFIL DEL ARTISTA
+Escalabilidad
 
-URL
+Carga progresiva.
+
+12 artistas por bloque.
+
+Compatible con paginación o infinite scroll.
+
+---
+
+11. PERFIL DEL ARTISTA
+
+URL:
 
 /artista/:slug
 
@@ -355,15 +356,15 @@ URL
 
 Cabecera
 
-Foto principal
+Fotografía principal.
 
-Nombre artístico
+Nombre artístico.
 
-Categoría
+Categoría.
 
-Ciudad
+Ciudad.
 
-Caché orientativo
+Caché orientativo.
 
 ---
 
@@ -377,37 +378,19 @@ Multimedia
 
 Plan Beta
 
-1 fotografía
+1 fotografía.
 
 Plan Standard
 
-3 fotografías
+3 fotografías.
 
-1 vídeo
+1 vídeo.
 
 Plan Pro
 
-3 fotografías
+3 fotografías.
 
-3 vídeos
-
----
-
-Tamaños recomendados
-
-Foto principal
-
-1200x800 px
-
-Miniaturas
-
-400x400 px
-
-Vídeos
-
-16:9
-
-1920x1080 px
+3 vídeos.
 
 ---
 
@@ -415,32 +398,43 @@ Contacto
 
 Botón:
 
-Contactar artista
+Contactar Artista
 
 ---
 
-13. PRIVACIDAD
+Artistas Relacionados
 
-Nunca se mostrarán:
+Misma categoría.
 
-- Email
-- Teléfono
-- WhatsApp
-- Dirección
+Misma ciudad.
 
-La privacidad es una característica estratégica de la plataforma.
+Categorías similares.
 
 ---
 
-14. SISTEMA DE CONTACTO
+12. PRIVACIDAD
 
-Flujo
+Nunca se mostrarán públicamente:
+
+- Email.
+- Teléfono.
+- WhatsApp.
+- Dirección.
+- Datos personales.
+
+La privacidad es un elemento diferenciador de TUESDI.
+
+---
+
+13. SISTEMA DE CONTACTO
+
+Funcionamiento:
 
 Visitante
 
 ↓
 
-Formulario
+Formulario privado
 
 ↓
 
@@ -456,79 +450,82 @@ Respuesta opcional del artista
 
 ---
 
-TUESDI no participa en la conversación posterior.
+No existe:
+
+- Chat interno.
+- Comunicación directa automática.
+- Intermediación.
 
 ---
 
-15. PANEL DEL ARTISTA
+14. PANEL DEL ARTISTA
 
-Funciones
+Incluye:
 
-Perfil
-
-Contenido multimedia
-
-Suscripción
-
-Métricas
-
-Solicitudes recibidas
+- Perfil.
+- Multimedia.
+- Contactos.
+- Métricas.
+- Suscripción.
 
 ---
 
-16. MÉTRICAS
+15. MÉTRICAS
 
-Las métricas siempre serán reales.
+Las métricas serán siempre reales.
 
-Nunca se utilizarán estadísticas falsas.
+No se utilizarán datos falsos.
 
 ---
 
 Plan Beta
 
-Visitas
+Visitas.
 
-Apariciones
+Apariciones.
 
-Solicitudes
+Solicitudes recibidas.
 
 ---
 
 Plan Standard
 
-Histórico
+Evolución semanal.
 
-Evolución semanal
+Histórico.
 
-Comparativas
+Comparativas.
 
 ---
 
 Plan Pro
 
-Analítica avanzada
+Analítica avanzada.
 
-Histórico completo
+Tendencias.
 
-Contenido más visto
+Contenido más visto.
 
-Tendencias
+Histórico completo.
 
 ---
 
-17. PLANES
+16. PLANES
 
 Beta
 
 0 €/mes
 
-1 fotografía
+Incluye:
 
-Perfil público
-
-Formulario privado
-
-Métricas básicas
+- Perfil público.
+- 1 fotografía.
+- Biografía.
+- Categoría.
+- Ciudad.
+- Caché orientativo.
+- Formulario privado.
+- Métricas básicas.
 
 ---
 
@@ -536,13 +533,12 @@ Standard
 
 6 €/mes
 
-3 fotografías
+Incluye:
 
-1 vídeo
-
-Mayor visibilidad
-
-Métricas ampliadas
+- 3 fotografías.
+- 1 vídeo.
+- Mejor posicionamiento.
+- Métricas ampliadas.
 
 ---
 
@@ -550,121 +546,131 @@ Pro
 
 9,99 €/mes
 
-3 fotografías
+Incluye:
 
-3 vídeos
-
-Prioridad interna
-
-Distintivo Pro
-
-Analítica avanzada
+- 3 fotografías.
+- 3 vídeos.
+- Prioridad interna.
+- Distintivo Pro.
+- Analítica avanzada.
 
 ---
 
-18. EVENTOS
+17. EVENTOS
 
-URL
+URL:
 
 /eventos
 
 ---
 
+Objetivo
+
+Difusión de oportunidades.
+
+---
+
 Publicación
 
-Gratuita
+Gratuita.
 
-Sin suscripción
+Sin suscripción.
 
-Sin cuenta permanente
+Sin cuenta permanente.
 
 ---
 
 Flujo
 
-Formulario
+Formulario.
 
 ↓
 
-Verificación Magic Link
+Magic Link.
 
 ↓
 
-Publicación
+Validación.
 
 ↓
 
-Caducidad automática
+Publicación.
+
+↓
+
+Caducidad automática.
 
 ---
 
-Tarjetas
+Visualización
 
-Imagen
+Tarjetas de evento.
 
-Título
+Paginación automática.
 
-Ciudad
-
-Fecha
-
-Categoría
-
-Descripción corta
+12 eventos por bloque.
 
 ---
 
-Paginación
+18. AUTENTICACIÓN
 
-Carga incremental
+Método oficial:
 
-12 eventos por bloque
-
-Escalable
+Magic Link.
 
 ---
 
-19. AUTENTICACIÓN
+Registro de artista
 
-Sistema oficial:
+Email.
 
-Magic Link
+↓
+
+Magic Link.
+
+↓
+
+Cuenta activada.
+
+↓
+
+Dashboard.
 
 ---
 
-Artistas
+Acceso artista
 
-Email
-
-↓
-
-Magic Link
+Email.
 
 ↓
 
-Acceso
+Magic Link.
+
+↓
+
+Dashboard.
 
 ---
 
-Eventos
+Publicación de evento
 
-Formulario
-
-↓
-
-Magic Link
+Formulario.
 
 ↓
 
-Confirmación
+Magic Link.
 
 ↓
 
-Publicación
+Validación.
+
+↓
+
+Publicación.
 
 ---
 
-20. CONTROL DE ABUSOS
+19. CONTROL DE ABUSOS
 
 Email verificado obligatorio.
 
@@ -674,47 +680,52 @@ Detección futura de duplicados.
 
 Moderación administrativa.
 
----
-
-21. POLÍTICA DE CONTENIDOS
-
-Permitido
-
-Música
-
-Danza
-
-Teatro
-
-Magia
-
-Humor
-
-Artes escénicas
+Control de spam.
 
 ---
 
-Prohibido
+20. POLÍTICA DE CONTENIDOS
 
-Pornografía
+Permitido:
 
-Violencia explícita
-
-Contenido ilegal
-
-Discurso de odio
-
-Suplantación
-
-Spam
+- Música.
+- Danza.
+- Teatro.
+- Magia.
+- Humor.
+- Artes escénicas.
 
 ---
 
-22. MAYORÍA DE EDAD
+Prohibido:
+
+- Pornografía.
+- Violencia explícita.
+- Contenido ilegal.
+- Discurso de odio.
+- Spam.
+- Suplantación de identidad.
+
+---
+
+21. MAYORÍA DE EDAD
 
 Uso exclusivo para mayores de 18 años.
 
-Confirmación obligatoria durante el registro.
+Aceptación obligatoria durante el registro.
+
+---
+
+22. MODELO DE NEGOCIO
+
+La monetización se basa exclusivamente en las suscripciones de artistas.
+
+No existen:
+
+- Comisiones.
+- Pagos entre usuarios.
+- Reservas.
+- Contrataciones gestionadas por TUESDI.
 
 ---
 
@@ -726,7 +737,7 @@ React
 
 Vite
 
-Tailwind
+TailwindCSS
 
 ---
 
@@ -736,135 +747,302 @@ Supabase
 
 ---
 
-Pagos
-
-Stripe
-
----
-
-Correo
-
-Resend
-
----
-
 Hosting
 
 Vercel
 
 ---
 
-Repositorio
+Email
+
+Resend
+
+---
+
+Pagos
+
+Stripe
+
+---
+
+Control de Código
 
 GitHub
 
 ---
 
-24. INTEGRACIÓN DE SUPABASE
+24. ARQUITECTURA DE DATOS
 
-Responsabilidades
+Tabla artists
 
-Autenticación
+id
 
-Perfiles
+user_id
 
-Eventos
+slug
 
-Métricas
+artist_name
 
-Multimedia
+bio
 
-Suscripciones
+category
 
-Formularios
+city
 
-Magic Links
+country
 
-Cron Jobs
+starting_price
+
+website
+
+instagram
+
+youtube
+
+spotify
+
+tiktok
+
+profile_image
+
+subscription_plan
+
+verified
+
+created_at
+
+updated_at
 
 ---
 
-25. INTEGRACIÓN DE STRIPE
+Tabla contact_requests
 
-Solo para suscripciones de artistas.
+id
 
-Nunca para pagos entre usuarios.
+artist_id
 
-Gestiona:
+sender_name
 
-Facturación
+sender_email
 
-Renovaciones
+sender_phone
 
-Cancelaciones
+subject
 
-Webhooks
+message
+
+status
+
+created_at
 
 ---
 
-26. INTEGRACIÓN DE RESEND
+Estados
+
+new
+
+read
+
+archived
+
+---
+
+Tabla metrics
+
+id
+
+artist_id
+
+profile_views
+
+search_impressions
+
+contact_clicks
+
+contacts_received
+
+recorded_at
+
+---
+
+Tabla subscriptions
+
+id
+
+artist_id
+
+stripe_customer_id
+
+stripe_subscription_id
+
+plan
+
+status
+
+current_period_end
+
+created_at
+
+---
+
+Tabla media
+
+id
+
+artist_id
+
+type
+
+url
+
+thumbnail
+
+position
+
+created_at
+
+---
+
+Tabla events
+
+id
+
+title
+
+description
+
+category
+
+city
+
+country
+
+event_date
+
+event_time
+
+image_url
+
+organizer_name
+
+organizer_email
+
+status
+
+expires_at
+
+created_at
+
+---
+
+25. SEGURIDAD
+
+Producción:
+
+RLS obligatorio.
+
+---
+
+Tablas protegidas:
+
+artists
+
+contact_requests
+
+metrics
+
+subscriptions
+
+media
+
+events
+
+---
+
+26. EDGE FUNCTIONS
+
+Actual
+
+resend-email
+
+---
+
+Planificadas
+
+send-contact-request
+
+send-magic-link
+
+verify-event
+
+stripe-webhook
+
+expire-events
+
+generate-metrics
+
+---
+
+27. INTEGRACIÓN DE STRIPE
+
+Stripe gestiona:
+
+- Suscripciones.
+- Renovaciones.
+- Cancelaciones.
+- Facturación.
+
+No gestiona pagos entre usuarios.
+
+---
+
+28. INTEGRACIÓN DE RESEND
 
 Responsable de:
 
-Magic Links
-
-Verificaciones
-
-Recuperación de acceso
-
-Formularios
-
-Notificaciones
+- Magic Links.
+- Verificaciones.
+- Formularios.
+- Notificaciones.
 
 ---
 
-27. INTEGRACIÓN DE GITHUB
+29. INTEGRACIÓN DE GITHUB
 
-Versionado
+Responsable de:
 
-Control de cambios
-
-Auditoría
-
-Desarrollo colaborativo
-
-CI/CD
+- Repositorio oficial.
+- Versionado.
+- Auditoría.
+- CI/CD.
 
 ---
 
-28. INTEGRACIÓN DE VERCEL
+30. INTEGRACIÓN DE VERCEL
 
-Hosting
+Responsable de:
 
-Deploy automático
-
-Entornos Preview
-
-CDN global
-
-Producción
+- Hosting.
+- Deploy automático.
+- Entornos Preview.
+- Producción.
 
 ---
 
-29. APARTADO LEGAL
+31. APARTADO LEGAL
 
 Debe incluir:
 
-Términos del Servicio
-
-Política de Privacidad
-
-Aviso Legal
-
-Política de Cookies
-
-Quiénes Somos
-
-Contacto
+- Términos del Servicio.
+- Política de Privacidad.
+- Aviso Legal.
+- Política de Cookies.
+- Quiénes Somos.
+- Contacto.
 
 ---
 
-30. PRINCIPIOS IRRENUNCIABLES
+32. PRINCIPIOS IRRENUNCIABLES
 
 ✓ Sin exposición de datos personales.
 
@@ -878,7 +1056,7 @@ Contacto
 
 ✓ Métricas reales.
 
-✓ Verificación mediante Magic Link.
+✓ Magic Link obligatorio.
 
 ✓ Mayores de edad.
 
@@ -888,13 +1066,11 @@ Contacto
 
 ---
 
-DECLARACIÓN OFICIAL
+VISIÓN OFICIAL
 
-TUESDI es un escaparate digital diseñado para que los artistas puedan mostrar su talento, aumentar su visibilidad y recibir oportunidades sin exponer sus datos personales.
+TUESDI aspira a convertirse en el escaparate digital de referencia para artistas independientes y profesionales.
 
-Los eventos se publican de forma independiente para facilitar la difusión cultural y la generación de oportunidades.
-
-La plataforma no actúa como intermediaria, no participa en acuerdos entre usuarios y no gestiona pagos externos.
+Una plataforma donde la visibilidad, la privacidad y las oportunidades convivan sin intermediarios, sin exposición innecesaria de datos y con un modelo de negocio sostenible basado exclusivamente en suscripciones.
 
 TUESDI.
 
