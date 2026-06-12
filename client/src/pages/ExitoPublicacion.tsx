@@ -1,10 +1,55 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, Share2, ArrowRight } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function ExitoPublicacion() {
   const [, setLocation] = useLocation();
+  const search = useSearch();
+  const [event, setEvent] = useState<any>(null);
+
+  useEffect(() => {
+    const eventId = new URLSearchParams(search).get("id");
+    if (!eventId) return;
+
+    const fetchEvent = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", eventId)
+        .single();
+
+      if (!error && data) {
+        setEvent(data);
+      }
+    };
+
+    fetchEvent();
+  }, [search]);
+
+  const handleShare = async () => {
+    const shareUrl = event
+      ? `${window.location.origin}/eventos/${event.id}`
+      : window.location.origin;
+    const shareData = {
+      title: event?.title || "Evento en TUESDI",
+      text: `Mira mi evento en TUESDI: ${event?.title || ""}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Enlace copiado al portapapeles");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -40,28 +85,36 @@ export default function ExitoPublicacion() {
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Título del Evento</p>
-                <p className="font-semibold text-foreground">Concierto de Luna Martínez</p>
+                <p className="font-semibold text-foreground">{event?.title || "—"}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Fecha</p>
-                <p className="font-semibold text-foreground">15 de Junio, 2024 • 20:00</p>
+                <p className="font-semibold text-foreground">
+                  {event?.event_date || "—"}{event?.event_time ? ` • ${event.event_time}` : ""}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Ubicación</p>
-                <p className="font-semibold text-foreground">Teatro Principal, Madrid</p>
+                <p className="font-semibold text-foreground">
+                  {event ? `${event.venue}, ${event.city}` : "—"}
+                </p>
               </div>
             </div>
           </Card>
 
           {/* Action Buttons */}
           <div className="space-y-3 mb-6">
-            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => setLocation(event ? `/eventos/${event.id}` : "/eventos")}
+            >
               Ver Evento Publicado
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               variant="outline"
               className="w-full border-border hover:bg-muted"
+              onClick={handleShare}
             >
               <Share2 className="w-4 h-4 mr-2" />
               Compartir Evento

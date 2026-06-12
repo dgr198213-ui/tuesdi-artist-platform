@@ -2,15 +2,64 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRoute } from "wouter";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useRoute, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { Mail, Instagram, Music, Globe, MapPin, Star, ArrowLeft } from "lucide-react";
+import { Mail, Instagram, Music, Music2, Globe, MapPin, Star, ArrowLeft } from "lucide-react";
 
 export default function ArtistaProfile() {
   const [route, params] = useRoute("/artista/:id");
+  const [, setLocation] = useLocation();
   const [artist, setArtist] = useState<any>(null);
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [contactSubject, setContactSubject] = useState("Contacto");
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
+
+  const openContactDialog = (subject: string) => {
+    setContactSubject(subject);
+    setContactForm({ name: "", email: "", message: "" });
+    setContactOpen(true);
+  };
+
+  const handleSendInquiry = async () => {
+    if (!contactForm.name || !contactForm.email || !contactForm.message) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    setSending(true);
+    try {
+      const { error } = await supabase.from("inquiries").insert([
+        {
+          artist_id: artist.id,
+          name: contactForm.name,
+          email: contactForm.email,
+          subject: contactSubject,
+          message: contactForm.message,
+          status: "pending",
+        },
+      ]);
+
+      if (error) {
+        console.error("Error sending inquiry:", error);
+        alert("No se pudo enviar tu mensaje. Intenta de nuevo más tarde.");
+      } else {
+        alert(`Mensaje enviado a ${artist.name}. Te contactará pronto.`);
+        setContactOpen(false);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error inesperado al enviar el mensaje.");
+    } finally {
+      setSending(false);
+    }
+  };
 
   useEffect(() => {
     const fetchArtist = async () => {
@@ -99,21 +148,33 @@ export default function ArtistaProfile() {
       </header>
       {/* Cover Image */}
       <div className="relative h-64 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-        <img
-          src={artist.cover_url}
-          alt="Cover"
-          className="w-full h-full object-cover"
-        />
+        {artist.cover_url ? (
+          <img
+            src={artist.cover_url}
+            alt="Cover"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-primary/30">
+            <Music2 size={64} />
+          </div>
+        )}
       </div>
 
       {/* Profile Header */}
       <div className="max-w-4xl mx-auto px-4 -mt-24 relative z-10 mb-8">
         <div className="flex flex-col md:flex-row gap-6 items-start">
-          <img
-            src={artist.avatar_url}
-            alt={artist.name}
-            className="w-32 h-32 rounded-full border-4 border-card object-cover"
-          />
+          {artist.avatar_url ? (
+            <img
+              src={artist.avatar_url}
+              alt={artist.name}
+              className="w-32 h-32 rounded-full border-4 border-card object-cover"
+            />
+          ) : (
+            <div className="w-32 h-32 rounded-full border-4 border-card bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary">
+              <Music2 size={40} />
+            </div>
+          )}
           <div className="flex-1 pt-4">
             <div className="flex items-center gap-2 mb-2">
               <h1 className="text-3xl font-bold text-foreground">{artist.name}</h1>
@@ -136,10 +197,17 @@ export default function ArtistaProfile() {
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => openContactDialog("Contacto")}
+              >
                 Contactar
               </Button>
-              <Button variant="outline" className="border-border hover:bg-muted">
+              <Button
+                variant="outline"
+                className="border-border hover:bg-muted"
+                onClick={() => openContactDialog("Solicitud de consulta")}
+              >
                 Solicitar Consulta
               </Button>
             </div>
@@ -249,6 +317,60 @@ export default function ArtistaProfile() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Contact / Inquiry Dialog */}
+      <Dialog open={contactOpen} onOpenChange={setContactOpen}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">{contactSubject} con {artist.name}</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Tu mensaje se enviará directamente al panel del artista.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="contact-name" className="text-foreground mb-2 block">Tu nombre</Label>
+              <Input
+                id="contact-name"
+                placeholder="Nombre"
+                value={contactForm.name}
+                onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                className="bg-input border-border"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact-email" className="text-foreground mb-2 block">Tu correo</Label>
+              <Input
+                id="contact-email"
+                type="email"
+                placeholder="tu@email.com"
+                value={contactForm.email}
+                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                className="bg-input border-border"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact-message" className="text-foreground mb-2 block">Mensaje</Label>
+              <Textarea
+                id="contact-message"
+                placeholder="Cuéntale al artista qué necesitas..."
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                className="bg-input border-border min-h-28"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleSendInquiry}
+              disabled={sending}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {sending ? "Enviando..." : "Enviar Mensaje"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

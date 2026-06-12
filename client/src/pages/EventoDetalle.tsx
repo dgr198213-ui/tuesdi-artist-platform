@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
-import { Calendar, MapPin, Users, Share2, Heart } from "lucide-react";
+import { Calendar, MapPin, Users, Share2, Heart, Sparkles, Music2 } from "lucide-react";
 
 export default function EventoDetalle() {
   const [route, params] = useRoute("/eventos/:id");
@@ -11,6 +11,38 @@ export default function EventoDetalle() {
   const [liked, setLiked] = useState(false);
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: event?.title || "Evento en TUESDI",
+      text: `Mira este evento en TUESDI: ${event?.title || ""}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Enlace copiado al portapapeles");
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
+  const handleBuyTicket = () => {
+    if (event?.promoter_email) {
+      const subject = encodeURIComponent(`Entradas: ${event.title}`);
+      const body = encodeURIComponent(
+        `Hola, estoy interesado/a en entradas para "${event.title}" el ${event.event_date}. ¿Podrías darme más información?`
+      );
+      window.location.href = `mailto:${event.promoter_email}?subject=${subject}&body=${body}`;
+    } else {
+      alert("Este evento aún no tiene un método de compra configurado. Contacta al organizador para más información.");
+    }
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -90,11 +122,17 @@ export default function EventoDetalle() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Hero Image */}
         <div className="relative h-96 rounded-lg overflow-hidden mb-8 bg-gradient-to-br from-primary/20 to-secondary/20">
-          <img
-            src={event.image_url}
-            alt={event.title}
-            className="w-full h-full object-cover"
-          />
+          {event.image_url ? (
+            <img
+              src={event.image_url}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-primary/30">
+              <Sparkles size={64} />
+            </div>
+          )}
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
               size="sm"
@@ -108,6 +146,7 @@ export default function EventoDetalle() {
               size="sm"
               variant="outline"
               className="bg-card/50 backdrop-blur-sm border-border hover:bg-card"
+              onClick={handleShare}
             >
               <Share2 className="w-4 h-4" />
             </Button>
@@ -164,11 +203,17 @@ export default function EventoDetalle() {
               <Card className="bg-card/50 border-border p-6">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Artista</h2>
                 <div className="flex items-center gap-4">
-                  <img
-                    src={event.artists.avatar_url}
-                    alt={event.artists.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
+                  {event.artists.avatar_url ? (
+                    <img
+                      src={event.artists.avatar_url}
+                      alt={event.artists.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary">
+                      <Music2 size={24} />
+                    </div>
+                  )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground">{event.artists.name}</h3>
@@ -195,10 +240,17 @@ export default function EventoDetalle() {
           <div>
             <Card className="bg-card/50 border-border p-6 sticky top-20">
               <p className="text-3xl font-bold text-foreground mb-6">{event.price}</p>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mb-3 py-6">
+              <Button
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mb-3 py-6"
+                onClick={handleBuyTicket}
+              >
                 Comprar Entrada
               </Button>
-              <Button variant="outline" className="w-full border-border hover:bg-muted">
+              <Button
+                variant="outline"
+                className="w-full border-border hover:bg-muted"
+                onClick={handleShare}
+              >
                 Compartir Evento
               </Button>
             </Card>

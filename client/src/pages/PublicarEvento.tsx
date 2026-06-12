@@ -89,7 +89,8 @@ export default function PublicarEvento() {
         console.error("Error creating event:", error);
         alert(`Error al crear el evento: ${error.message}`);
       } else {
-        setLocation("/exito-publicacion");
+        const newEventId = data && data[0] ? data[0].id : "";
+        setLocation(`/exito-publicacion${newEventId ? `?id=${newEventId}` : ""}`);
       }
     } catch (error) {
       console.error("Error:", error);

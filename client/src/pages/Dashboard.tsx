@@ -367,7 +367,13 @@ export default function Dashboard() {
                         }`}>
                           {event.status === "published" ? "Publicado" : "Borrador"}
                         </span>
-                        <Button variant="outline" size="sm">Editar</Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setLocation(`/eventos/${event.id}`)}
+                        >
+                          Ver
+                        </Button>
                       </div>
                     </div>
                   ))
