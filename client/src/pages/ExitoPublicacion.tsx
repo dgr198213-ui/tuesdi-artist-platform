@@ -25,11 +25,14 @@ export default function ExitoPublicacion() {
           </div>
 
           {/* Title */}
+          <div className="flex items-center justify-center gap-2 mb-6 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 object-contain" />
+          </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            ¡Evento Publicado!
+            ¡Escenario Preparado!
           </h1>
           <p className="text-muted-foreground mb-8">
-            Tu evento ha sido publicado exitosamente y está visible para todos los usuarios.
+            Tu evento ha sido publicado exitosamente y ya brilla en Tu Escenario Digital.
           </p>
 
           {/* Event Info */}

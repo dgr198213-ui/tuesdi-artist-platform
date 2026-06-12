@@ -76,8 +76,7 @@ export default function Eventos() {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
-            <img src="/logo.png" alt="Tuesdi Logo" className="w-10 h-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="/explorar-artistas" className="text-foreground hover:text-primary transition-colors">Artistas</a>
@@ -89,9 +88,9 @@ export default function Eventos() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-foreground mb-2">Próximos Eventos</h2>
-          <p className="text-muted-foreground">Encuentra las mejores presentaciones musicales cerca de ti.</p>
+        <div className="mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Próximos Eventos</h2>
+          <p className="text-xl text-muted-foreground">Descubre las mejores actuaciones y oportunidades en directo.</p>
         </div>
 
         {/* Search & Filters */}

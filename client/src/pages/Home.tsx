@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
-import { Search, Music2, Calendar, MapPin, ArrowRight, Sparkles } from "lucide-react";
+import { Search, Music2, Calendar, MapPin, ArrowRight, Sparkles, Instagram } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function Home() {
@@ -55,7 +55,7 @@ export default function Home() {
       artist: "The Rock Stars",
       date: "2024-06-17",
       city: "Valencia",
-      image: "https://images.unsplash.com/photo-1493225255756-d9584f8606e9?auto=format&fit=crop&w=600&q=80",
+      image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=600&q=80",
       price: "30€",
     },
   ];
@@ -82,7 +82,7 @@ export default function Home() {
       name: "The Rock Stars",
       category: "Banda de Rock",
       city: "Valencia",
-      image: "https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&w=300&q=80",
+      image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=300&q=80",
       verified: true,
     },
   ];
@@ -355,19 +355,19 @@ export default function Home() {
             <div>
               <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Legal</h4>
               <ul className="space-y-4 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Términos de servicio</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Política de privacidad</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contacto</a></li>
+                <li><a href="/terminos" className="hover:text-primary transition-colors">Términos de servicio</a></li>
+                <li><a href="/privacidad" className="hover:text-primary transition-colors">Política de privacidad</a></li>
+                <li><a href="mailto:hola@tuesdi.es" className="hover:text-primary transition-colors">Contacto</a></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-xs">Síguenos</h4>
               <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
-                  <Music2 size={20} />
+                <a href="https://instagram.com/tuesdi" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
+                  <Instagram size={20} />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
-                  <Sparkles size={20} />
+                <a href="https://tiktok.com/@tuesdi" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all">
+                  <Music2 size={20} />
                 </a>
               </div>
             </div>

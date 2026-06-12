@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Search, MapPin, Music2 } from "lucide-react";
+import { Search, MapPin, Music2, Sparkles } from "lucide-react";
 
 export default function ExplorarArtistas() {
   const [, setLocation] = useLocation();
@@ -81,8 +81,7 @@ export default function ExplorarArtistas() {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
-            <img src="/logo.png" alt="Tuesdi Logo" className="w-10 h-10 object-contain" />
-            <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <a href="/explorar-artistas" className="text-primary font-medium">Artistas</a>
@@ -94,9 +93,9 @@ export default function ExplorarArtistas() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-4xl font-bold text-foreground mb-2">Explorar Artistas</h2>
-          <p className="text-muted-foreground">Descubre el mejor talento artístico para tu próximo evento.</p>
+        <div className="mb-12">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Explorar Artistas</h2>
+          <p className="text-xl text-muted-foreground">Conecta directamente con el talento que buscas para tu escenario.</p>
         </div>
 
         {/* Search & Filters */}

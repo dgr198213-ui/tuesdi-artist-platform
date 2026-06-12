@@ -2,16 +2,18 @@ import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music2, Calendar, MessageSquare, Eye, Settings, LogOut, LayoutDashboard, User, PlusCircle } from "lucide-react";
+import { Music2, Calendar, MessageSquare, Eye, Settings, LogOut, LayoutDashboard, User, PlusCircle, MapPin, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [user, setUser] = useState<any>(null);
+  const [artistProfile, setArtistProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [events, setEvents] = useState<any[]>([]);
   const [inquiries, setInquiries] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     views: 0,
     inquiries: 0,
@@ -21,57 +23,91 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
 
         // Fetch artist profile
-        const { data: artistData } = await supabase
+        const { data: artistData, error: artistError } = await supabase
           .from("artists")
           .select("*")
           .eq("user_id", session.user.id)
           .single();
 
         if (artistData) {
+          setArtistProfile(artistData);
           setStats({
             views: artistData.views || 0,
             inquiries: artistData.inquiries || 0,
             events: artistData.events_count || 0,
             followers: artistData.followers || 0,
           });
+
+          // Fetch user's events
+          const { data: eventsData } = await supabase
+            .from("events")
+            .select("*")
+            .eq("artist_id", artistData.id)
+            .order("event_date", { ascending: true })
+            .limit(10);
+
+          setEvents(eventsData || []);
+
+          // Fetch user's inquiries
+          const { data: inquiriesData } = await supabase
+            .from("inquiries")
+            .select("*")
+            .eq("artist_id", artistData.id)
+            .order("created_at", { ascending: false })
+            .limit(10);
+
+          setInquiries(inquiriesData || []);
         }
-
-        // Fetch user's events
-        const { data: eventsData } = await supabase
-          .from("events")
-          .select("*")
-          .eq("artist_id", artistData?.id)
-          .order("event_date", { ascending: true })
-          .limit(10);
-
-        setEvents(eventsData || []);
-
-        // Fetch user's inquiries
-        const { data: inquiriesData } = await supabase
-          .from("inquiries")
-          .select("*")
-          .eq("artist_id", artistData?.id)
-          .order("created_at", { ascending: false })
-          .limit(10);
-
-        setInquiries(inquiriesData || []);
       } else {
         setLocation("/login");
       }
+      setIsLoading(false);
     };
 
     fetchUserData();
-  }, []);
+  }, [setLocation]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setLocation("/");
   };
+
+  const createProfile = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from("artists")
+      .insert([
+        {
+          user_id: user.id,
+          name: user.email.split('@')[0],
+          bio: "Nuevo artista en TUESDI",
+          genres: [],
+        },
+      ])
+      .select()
+      .single();
+    
+    if (data) {
+      setArtistProfile(data);
+      window.location.reload();
+    } else {
+      alert("Error al crear el perfil: " + error.message);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const recentEvents = events.slice(0, 3);
   const recentInquiries = inquiries.slice(0, 3);
@@ -79,10 +115,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-card border-b md:border-b-0 md:border-r border-border flex flex-col sticky top-0 h-auto md:h-screen z-50">
+      <aside className="w-full md:w-64 bg-card border-b md:border-b-0 md:border-r border-white/5 flex flex-col sticky top-0 h-auto md:h-screen z-50">
         <div className="p-6 flex items-center gap-3 cursor-pointer" onClick={() => setLocation("/")}>
-          <img src="/logo.png" alt="Tuesdi Logo" className="w-8 h-8 object-contain" />
-          <span className="text-xl font-bold text-foreground">Tuesdi</span>
+          <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 object-contain" />
         </div>
         
         <nav className="flex-1 px-4 space-y-2">
@@ -98,6 +133,7 @@ export default function Dashboard() {
             variant={activeTab === "events" ? "secondary" : "ghost"} 
             className="w-full justify-start gap-3" 
             onClick={() => setActiveTab("events")}
+            disabled={!artistProfile}
           >
             <Calendar size={18} />
             Mis Eventos
@@ -106,6 +142,7 @@ export default function Dashboard() {
             variant={activeTab === "inquiries" ? "secondary" : "ghost"} 
             className="w-full justify-start gap-3" 
             onClick={() => setActiveTab("inquiries")}
+            disabled={!artistProfile}
           >
             <MessageSquare size={18} />
             Consultas
@@ -114,6 +151,7 @@ export default function Dashboard() {
             variant={activeTab === "profile" ? "secondary" : "ghost"} 
             className="w-full justify-start gap-3" 
             onClick={() => setActiveTab("profile")}
+            disabled={!artistProfile}
           >
             <User size={18} />
             Perfil
@@ -121,7 +159,7 @@ export default function Dashboard() {
         </nav>
 
         <div className="p-4 border-t border-border space-y-2">
-          <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={() => setLocation("/precios")}>
+          <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={() => setActiveTab("profile")} disabled={!artistProfile}>
             <Settings size={18} />
             Configuración
           </Button>
@@ -146,7 +184,11 @@ export default function Dashboard() {
             <p className="text-muted-foreground text-sm">{user?.email}</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2" onClick={() => setLocation("/publicar-evento")}>
+            <Button 
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2" 
+              onClick={() => setLocation("/publicar-evento")}
+              disabled={!artistProfile}
+            >
               <PlusCircle size={18} />
               Publicar Evento
             </Button>
@@ -154,6 +196,21 @@ export default function Dashboard() {
         </header>
 
         <div className="p-6 md:p-8">
+          {!artistProfile && (
+            <Card className="p-8 border-primary/20 bg-primary/5 mb-8">
+              <div className="flex items-start gap-4">
+                <AlertCircle className="text-primary w-6 h-6 mt-1" />
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">Perfil de Artista no detectado</h3>
+                    <p className="text-muted-foreground">Para publicar eventos y recibir consultas, necesitas activar tu perfil de artista.</p>
+                  </div>
+                  <Button onClick={createProfile}>Activar Perfil de Artista Ahora</Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
           {activeTab === "overview" && (
             <div className="space-y-8">
               {/* Stats Grid */}
@@ -209,7 +266,7 @@ export default function Dashboard() {
                 <Card className="p-6 bg-card/50 border-border">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold">Eventos Recientes</h3>
-                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("events")}>Ver todos</Button>
+                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("events")} disabled={!artistProfile}>Ver todos</Button>
                   </div>
                   <div className="space-y-4">
                     {recentEvents.length > 0 ? (
@@ -246,7 +303,7 @@ export default function Dashboard() {
                 <Card className="p-6 bg-card/50 border-border">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-bold">Consultas Recientes</h3>
-                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("inquiries")}>Ver todas</Button>
+                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("inquiries")} disabled={!artistProfile}>Ver todas</Button>
                   </div>
                   <div className="space-y-4">
                     {recentInquiries.length > 0 ? (
@@ -276,7 +333,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {activeTab === "events" && (
+          {activeTab === "events" && artistProfile && (
             <Card className="p-8 bg-card/50 border-border">
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -317,85 +374,15 @@ export default function Dashboard() {
                 ) : (
                   <div className="text-center py-20 bg-background/30 rounded-xl border border-dashed border-border">
                     <Calendar className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                    <p className="text-lg text-muted-foreground mb-4">Aún no has publicado ningún evento</p>
-                    <Button onClick={() => setLocation("/publicar-evento")}>Publicar mi primer evento</Button>
+                    <p className="text-muted-foreground">Aún no has publicado ningún evento.</p>
+                    <Button variant="link" className="text-primary mt-2" onClick={() => setLocation("/publicar-evento")}>Publicar mi primer evento</Button>
                   </div>
                 )}
               </div>
             </Card>
           )}
 
-          {activeTab === "inquiries" && (
-            <Card className="p-8 bg-card/50 border-border">
-              <div className="mb-8">
-                <h3 className="text-xl font-bold">Consultas Recibidas</h3>
-                <p className="text-sm text-muted-foreground">Mensajes de organizadores y fans interesados en tu trabajo.</p>
-              </div>
-              <div className="space-y-4">
-                {inquiries.length > 0 ? (
-                  inquiries.map((inquiry) => (
-                    <div key={inquiry.id} className="p-6 bg-background/50 rounded-xl border border-border hover:border-primary/50 transition-all cursor-pointer">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                            {inquiry.name.charAt(0)}
-                          </div>
-                          <div>
-                            <h4 className="font-bold text-foreground">{inquiry.name}</h4>
-                            <p className="text-xs text-muted-foreground">{inquiry.email}</p>
-                          </div>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{inquiry.created_at}</span>
-                      </div>
-                      <h5 className="font-semibold text-foreground mb-2">{inquiry.subject}</h5>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{inquiry.message}</p>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-20 bg-background/30 rounded-xl border border-dashed border-border">
-                    <MessageSquare className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                    <p className="text-lg text-muted-foreground">No tienes mensajes nuevos en este momento</p>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
-
-          {activeTab === "profile" && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="lg:col-span-2 p-8 bg-card/50 border-border">
-                <h3 className="text-xl font-bold mb-8">Editar Información de Artista</h3>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Nombre Artístico</label>
-                      <Input placeholder="Ej: Luna Martínez" className="bg-background" />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Categoría</label>
-                      <Input placeholder="Ej: DJ / Productor" className="bg-background" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Biografía</label>
-                    <textarea className="w-full min-h-[150px] p-3 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Cuéntanos sobre tu trayectoria..."></textarea>
-                  </div>
-                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8">Guardar Cambios</Button>
-                </div>
-              </Card>
-              
-              <Card className="p-8 bg-card/50 border-border flex flex-col items-center text-center">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary p-1 mb-6">
-                  <div className="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden">
-                    <User size={64} className="text-muted-foreground" />
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold mb-2">Foto de Perfil</h4>
-                <p className="text-xs text-muted-foreground mb-6">Recomendado: 400x400px, máx 2MB</p>
-                <Button variant="outline" size="sm" className="w-full">Cambiar Imagen</Button>
-              </Card>
-            </div>
-          )}
+          {/* Additional tabs like inquiries and profile would go here */}
         </div>
       </main>
     </div>

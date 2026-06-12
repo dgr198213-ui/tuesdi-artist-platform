@@ -27,9 +27,15 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
+import { Calendar, Music, Settings, Star, MessageSquare, Home } from "lucide-react";
+
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: LayoutDashboard, label: "Resumen", path: "/dashboard" },
+  { icon: Calendar, label: "Mis Eventos", path: "/dashboard/eventos" },
+  { icon: MessageSquare, label: "Mensajes", path: "/dashboard/mensajes" },
+  { icon: Star, label: "Reseñas", path: "/dashboard/resenas" },
+  { icon: Settings, label: "Configuración", path: "/dashboard/configuracion" },
+  { icon: Home, label: "Volver a la Web", path: "/" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -62,20 +68,20 @@ export default function DashboardLayout({
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
             <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to continue
+              Inicia sesión para continuar
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
+              El acceso a este panel requiere autenticación. Continúa para iniciar sesión.
             </p>
           </div>
           <Button
             onClick={() => {
-              window.location.href = getLoginUrl();
+              window.location.href = "/login";
             }}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full shadow-lg hover:shadow-xl transition-all bg-primary text-primary-foreground"
           >
-            Sign in
+            Iniciar Sesión
           </Button>
         </div>
       </div>
@@ -169,10 +175,8 @@ function DashboardLayoutContent({
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
-                  </span>
+                <div className="flex items-center gap-2 min-w-0" onClick={() => setLocation("/")}>
+                  <img src="/logo-horizontal.png" alt="TUESDI" className="h-8 object-contain cursor-pointer" />
                 </div>
               ) : null}
             </div>
@@ -226,7 +230,7 @@ function DashboardLayoutContent({
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>Cerrar Sesión</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

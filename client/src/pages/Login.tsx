@@ -53,11 +53,10 @@ export default function Login() {
       <div className="relative w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Music2 className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
+          <div className="flex items-center justify-center gap-2 mb-6 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-12 object-contain" />
           </div>
-          <p className="text-muted-foreground">Plataforma de Artistas y Eventos</p>
+          <p className="text-muted-foreground">Tu Escenario Digital — Sin Intermediarios</p>
         </div>
 
         {/* Login Card */}

@@ -72,13 +72,18 @@ export default function EventoDetalle() {
       {/* Header */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <Button
-            variant="ghost"
-            className="text-primary hover:bg-primary/10"
-            onClick={() => setLocation("/eventos")}
-          >
-            ← Volver
-          </Button>
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              className="text-primary hover:bg-primary/10"
+              onClick={() => setLocation("/eventos")}
+            >
+              ← Volver
+            </Button>
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
+              <img src="/logo-horizontal.png" alt="TUESDI" className="h-8 object-contain" />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Calendar, MapPin, DollarSign, CheckCircle2 } from "lucide-react";
+import { Calendar, MapPin, DollarSign, CheckCircle2, Image as ImageIcon, ArrowLeft } from "lucide-react";
 
 export default function PublicarEvento() {
   const [, setLocation] = useLocation();
@@ -22,6 +22,7 @@ export default function PublicarEvento() {
     price: "",
     contactEmail: "",
     contactPhone: "",
+    promoterName: "",
   });
 
   const steps = [
@@ -50,18 +51,19 @@ export default function PublicarEvento() {
       }
 
       // Get artist ID
-      const { data: artistData } = await supabase
+      const { data: artistData, error: artistError } = await supabase
         .from("artists")
         .select("id")
         .eq("user_id", session.user.id)
         .single();
 
-      if (!artistData) {
-        alert("No se encontró tu perfil de artista");
+      if (artistError || !artistData) {
+        console.error("Artist profile not found:", artistError);
+        alert("No se encontró tu perfil de artista. Asegúrate de haber completado tu registro como artista.");
         return;
       }
 
-      // Insert event
+      // Insert event using the columns mentioned in the user's pasted_content.txt
       const { data, error } = await supabase
         .from("events")
         .insert([
@@ -73,9 +75,10 @@ export default function PublicarEvento() {
             venue: formData.venue,
             city: formData.city,
             country: formData.country,
-            price: formData.price,
-            contact_email: formData.contactEmail,
-            contact_phone: formData.contactPhone,
+            price: parseFloat(formData.price) || 0,
+            promoter_email: formData.contactEmail,
+            promoter_phone: formData.contactPhone,
+            promoter_name: formData.promoterName || session.user.email,
             artist_id: artistData.id,
             status: "published",
           },
@@ -84,13 +87,13 @@ export default function PublicarEvento() {
 
       if (error) {
         console.error("Error creating event:", error);
-        alert("Error al crear el evento");
+        alert(`Error al crear el evento: ${error.message}`);
       } else {
         setLocation("/exito-publicacion");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Error al crear el evento");
+      alert("Error inesperado al crear el evento");
     } finally {
       setIsSubmitting(false);
     }
@@ -99,11 +102,24 @@ export default function PublicarEvento() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-foreground mb-4">Publicar Evento</h1>
+      <header className="border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-white"
+              onClick={() => setLocation("/dashboard")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Volver al Panel
+            </Button>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Progress Steps */}
@@ -248,7 +264,20 @@ export default function PublicarEvento() {
               <h2 className="text-2xl font-bold text-foreground">Información de Contacto</h2>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Correo Electrónico
+                  Nombre del Promotor/Organizador
+                </label>
+                <Input
+                  placeholder="Tu nombre o empresa"
+                  value={formData.promoterName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, promoterName: e.target.value })
+                  }
+                  className="bg-input border-border"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Correo Electrónico de Contacto
                 </label>
                 <Input
                   type="email"
@@ -262,7 +291,7 @@ export default function PublicarEvento() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Teléfono
+                  Teléfono de Contacto
                 </label>
                 <Input
                   placeholder="+34 600 000 000"
@@ -275,10 +304,11 @@ export default function PublicarEvento() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
-                  Precio de Entrada
+                  Precio de Entrada (€)
                 </label>
                 <Input
-                  placeholder="25€"
+                  type="number"
+                  placeholder="25"
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({ ...formData, price: e.target.value })
@@ -293,11 +323,16 @@ export default function PublicarEvento() {
           {step === 4 && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-foreground">Imagen del Evento</h2>
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-                <p className="text-muted-foreground mb-4">Arrastra una imagen o haz clic para seleccionar</p>
-                <Button variant="outline" className="border-border">
-                  Seleccionar Imagen
+              <div className="border-2 border-dashed border-border rounded-3xl p-12 text-center bg-background/50">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <ImageIcon className="w-10 h-10 text-primary" />
+                </div>
+                <p className="text-lg font-medium text-white mb-2">Selecciona una imagen para tu evento</p>
+                <p className="text-muted-foreground mb-8 max-w-sm mx-auto">Se recomienda una imagen de alta calidad que muestre el escenario o el artista.</p>
+                <Button variant="outline" className="border-primary/20 hover:bg-primary/10 text-primary rounded-2xl px-8 h-12 font-bold">
+                  Elegir Archivo
                 </Button>
+                <p className="mt-6 text-xs text-muted-foreground">Formato sugerido: JPG o PNG (máx. 5MB)</p>
               </div>
             </div>
           )}
@@ -318,6 +353,10 @@ export default function PublicarEvento() {
                 <div className="p-4 bg-muted/20 rounded border border-border">
                   <p className="text-sm text-muted-foreground">Ubicación</p>
                   <p className="font-semibold text-foreground">{formData.venue}, {formData.city}</p>
+                </div>
+                <div className="p-4 bg-muted/20 rounded border border-border">
+                  <p className="text-sm text-muted-foreground">Contacto</p>
+                  <p className="font-semibold text-foreground">{formData.contactEmail} • {formData.contactPhone}</p>
                 </div>
               </div>
             </div>

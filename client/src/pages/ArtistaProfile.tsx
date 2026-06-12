@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRoute } from "wouter";
 import { useEffect, useState } from "react";
-import { Mail, Instagram, Music, Globe, MapPin, Star } from "lucide-react";
+import { Mail, Instagram, Music, Globe, MapPin, Star, ArrowLeft } from "lucide-react";
 
 export default function ArtistaProfile() {
   const [route, params] = useRoute("/artista/:id");
@@ -78,6 +78,25 @@ export default function ArtistaProfile() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-white"
+              onClick={() => setLocation("/explorar-artistas")}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Explorar Artistas
+            </Button>
+          </div>
+        </div>
+      </header>
       {/* Cover Image */}
       <div className="relative h-64 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
         <img

@@ -8,7 +8,7 @@ import { Music2 } from "lucide-react";
 
 export default function Registro() {
   const [, setLocation] = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -26,20 +26,50 @@ export default function Registro() {
   }, [setLocation]);
 
   const handleSignup = async () => {
+    if (!formData.email || !formData.password) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+    
+    setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: {
+            is_artist: formData.isArtist,
+          }
+        }
       });
 
       if (error) {
         alert(error.message);
       } else {
-        alert("Revisa tu correo para confirmar el registro");
+        // If user is an artist, we might need to create the artist profile.
+        // Usually this is done via a trigger in Supabase, but let's ensure it works.
+        if (formData.isArtist && data.user) {
+          const { error: artistError } = await supabase
+            .from("artists")
+            .insert([
+              {
+                user_id: data.user.id,
+                name: formData.email.split('@')[0],
+                bio: "Nuevo artista en TUESDI",
+                genres: [],
+              },
+            ]);
+          if (artistError) console.error("Error creating artist profile:", artistError);
+        }
+        
+        alert("Registro exitoso. Revisa tu correo para confirmar tu cuenta.");
         setLocation("/login");
       }
     } catch (error) {
       console.error("Error:", error);
+      alert("Error inesperado durante el registro");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -54,11 +84,10 @@ export default function Registro() {
       <div className="relative w-full max-w-md">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Music2 className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground">Tuesdi</h1>
+          <div className="flex items-center justify-center gap-2 mb-6 cursor-pointer" onClick={() => setLocation("/")}>
+            <img src="/logo-horizontal.png" alt="TUESDI" className="h-12 object-contain" />
           </div>
-          <p className="text-muted-foreground">Plataforma de Artistas y Eventos</p>
+          <p className="text-muted-foreground">Tu Escenario Digital — Sin Intermediarios</p>
         </div>
 
         {/* Signup Card */}
@@ -122,9 +151,10 @@ export default function Registro() {
             {/* Signup Button */}
             <Button
               onClick={handleSignup}
+              disabled={isLoading}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold py-2 rounded transition-all"
             >
-              Registrarse
+              {isLoading ? "Registrando..." : "Registrarse"}
             </Button>
 
             {/* Divider */}
