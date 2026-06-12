@@ -43,42 +43,54 @@
 }
 
 :root {
-  /* Stitch Dark Theme - Light mode defaults */
-  --primary: #b0c6ff;
-  --primary-foreground: #002d6e;
-  --sidebar-primary: #b0c6ff;
-  --sidebar-primary-foreground: #002d6e;
-  --chart-1: #b0c6ff;
-  --chart-2: #558dff;
-  --chart-3: #7ba3ff;
-  --chart-4: #9eb9ff;
-  --chart-5: #c1ceff;
-  --radius: 16px;
-  --background: #050816;
-  --foreground: #FFFFFF;
-  --card: #111827;
-  --card-foreground: #FFFFFF;
-  --popover: #111827;
-  --popover-foreground: #FFFFFF;
-  --primary: #008CFF;
+  /* TUESDI - Tu Escenario Digital v3.0 */
+  /* Colores Corporativos Oficiales */
+  --color-negro: #000000;
+  --color-azul-principal: #0081FF;
+  --color-azul-capri: #00DBFF;
+  --color-blanco: #FFFFFF;
+
+  /* Variables de tema basadas en colores corporativos */
+  --primary: #0081FF;
   --primary-foreground: #FFFFFF;
-  --secondary: #00D4FF;
-  --secondary-foreground: #050816;
-  --muted: #0F172A;
-  --muted-foreground: #CBD5E1;
-  --accent: #00D4FF;
-  --accent-foreground: #050816;
+  --sidebar-primary: #0081FF;
+  --sidebar-primary-foreground: #FFFFFF;
+
+  /* Gráfico de colores - paleta cyan/azul */
+  --chart-1: #0081FF;
+  --chart-2: #00DBFF;
+  --chart-3: #33E1FF;
+  --chart-4: #66E7FF;
+  --chart-5: #99EDFF;
+
+  --radius: 16px;
+
+  /* Tema oscuro profesional - inspirado en escenarios */
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --card: #0a0a0a;
+  --card-foreground: #FFFFFF;
+  --popover: #0a0a0a;
+  --popover-foreground: #FFFFFF;
+  --secondary: #00DBFF;
+  --secondary-foreground: #000000;
+  --muted: #111111;
+  --muted-foreground: #888888;
+  --accent: #00DBFF;
+  --accent-foreground: #000000;
   --destructive: #ff4444;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: #0F172A;
-  --ring: #008CFF;
-  --sidebar: #0F172A;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: #111111;
+  --ring: #0081FF;
+
+  /* Sidebar oscuro */
+  --sidebar: #0a0a0a;
   --sidebar-foreground: #FFFFFF;
-  --sidebar-accent: #00D4FF;
-  --sidebar-accent-foreground: #050816;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #008CFF;
+  --sidebar-accent: #0081FF;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #0081FF;
 }
 
 @layer base {

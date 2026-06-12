@@ -1,3 +1,11 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ *
+ * Plataforma de visibilidad artística diseñada para que los artistas
+ * dispongan de un perfil profesional público donde mostrar su trabajo
+ * y recibir solicitudes de contacto de forma privada y segura.
+ */
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
@@ -24,50 +32,78 @@ import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
 import AvisoLegal from "./pages/AvisoLegal";
 import PoliticaCookies from "./pages/PoliticaCookies";
 import QuienesSomos from "./pages/QuienesSomos";
+import Contacto from "./pages/Contacto";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
+  /**
+   * Estructura de rutas según documento maestro TUESDI v3.0
+   *
+   * Páginas Públicas:
+   * - / : Home
+   * - /artistas : Directorio general de artistas
+   * - /artista/:slug : Perfil individual
+   * - /eventos : Directorio de eventos
+   * - /planes : Planes de suscripción
+   * - /quienes-somos : Quiénes Somos
+   * - /contacto : Contacto
+   * - /aviso-legal : Aviso Legal
+   * - /politica-privacidad : Política de Privacidad
+   * - /politica-cookies : Política de Cookies
+   * - /terminos-servicio : Términos del Servicio
+   *
+   * Páginas Privadas (Dashboard):
+   * - /dashboard : Dashboard principal
+   * - /dashboard/perfil : Gestión de perfil
+   * - /dashboard/media : Gestión de multimedia
+   * - /dashboard/contactos : Solicitudes de contacto
+   * - /dashboard/estadisticas : Métricas
+   * - /dashboard/suscripcion : Gestión de suscripción
+   */
   return (
     <Switch>
-            <Route path={"/"} component={Home} />
-      <Route path={"/login"} component={Login} />
-      <Route path={"/registro"} component={Registro} />
-      <Route path={"/dashboard"} component={ProtectedRoute(Dashboard)} />
-      <Route path={"/explorar-artistas"} component={ExplorarArtistas} />
+      {/* Páginas Públicas */}
+      <Route path={"/"} component={Home} />
+      <Route path={"/artistas"} component={ExplorarArtistas} />
+      <Route path={"/artista/:slug"} component={ArtistaProfile} />
       <Route path={"/eventos"} component={Eventos} />
       <Route path={"/eventos/:id"} component={EventoDetalle} />
-      <Route path={"/artista/:id"} component={ArtistaProfile} />
+      <Route path={"/planes"} component={Precios} />
+      <Route path={"/quienes-somos"} component={QuienesSomos} />
+      <Route path={"/contacto"} component={Contacto} />
+      <Route path={"/aviso-legal"} component={AvisoLegal} />
+      <Route path={"/politica-privacidad"} component={PoliticaPrivacidad} />
+      <Route path={"/politica-cookies"} component={PoliticaCookies} />
+      <Route path={"/terminos-servicio"} component={TerminosServicio} />
+
+      {/* Autenticación */}
+      <Route path={"/login"} component={Login} />
+      <Route path={"/registro"} component={Registro} />
+
+      {/* Publicación de Eventos (Magic Link) */}
       <Route path={"/publicar-evento"} component={PublicarEvento} />
       <Route path={"/confirmar-evento/:token"} component={ConfirmarEvento} />
-      <Route path={"/precios"} component={Precios} />
       <Route path={"/exito-publicacion"} component={ExitoPublicacion} />
 
-      {/* Páginas Legales */}
-      <Route path={"/terminos"} component={TerminosServicio} />
-      <Route path={"/privacidad"} component={PoliticaPrivacidad} />
-      <Route path={"/aviso-legal"} component={AvisoLegal} />
-      <Route path={"/cookies"} component={PoliticaCookies} />
-      <Route path={"/quienes-somos"} component={QuienesSomos} />
+      {/* Dashboard Privado */}
+      <Route path={"/dashboard"} component={ProtectedRoute(Dashboard)} />
 
+      {/* 404 */}
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
+/**
+ * TUESDI App
+ *
+ * Configuración del tema oscuro profesional inspirado en escenarios
+ * de espectáculos en vivo con iluminación azul (#0081FF) y cian (#00DBFF)
+ */
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="dark"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <Router />
