@@ -2,42 +2,74 @@
  * TUESDI - Tu Escenario Digital v3.0
  * Página Principal (Home)
  *
- * Objetivo: Explicar TUESDI en menos de 10 segundos.
+ * Diseño: Stitch "Digital Stage" (home_planes_refinados_tuesdi)
  * - Hero con título y subtítulo oficiales
- * - Artistas destacados
- * - Eventos recientes
+ * - Artistas destacados (datos reales con fallback a contenido de ejemplo)
  * - Cómo funciona
- * - Planes
- * - Preguntas frecuentes
+ * - Próximos eventos (datos reales con fallback a contenido de ejemplo)
+ * - Planes (Beta / Standard / Pro)
  * - CTA final
  */
 
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
-import {
-  Search,
-  Music2,
-  Calendar,
-  MapPin,
-  ArrowRight,
-  Sparkles,
-  Instagram,
-  Eye,
-  Shield,
-  Zap,
-  Users,
-  CheckCircle,
-  ChevronDown,
-} from "lucide-react";
 import { useState, useEffect } from "react";
+
+interface FeaturedArtist {
+  slug: string;
+  artist_name: string;
+  category: string;
+  bio: string | null;
+  profile_image: string | null;
+}
+
+interface UpcomingEvent {
+  id: string;
+  title: string;
+  city: string;
+  event_date: string;
+  category: string | null;
+}
+
+const MOCK_ARTISTS: FeaturedArtist[] = [
+  {
+    slug: "elena-rivers",
+    artist_name: "Elena Rivers",
+    category: "Singer",
+    bio: "Vocalista Jazz & Soul con más de 10 años de experiencia en salas nacionales.",
+    profile_image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCTTzoI6munHlAZ7yuPLlbL_dJCKwhjkNiwVuAA1gDaUJHEJX2_gwy_pXkxcTHv-Sm3cyuTyTgdwxAlVxxfeFX5XHHUU1Lvpx_y0maz6EiNgm09Rqv6TJ3DV9tbt2i7Rr6IC2N-B0pK0x71SGfy-PXK8yjD5dmR3ZinDx9B_08ah-l3Z0P7-r2HOy3iY9YpU1PHS48RsKloDCOzrs9yD0fqwY2DNnQHa_mUJn5k0RwbEYYfvqsdGdzhnVon4_GlY35vurCEfrD3cglf",
+  },
+  {
+    slug: "echo-pulse",
+    artist_name: "Echo Pulse",
+    category: "DJ / Producer",
+    bio: "Especialista en Techno Melódico y House Progresivo. Residente en SoundSystem.",
+    profile_image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDe_HnKwQnjV1XfmaRK9TpnXKk-L7InLjUWDOGrstR0N8Plbz9IPdUlN_zg5JHrcr5NAIhG63QkIdhM1qVkwwa2ZQV4Y2m54X11LjFlBepMnDjq_-Q4X3avcuwh4a36PigURJxguq7fK44Nn4qEO-ovRAd8G83uuTVcXiG7jy8AfegZg3TjNnvltcYikfUf25ZmjedDFTPUFFW0R4tZf8pWtU9DLeePDYh_hitPkzimJeg4v0EpuFCmLCFIQE27xaO3piN-GNM_GpIz",
+  },
+  {
+    slug: "lunar-riot",
+    artist_name: "Lunar Riot",
+    category: "Rock Band",
+    bio: "Cuarteto de Rock Alternativo. Potencia y melodía en cada directo.",
+    profile_image:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCTP4cpBzrtqIPsqsQJbKxuKIZWsPZQCNTtgtdfRg1DM7JSMT_JH9DlERik3sDP9psa37MBgPB546PiH1x7eegLDjzy7sjwpLqu0o7UdVZhce30fKsdCtl9Mak5MPLfk82ooo5piiq1QoLzo6wvK-3KM3Kb_YDzDLlkGxuTJNIhi3Q78ypIZNqUdHLr-Y5gs0RrkVkulMX9x2hEdZE8NmRwSdKVBF1qXXIK0QbwLLIChDDYC3cKdLwgbs2uM8egpod007DA8HunqB9V",
+  },
+];
+
+const MOCK_EVENTS: UpcomingEvent[] = [
+  { id: "mock-1", title: "Noche de Jazz", city: "Madrid, ES", event_date: "2026-10-24", category: "Música" },
+  { id: "mock-2", title: "Underground Bass", city: "Barcelona, ES", event_date: "2026-10-28", category: "Música" },
+  { id: "mock-3", title: "Art Showcase", city: "Valencia, ES", event_date: "2026-11-02", category: "Arte" },
+  { id: "mock-4", title: "Indie Fest", city: "Sevilla, ES", event_date: "2026-11-15", category: "Música" },
+];
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [artists, setArtists] = useState<FeaturedArtist[]>([]);
+  const [events, setEvents] = useState<UpcomingEvent[]>([]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,760 +90,431 @@ export default function Home() {
     };
   }, []);
 
-  const featuredArtists = [
-    {
-      id: "luna-martinez",
-      name: "Luna Martínez",
-      category: "Cantante",
-      city: "Madrid",
-      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      plan: "pro",
-    },
-    {
-      id: "dj-carlos",
-      name: "DJ Carlos",
-      category: "DJ",
-      city: "Barcelona",
-      image: "https://images.unsplash.com/photo-1520872024865-3ff2805d8bb3?auto=format&fit=crop&w=400&q=80",
-      verified: false,
-      plan: "standard",
-    },
-    {
-      id: "the-rock-stars",
-      name: "The Rock Stars",
-      category: "Banda",
-      city: "Valencia",
-      image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      plan: "pro",
-    },
-    {
-      id: "mago-alex",
-      name: "Mago Álex",
-      category: "Magia",
-      city: "Sevilla",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      verified: true,
-      plan: "standard",
-    },
-  ];
+  useEffect(() => {
+    const loadFeatured = async () => {
+      const { data: artistsData } = await supabase
+        .from("artists")
+        .select("slug, artist_name, category, bio, profile_image")
+        .order("created_at", { ascending: false })
+        .limit(3);
 
-  const recentEvents = [
-    {
-      id: 1,
-      title: "Noche de Blues en el Local",
-      date: "15 Jun 2024",
-      city: "Madrid",
-      category: "Concierto",
-      image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 2,
-      title: "Festival Electrónico Verano",
-      date: "22 Jun 2024",
-      city: "Barcelona",
-      category: "Festival",
-      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: 3,
-      title: "Jazz en el Parque",
-      date: "29 Jun 2024",
-      city: "Valencia",
-      category: "Concierto",
-      image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=600&q=80",
-    },
-  ];
+      if (artistsData && artistsData.length > 0) {
+        setArtists(artistsData as FeaturedArtist[]);
+      }
 
-  const howItWorks = [
-    {
-      icon: UserPlus,
-      title: "Crea tu perfil",
-      description: "Regístrate en segundos con tu email. Sin contraseñas, sin complicaciones.",
-    },
-    {
-      icon: ImageIcon,
-      title: "Muestra tu talento",
-      description: "Añade fotos, vídeos y tu biografía. Elige tu plan según tus necesidades.",
-    },
-    {
-      icon: Eye,
-      title: "Gana visibilidad",
-      description: "Aparece en el directorio y recibe visitas de organizadores y promotores.",
-    },
-    {
-      icon: Mail,
-      title: "Recibe contactos",
-      description: "Las solicitudes llegan a tu panel privado. Tú decides si responder.",
-    },
-  ];
+      const today = new Date().toISOString().split("T")[0];
+      const { data: eventsData } = await supabase
+        .from("events")
+        .select("id, title, city, event_date, category")
+        .eq("status", "approved")
+        .gte("event_date", today)
+        .order("event_date", { ascending: true })
+        .limit(4);
 
-  const plans = [
-    {
-      name: "Beta",
-      price: "0€",
-      period: "/mes",
-      description: "Perfecto para empezar",
-      features: [
-        "Perfil público",
-        "1 fotografía",
-        "Biografía básica",
-        "Categoría y ciudad",
-        "Formulario de contacto",
-        "Métricas básicas",
-      ],
-      highlighted: false,
-    },
-    {
-      name: "Standard",
-      price: "6€",
-      period: "/mes",
-      description: "Más visibilidad",
-      features: [
-        "Todo lo de Beta",
-        "3 fotografías",
-        "1 vídeo",
-        "Mejor posicionamiento",
-        "Métricas ampliadas",
-      ],
-      highlighted: true,
-    },
-    {
-      name: "Pro",
-      price: "9,99€",
-      period: "/mes",
-      description: "Máxima exposición",
-      features: [
-        "Todo lo de Standard",
-        "3 vídeos",
-        "Prioridad en búsquedas",
-        "Distintivo Pro",
-        "Analítica avanzada",
-      ],
-      highlighted: false,
-    },
-  ];
+      if (eventsData && eventsData.length > 0) {
+        setEvents(eventsData as UpcomingEvent[]);
+      }
+    };
 
-  const faqs = [
-    {
-      question: "¿Qué es TUESDI?",
-      answer:
-        "TUESDI es una plataforma de visibilidad artística. Un escaparate digital donde los artistas muestran su trabajo y reciben solicitudes de contacto de forma privada, sin exponer sus datos personales.",
-    },
-    {
-      question: "¿TUESDI es una agencia artística?",
-      answer:
-        "No. TUESDI no es una agencia, no intermediamos, no cobramos comisiones y no gestionamos pagos entre usuarios. Somos exclusivamente una plataforma de visibilidad.",
-    },
-    {
-      question: "¿Cómo funciona el contacto con los artistas?",
-      answer:
-        "Los visitantes envían solicitudes a través de un formulario privado. El artista las recibe en su panel y decide si responder. Nunca se exponen emails, teléfonos o datos personales.",
-    },
-    {
-      question: "¿Puedo publicar eventos?",
-      answer:
-        "Sí. El ecosistema de eventos es independiente y gratuito. Los organizadores publican a través de un formulario con Magic Link, sin necesidad de cuenta permanente.",
-    },
-    {
-      question: "¿Qué incluye cada plan?",
-      answer:
-        "Beta es gratuito con perfil básico. Standard (6€/mes) añade 3 fotos, 1 vídeo y mejor posicionamiento. Pro (9,99€/mes) incluye 3 vídeos, prioridad en búsquedas y analítica avanzada.",
-    },
-  ];
+    loadFeatured();
+  }, []);
 
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const displayArtists = artists.length > 0 ? artists : MOCK_ARTISTS;
+  const displayEvents = events.length > 0 ? events : MOCK_EVENTS;
+  const usingMockEvents = events.length === 0;
+
+  const formatEventDate = (dateStr: string) => {
+    const date = new Date(dateStr + "T00:00:00");
+    return date
+      .toLocaleDateString("es-ES", { month: "short", day: "2-digit" })
+      .toUpperCase()
+      .replace(".", "");
+  };
+
+  const goToProfile = () => setLocation(isAuthenticated ? "/dashboard" : "/registro");
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation Header */}
-      <header className="border-b border-white/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
+    <div className="bg-background text-on-surface min-h-screen selection:bg-primary selection:text-on-primary">
+      {/* TopNavBar */}
+      <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+        <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
+          <button
+            className="font-headline-md text-headline-md font-bold text-primary"
             onClick={() => setLocation("/")}
           >
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">T</span>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight">
-                TUESDI
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                Tu Escenario Digital
-              </span>
-            </div>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="/artistas"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            TUESDI
+          </button>
+          <div className="hidden md:flex items-center gap-md">
+            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">
+              Inicio
+            </button>
+            <button
+              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/artistas")}
             >
               Artistas
-            </a>
-            <a
-              href="/eventos"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            </button>
+            <button
+              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/eventos")}
             >
               Eventos
-            </a>
-            <a
-              href="/planes"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            </button>
+            <button
+              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/planes")}
             >
               Planes
-            </a>
-          </nav>
-          <div className="flex items-center gap-3">
+            </button>
+          </div>
+          <div className="flex items-center gap-sm">
             {isAuthenticated ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-primary text-primary hover:bg-primary/10"
+              <button
+                className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all duration-300"
                 onClick={() => setLocation("/dashboard")}
               >
                 Mi Panel
-              </Button>
+              </button>
             ) : (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:text-primary"
-                  onClick={() => setLocation("/login")}
-                >
-                  Acceso
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-primary text-white hover:bg-primary/90"
-                  onClick={() => setLocation("/registro")}
-                >
-                  Registro
-                </Button>
-              </>
+              <button
+                className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all duration-300"
+                onClick={() => setLocation("/login")}
+              >
+                Acceso
+              </button>
             )}
+            <button
+              className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary scale-95 duration-200 ease-in-out hover:scale-100"
+              onClick={goToProfile}
+            >
+              Crear Perfil
+            </button>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Hero Section */}
-      <section className="relative py-24 md:py-40 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8">
-              <Sparkles className="w-4 h-4 text-secondary" />
-              <span className="text-xs text-secondary font-bold uppercase tracking-widest">
-                Tu Escenario Digital
+      <main className="overflow-x-hidden">
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center pt-xl px-margin overflow-hidden">
+          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full"></div>
+          <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full"></div>
+          <div className="max-w-4xl text-center z-10">
+            <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full border border-white/10 bg-white/5 mb-md">
+              <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
+              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">
+                En Vivo: Beta Abierta
               </span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight max-w-4xl mx-auto">
-              Tu escaparate digital para{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-                artistas
-              </span>
+            <h1 className="font-headline-xl text-headline-xl text-on-surface mb-md leading-tight">
+              Tu escaparate digital para <span className="text-primary italic">artistas</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de
-              contacto sin exponer tus datos personales.
+            <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-2xl mx-auto">
+              Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales. La plataforma profesional definitiva.
             </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button
-                size="lg"
-                className="bg-primary text-white hover:bg-primary/90 h-14 px-10 text-lg font-semibold shadow-lg shadow-primary/20"
-                onClick={() => setLocation("/registro")}
+            <div className="flex flex-col md:flex-row gap-md justify-center">
+              <button
+                className="bg-primary text-on-primary font-headline-md text-headline-md px-lg py-sm rounded-lg bloom-primary hover:scale-105 transition-transform duration-300"
+                onClick={goToProfile}
               >
                 Crear Perfil
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/5 h-14 px-10 text-lg font-semibold"
+              </button>
+              <button
+                className="neon-border text-on-surface font-headline-md text-headline-md px-lg py-sm rounded-lg hover:bg-white/5"
                 onClick={() => setLocation("/artistas")}
               >
                 Ver Artistas
-              </Button>
+              </button>
             </div>
           </div>
-
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <div className="flex items-center bg-card border border-white/10 rounded-2xl overflow-hidden p-2">
-                <Search className="ml-4 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Busca artistas por nombre, categoría o ciudad..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="flex-1 bg-transparent border-none text-white placeholder:text-muted-foreground py-5 text-base focus-visible:ring-0"
-                />
-                <Button
-                  className="bg-primary text-white hover:bg-primary/90 px-6 h-11 rounded-xl font-semibold mr-1"
-                  onClick={() => setLocation(`/artistas?search=${searchTerm}`)}
-                >
-                  Buscar
-                </Button>
-              </div>
-            </div>
+          <div className="absolute bottom-base left-1/2 -translate-x-1/2 animate-bounce opacity-50">
+            <span className="material-symbols-outlined text-on-surface-variant">keyboard_double_arrow_down</span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Artists */}
-      <section className="py-24 border-t border-white/10 relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
+        {/* Featured Artists Section */}
+        <section className="py-xl px-margin max-w-7xl mx-auto">
+          <div className="flex justify-between items-end mb-lg">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                Artistas Destacados
-              </h2>
-              <p className="text-muted-foreground">
-                Descubre talento emergente en TUESDI
+              <h2 className="font-headline-lg text-headline-lg text-on-surface">Artistas Destacados</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Descubre el talento que está marcando tendencia
               </p>
             </div>
-            <Button
-              variant="link"
-              className="text-primary font-medium hidden md:flex items-center gap-2"
+            <button
+              className="font-label-sm text-label-sm text-primary flex items-center gap-xs hover:gap-sm transition-all"
               onClick={() => setLocation("/artistas")}
             >
-              Ver todos los artistas
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+              Ver todos <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredArtists.map((artist) => (
-              <Card
-                key={artist.id}
-                className="bg-card border-white/10 overflow-hidden hover:border-primary/50 transition-all duration-300 cursor-pointer group"
-                onClick={() => setLocation(`/artista/${artist.id}`)}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+            {displayArtists.map((artist) => (
+              <div
+                key={artist.slug}
+                className="glass-card group rounded-xl overflow-hidden cursor-pointer"
+                onClick={() => setLocation(`/artista/${artist.slug}`)}
               >
-                <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={artist.image}
-                    alt={artist.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {artist.verified && (
-                    <div className="absolute top-3 left-3 bg-secondary text-black p-1.5 rounded-full">
-                      <CheckCircle size={14} />
+                <div className="aspect-[4/5] relative overflow-hidden">
+                  {artist.profile_image ? (
+                    <img
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
+                      src={artist.profile_image}
+                      alt={artist.artist_name}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-surface-container text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[64px]">person</span>
                     </div>
                   )}
-                  {artist.plan === "pro" && (
-                    <div className="absolute top-3 right-3 bg-primary text-white px-2 py-1 rounded-full text-xs font-bold uppercase">
-                      Pro
+                  {artist.category && (
+                    <div className="absolute top-sm left-sm bg-black/50 backdrop-blur-md px-sm py-xs rounded-full">
+                      <span className="font-label-sm text-label-sm text-secondary">{artist.category}</span>
                     </div>
                   )}
                 </div>
-                <div className="p-5 text-center">
-                  <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">
-                    {artist.name}
-                  </h3>
-                  <p className="text-xs text-primary font-semibold uppercase tracking-wider mb-3">
-                    {artist.category}
+                <div className="p-md">
+                  <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">{artist.artist_name}</h3>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-md line-clamp-2">
+                    {artist.bio || "Artista en TUESDI"}
                   </p>
-                  <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {artist.city}
-                  </div>
+                  <button className="w-full py-xs border border-white/10 rounded-lg font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all">
+                    Ver Portafolio
+                  </button>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Recent Events */}
-      <section className="py-24 border-t border-white/10 bg-white/[0.02] relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                Eventos Recientes
-              </h2>
-              <p className="text-muted-foreground">
-                Oportunidades para artistas y público
+        {/* How It Works Section */}
+        <section className="py-xl bg-surface-container-low">
+          <div className="max-w-7xl mx-auto px-margin">
+            <div className="text-center mb-xl">
+              <h2 className="font-headline-lg text-headline-lg text-on-surface">¿Cómo funciona?</h2>
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                Tres pasos para profesionalizar tu presencia digital
               </p>
             </div>
-            <Button
-              variant="link"
-              className="text-primary font-medium hidden md:flex items-center gap-2"
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+              <div className="text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-md border border-primary/20">
+                  <span className="material-symbols-outlined text-primary text-[32px]">app_registration</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">1. Regístrate</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Crea tu cuenta de forma gratuita en menos de un minuto.
+                </p>
+              </div>
+              <div className="text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center mb-md border border-secondary/20">
+                  <span className="material-symbols-outlined text-secondary text-[32px]">account_circle</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">2. Crea tu Perfil</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Añade tus mejores trabajos, enlaces y biografía profesional.
+                </p>
+              </div>
+              <div className="text-center flex flex-col items-center">
+                <div className="w-16 h-16 rounded-2xl bg-primary-container/10 flex items-center justify-center mb-md border border-primary-container/20">
+                  <span className="material-symbols-outlined text-primary-container text-[32px]">mail</span>
+                </div>
+                <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">3. Recibe Contactos</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Recibe ofertas directamente a través de nuestro sistema seguro.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Upcoming Events Section */}
+        <section className="py-xl px-margin max-w-7xl mx-auto">
+          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-lg">Próximos Eventos</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
+            {displayEvents.map((event) => (
+              <div
+                key={event.id}
+                className="glass-card rounded-lg p-md cursor-pointer"
+                onClick={() => !usingMockEvents && setLocation(`/eventos/${event.id}`)}
+              >
+                <div className="flex justify-between items-start mb-sm">
+                  <div className="bg-primary/20 text-primary px-xs py-1 rounded font-label-sm text-label-sm">
+                    {formatEventDate(event.event_date)}
+                  </div>
+                  <span className="material-symbols-outlined text-on-surface-variant">event</span>
+                </div>
+                <h4 className="font-headline-md text-headline-md text-on-surface mb-xs">{event.title}</h4>
+                <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                  <span className="material-symbols-outlined text-xs">location_on</span> {event.city}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-lg">
+            <button
+              className="font-label-sm text-label-sm text-primary flex items-center gap-xs justify-center mx-auto hover:gap-sm transition-all"
               onClick={() => setLocation("/eventos")}
             >
-              Ver todos los eventos
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+              Ver todos los eventos <span className="material-symbols-outlined">arrow_forward</span>
+            </button>
           </div>
+        </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {recentEvents.map((event) => (
-              <Card
-                key={event.id}
-                className="bg-card border-white/10 overflow-hidden hover:border-primary/50 transition-all duration-300 cursor-pointer group"
-                onClick={() => setLocation(`/eventos/${event.id}`)}
-              >
-                <div className="relative h-44 overflow-hidden">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    {event.category}
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-white mb-3 group-hover:text-primary transition-colors">
-                    {event.title}
-                  </h3>
-                  <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      {event.date}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-primary" />
-                      {event.city}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 border-t border-white/10 relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Cómo funciona
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Simple, directo y sin intermediarios. Así es TUESDI.
+        {/* Pricing Section */}
+        <section className="py-xl px-margin max-w-7xl mx-auto">
+          <div className="text-center mb-xl">
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">Planes Profesionales</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Elige el plan que mejor se adapte a tu carrera
             </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {howItWorks.map((step, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <step.icon className="w-8 h-8 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground">{step.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-center">
+            {/* Beta */}
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Beta</h3>
+              <div className="mb-lg">
+                <span className="text-[48px] font-bold text-on-surface">0€</span>
+                <span className="text-on-surface-variant">/mes</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Perfil público de artista
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> 1 fotografía
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Formulario de contacto
+                </li>
+              </ul>
+              <button
+                className="w-full py-sm rounded-lg border border-white/10 hover:bg-white/5 transition-all font-label-sm text-label-sm"
+                onClick={() => setLocation("/registro")}
+              >
+                Empezar Gratis
+              </button>
+            </div>
 
-      {/* Plans */}
-      <section className="py-24 border-t border-white/10 bg-white/[0.02] relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Planes de suscripción
+            {/* Standard */}
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full border-primary/50 relative shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-md py-1 rounded-full font-label-sm text-label-sm shadow-lg pulse-live">
+                MÁS POPULAR
+              </div>
+              <h3 className="font-headline-md text-headline-md text-primary mb-xs">Standard</h3>
+              <div className="mb-lg">
+                <span className="text-[48px] font-bold text-on-surface">6€</span>
+                <span className="text-on-surface-variant">/mes</span>
+              </div>
+              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Todo lo del plan Beta
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> 3 fotografías + 1 vídeo
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Mejor posicionamiento
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Métricas ampliadas
+                </li>
+              </ul>
+              <button
+                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary transition-all font-label-sm text-label-sm"
+                onClick={() => setLocation("/planes")}
+              >
+                Seleccionar Plan
+              </button>
+            </div>
+
+            {/* Pro */}
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full border-secondary/20 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+              <h3 className="font-headline-md text-headline-md text-secondary mb-xs">Pro</h3>
+              <div className="mb-lg">
+                <span className="text-[48px] font-bold text-on-surface">9,99€</span>
+                <span className="text-on-surface-variant">/mes</span>
+              </div>
+              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Todo lo de Standard
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> 3 fotografías + 3 vídeos
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Prioridad interna + distintivo Pro
+                </li>
+                <li className="flex items-center gap-xs font-body-md text-body-md">
+                  <span className="material-symbols-outlined text-primary">check_circle</span> Analítica avanzada
+                </li>
+              </ul>
+              <button
+                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary transition-all font-label-sm text-label-sm hover:scale-105"
+                onClick={() => setLocation("/planes")}
+              >
+                Go Pro
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA */}
+        <section className="py-xl relative overflow-hidden">
+          <div className="absolute inset-0 spotlight opacity-30"></div>
+          <div className="max-w-4xl mx-auto px-margin text-center z-10 relative">
+            <h2 className="font-headline-xl text-headline-xl text-on-surface mb-md">
+              Únete a la revolución artística
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Elige el plan que mejor se adapte a tus necesidades
+            <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg">
+              No esperes a que te encuentren. Haz que tu talento sea imposible de ignorar.
             </p>
+            <button
+              className="bg-primary text-on-primary font-headline-md text-headline-md px-xl py-sm rounded-lg bloom-primary hover:scale-105 transition-transform duration-300"
+              onClick={goToProfile}
+            >
+              Empezar Ahora
+            </button>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card
-                key={index}
-                className={`relative ${
-                  plan.highlighted
-                    ? "bg-gradient-to-b from-primary/10 to-card border-primary/50"
-                    : "bg-card border-white/10"
-                } p-8`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-bold">
-                    Más popular
-                  </div>
-                )}
-                <div className="text-center mb-8">
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    {plan.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    {plan.description}
-                  </p>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-white">
-                      {plan.price}
-                    </span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, fIndex) => (
-                    <li key={fIndex} className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className={`w-full ${
-                    plan.highlighted
-                      ? "bg-primary text-white hover:bg-primary/90"
-                      : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
-                  onClick={() => setLocation("/registro")}
-                >
-                  Empezar
-                </Button>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQs */}
-      <section className="py-24 border-t border-white/10 relative z-10">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Preguntas frecuentes
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq, index) => (
-              <Card
-                key={index}
-                className="bg-card border-white/10 overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full p-6 flex items-center justify-between text-left"
-                >
-                  <span className="text-white font-semibold pr-4">
-                    {faq.question}
-                  </span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-muted-foreground flex-shrink-0 transition-transform ${
-                      openFaq === index ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {openFaq === index && (
-                  <div className="px-6 pb-6">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-32 relative z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10" />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            ¿Listo para ganar visibilidad?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Visibilidad para artistas. Oportunidades para eventos. Sin
-            intermediarios.
-          </p>
-          <Button
-            size="lg"
-            className="bg-primary text-white hover:bg-primary/90 h-14 px-12 text-lg font-semibold shadow-xl shadow-primary/20"
-            onClick={() => setLocation("/registro")}
-          >
-            Crear mi perfil gratis
-          </Button>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-card py-16 relative z-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">T</span>
-                </div>
-                <span className="text-white font-bold">TUESDI</span>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Tu Escenario Digital. Plataforma de visibilidad artística sin
-                intermediarios.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
-                Plataforma
-              </h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="/artistas" className="hover:text-primary transition-colors">
-                    Artistas
-                  </a>
-                </li>
-                <li>
-                  <a href="/eventos" className="hover:text-primary transition-colors">
-                    Eventos
-                  </a>
-                </li>
-                <li>
-                  <a href="/planes" className="hover:text-primary transition-colors">
-                    Planes
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
-                Empresa
-              </h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="/quienes-somos" className="hover:text-primary transition-colors">
-                    Quiénes Somos
-                  </a>
-                </li>
-                <li>
-                  <a href="/contacto" className="hover:text-primary transition-colors">
-                    Contacto
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
-                Legal
-              </h4>
-              <ul className="space-y-3 text-sm text-muted-foreground">
-                <li>
-                  <a href="/terminos-servicio" className="hover:text-primary transition-colors">
-                    Términos del Servicio
-                  </a>
-                </li>
-                <li>
-                  <a href="/politica-privacidad" className="hover:text-primary transition-colors">
-                    Política de Privacidad
-                  </a>
-                </li>
-                <li>
-                  <a href="/politica-cookies" className="hover:text-primary transition-colors">
-                    Política de Cookies
-                  </a>
-                </li>
-                <li>
-                  <a href="/aviso-legal" className="hover:text-primary transition-colors">
-                    Aviso Legal
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} TUESDI — Tu Escenario Digital.
+      <footer className="bg-surface-dim w-full py-xl border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <div className="flex flex-col items-center md:items-start">
+            <span className="font-headline-md text-headline-md text-on-surface opacity-50 mb-sm">TUESDI</span>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              © {new Date().getFullYear()} TUESDI — Tu Escenario Digital. Todos los derechos reservados.
             </p>
-            <div className="flex items-center gap-4">
-              <a
-                href="https://instagram.com/tuesdi"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white hover:bg-primary transition-all"
-              >
-                <Instagram size={18} />
-              </a>
-            </div>
+          </div>
+          <div className="flex gap-md flex-wrap justify-center">
+            <button
+              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/politica-privacidad")}
+            >
+              Privacidad
+            </button>
+            <button
+              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/terminos-servicio")}
+            >
+              Términos
+            </button>
+            <button
+              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/contacto")}
+            >
+              Contacto
+            </button>
+            <button
+              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
+              onClick={() => setLocation("/politica-cookies")}
+            >
+              Cookies
+            </button>
           </div>
         </div>
       </footer>
     </div>
-  );
-}
-
-// Icon components
-function UserPlus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <line x1="19" x2="19" y1="8" y2="14" />
-      <line x1="22" x2="16" y1="11" y2="11" />
-    </svg>
-  );
-}
-
-function ImageIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-      <circle cx="9" cy="9" r="2" />
-      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-    </svg>
-  );
-}
-
-function Mail(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect width="20" height="16" x="2" y="4" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
   );
 }

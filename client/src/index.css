@@ -148,6 +148,7 @@
 
   /* Espaciado (escala Stitch, complementa la de Tailwind) */
   --spacing-xs: 4px;
+  --spacing-base: 8px;
   --spacing-sm: 12px;
   --spacing-md: 24px;
   --spacing-lg: 48px;
