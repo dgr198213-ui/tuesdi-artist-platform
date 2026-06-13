@@ -167,6 +167,17 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     emptyOutDir: true,
+    // === CONFIGURACIÓN DE CODE-SPLITTING AÑADIDA ===
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
+      },
+    },
+    // ===============================================
   },
   server: {
     host: true,
