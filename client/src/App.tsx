@@ -13,8 +13,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Registro from "./pages/Registro";
+import Acceso from "./pages/Acceso";
+import EnlaceEnviado from "./pages/EnlaceEnviado";
 import Dashboard from "./pages/Dashboard";
 import ExplorarArtistas from "./pages/ExplorarArtistas";
 import Eventos from "./pages/Eventos";
@@ -76,8 +76,11 @@ function Router() {
       <Route path={"/terminos-servicio"} component={TerminosServicio} />
 
       {/* Autenticación */}
-      <Route path={"/login"} component={Login} />
-      <Route path={"/registro"} component={Registro} />
+      <Route path={"/acceso"} component={Acceso} />
+      <Route path={"/enlace-enviado"} component={EnlaceEnviado} />
+      {/* Alias para enlaces antiguos: login/registro -> Acceso (Magic Link) */}
+      <Route path={"/login"} component={Acceso} />
+      <Route path={"/registro"} component={Acceso} />
 
       {/* Publicación de Eventos (Magic Link) */}
       <Route path={"/publicar-evento"} component={PublicarEvento} />

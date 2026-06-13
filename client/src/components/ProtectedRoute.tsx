@@ -13,7 +13,7 @@ export default function ProtectedRoute(Component: React.ComponentType) {
         setIsAuthenticated(!!session);
         
         if (!session) {
-          setLocation("/login");
+          setLocation("/acceso");
         }
       };
 
@@ -24,7 +24,7 @@ export default function ProtectedRoute(Component: React.ComponentType) {
         (_event, session) => {
           setIsAuthenticated(!!session);
           if (!session) {
-            setLocation("/login");
+            setLocation("/acceso");
           }
         }
       );
