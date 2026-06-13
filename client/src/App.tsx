@@ -16,6 +16,7 @@ import Home from "./pages/Home";
 import Acceso from "./pages/Acceso";
 import EnlaceEnviado from "./pages/EnlaceEnviado";
 import Dashboard from "./pages/Dashboard";
+import EditorPerfil from "./pages/EditorPerfil";
 import ExplorarArtistas from "./pages/ExplorarArtistas";
 import Eventos from "./pages/Eventos";
 import EventoDetalle from "./pages/EventoDetalle";
@@ -89,6 +90,7 @@ function Router() {
 
       {/* Dashboard Privado */}
       <Route path={"/dashboard"} component={ProtectedRoute(Dashboard)} />
+      <Route path={"/dashboard/perfil"} component={ProtectedRoute(EditorPerfil)} />
 
       {/* 404 */}
       <Route path={"/404"} component={NotFound} />
