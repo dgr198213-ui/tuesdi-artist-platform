@@ -167,7 +167,7 @@ export default defineConfig({
   build: {
     outDir: "../dist",
     emptyOutDir: true,
-    // === CONFIGURACIÓN DE CODE-SPLITTING AÑADIDA ===
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -177,7 +177,6 @@ export default defineConfig({
         },
       },
     },
-    // ===============================================
   },
   server: {
     host: true,
@@ -196,3 +195,4 @@ export default defineConfig({
     },
   },
 });
+
