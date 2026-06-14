@@ -1,343 +1,345 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Publicar Evento (/publicar-evento)
+ * Diseño: Stitch "Digital Stage" (publicar_evento_tuesdi)
+ *
+ * Flujo: Formulario anónimo → INSERT events (status: pending) →
+ *        invoke create-magic-link → redirige a /exito-publicacion?id=xxx
+ */
+
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { Calendar, MapPin, Mail, CheckCircle2, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
+const CATEGORIES = ["Música", "Arte", "Teatro", "Danza", "Magia", "Humor", "Performance", "Otro"];
+
+interface EventForm {
+  title: string;
+  description: string;
+  category: string;
+  city: string;
+  country: string;
+  event_date: string;
+  event_time: string;
+  organizer_name: string;
+  organizer_email: string;
+}
+
+const EMPTY: EventForm = {
+  title: "",
+  description: "",
+  category: CATEGORIES[0],
+  city: "",
+  country: "España",
+  event_date: "",
+  event_time: "",
+  organizer_name: "",
+  organizer_email: "",
+};
 
 export default function PublicarEvento() {
   const [, setLocation] = useLocation();
-  const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState<EventForm>(EMPTY);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    venue: "",
-    city: "",
-    country: "",
-    price: "",
-    promoterEmail: "",
-    promoterPhone: "",
-    promoterName: "",
-  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const steps = [
-    { number: 1, title: "Información Básica" },
-    { number: 2, title: "Ubicación" },
-    { number: 3, title: "Contacto" },
-    { number: 4, title: "Revisión" },
-  ];
+  const update = (field: keyof EventForm, value: string) =>
+    setForm((f) => ({ ...f, [field]: value }));
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const handlePrev = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
 
-    try {
-      // Validar campos requeridos
-      if (!formData.title || !formData.date || !formData.venue || !formData.city || !formData.promoterEmail) {
-        setError("Por favor completa todos los campos requeridos");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Crear evento con estado "pending"
-      const { data: eventData, error: eventError } = await supabase
-        .from("events")
-        .insert([{
-          title: formData.title,
-          description: formData.description,
-          event_date: formData.date,
-          event_time: formData.time,
-          venue: formData.venue,
-          city: formData.city,
-          country: formData.country,
-          price: formData.price || null,
-          promoter_email: formData.promoterEmail,
-          promoter_phone: formData.promoterPhone || null,
-          promoter_name: formData.promoterName || null,
-          status: "pending",
-          created_at: new Date().toISOString(),
-          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        }])
-        .select()
-        .single();
-
-      if (eventError || !eventData) {
-        console.error("Error creating event:", eventError);
-        setError("Error al crear el evento. Intenta de nuevo.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      // ✅ FIX #1: el Magic Link se genera en el servidor (Edge Function),
-      // nunca en el cliente. La función genera un HMAC-SHA256 con un secreto
-      // de servidor y envía el email directamente desde el backend.
-      const { error: fnError } = await supabase.functions.invoke("create-magic-link", {
-        body: {
-          eventId: eventData.id,
-          email: formData.promoterEmail,
-          promoterName: formData.promoterName || "Promotor",
-        },
-      });
-
-      if (fnError) {
-        console.error("Error invoking magic link function:", fnError);
-        // No bloqueamos: el evento existe, el promotor puede contactar soporte
-        // En producción podrías mostrar un aviso, pero no revertir el evento
-      }
-
-      setLocation(`/exito-publicacion?id=${eventData.id}`);
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Error inesperado. Intenta de nuevo.");
-    } finally {
-      setIsSubmitting(false);
+    if (!form.title || !form.category || !form.city || !form.event_date || !form.organizer_email) {
+      setError("Completa todos los campos obligatorios: título, categoría, ciudad, fecha y email.");
+      return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.organizer_email)) {
+      setError("El email del organizador no tiene un formato válido.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    let image_url: string | null = null;
+
+    if (imageFile) {
+      const ext = imageFile.name.split(".").pop() || "jpg";
+      const path = `events/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("artist-media")
+        .upload(path, imageFile, { upsert: true, contentType: imageFile.type });
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from("artist-media").getPublicUrl(path);
+        image_url = urlData.publicUrl;
+      }
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+
+    const { data: eventData, error: insertError } = await supabase
+      .from("events")
+      .insert([{
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        category: form.category,
+        city: form.city.trim(),
+        country: form.country.trim() || "España",
+        event_date: form.event_date,
+        event_time: form.event_time || null,
+        image_url,
+        organizer_name: form.organizer_name.trim() || null,
+        organizer_email: form.organizer_email.trim(),
+        status: "pending",
+        expires_at: expiresAt.toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (insertError || !eventData) {
+      setError("No se pudo crear el evento: " + (insertError?.message || "error desconocido"));
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      await supabase.functions.invoke("create-magic-link", {
+        body: { eventId: eventData.id, email: form.organizer_email },
+      });
+    } catch {
+      // Si el envío del email falla, el evento está creado; el usuario puede
+      // contactar soporte. No bloqueamos la UX.
+    }
+
+    setLocation(`/exito-publicacion?id=${eventData.id}`);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Header */}
-      <header className="border-b border-border px-6 py-4 text-center">
-        <h1 className="text-xl font-bold">Publicar Evento</h1>
-        <p className="text-sm text-muted-foreground">Gratis, sin registro, sin comisiones</p>
+    <div className="bg-background text-on-surface min-h-screen">
+      {/* Nav */}
+      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}>TUESDI</button>
+          <div className="hidden md:flex gap-md">
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
+            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" onClick={() => setLocation("/eventos")}>Eventos</button>
+          </div>
+          <button className="font-body-md text-body-md text-primary hover:opacity-80 px-md py-xs rounded-lg neon-border" onClick={() => setLocation("/acceso")}>Acceso</button>
+        </nav>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* Progress Steps */}
-        <div className="flex items-center gap-2">
-          {steps.map((s) => (
-            <div key={s.number} className="flex items-center gap-2 flex-1">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium shrink-0 transition-colors ${
-                step >= s.number
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-              }`}>
-                {step > s.number ? <CheckCircle2 className="w-4 h-4" /> : s.number}
+      {/* Ambient */}
+      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-secondary/5 blur-[100px] rounded-full pointer-events-none"></div>
+
+      <main className="relative z-10 max-w-3xl mx-auto px-margin pt-[120px] pb-xl">
+        {/* Page header */}
+        <header className="text-center mb-xl">
+          <div className="inline-flex items-center gap-xs bg-secondary/10 border border-secondary/20 px-md py-xs rounded-full mb-md">
+            <span className="material-symbols-outlined text-secondary text-[16px]">add_circle</span>
+            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Publicación Gratuita</span>
+          </div>
+          <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-sm">Publica tu Evento</h1>
+          <p className="text-on-surface-variant font-body-lg text-body-lg max-w-2xl mx-auto">
+            Comparte tu visión con el mundo. Tu evento aparecerá en el directorio una vez validado por email.
+          </p>
+        </header>
+
+        <form className="space-y-md" onSubmit={handleSubmit}>
+          {/* Cover Upload */}
+          <div
+            className="glass-card rounded-xl p-base md:p-md text-center group cursor-pointer relative overflow-hidden transition-all duration-500 hover:border-secondary/50 min-h-[220px] flex flex-col items-center justify-center border-dashed border-2 border-white/20"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imagePreview ? (
+              <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+            ) : null}
+            <div className={`relative z-10 space-y-sm ${imagePreview ? "bg-black/50 p-md rounded-xl" : ""}`}>
+              <span className="material-symbols-outlined text-[48px] text-on-surface-variant group-hover:text-secondary transition-colors duration-300">
+                {imagePreview ? "edit" : "add_a_photo"}
+              </span>
+              <div className="space-y-xs">
+                <p className="font-headline-md text-headline-md text-on-surface">
+                  {imagePreview ? "Cambiar imagen de portada" : "Añadir imagen de portada"}
+                </p>
+                <p className="text-on-surface-variant font-label-sm text-label-sm">Formato sugerido: 16:9. Máximo 10MB.</p>
               </div>
-              <span className="text-xs hidden sm:block">{s.title}</span>
-              {s.number < 4 && (
-                <div className={`h-px flex-1 transition-colors ${step > s.number ? "bg-primary" : "bg-muted"}`} />
-              )}
             </div>
-          ))}
-        </div>
+            <input ref={fileInputRef} className="absolute inset-0 opacity-0 cursor-pointer" type="file" accept="image/*" onChange={handleImageChange} />
+          </div>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+          {/* Form Fields */}
+          <div className="glass-card rounded-xl p-md space-y-md">
+            <h3 className="font-headline-md text-headline-md text-primary">Información del Evento</h3>
 
-        {/* Form Steps */}
-        <Card className="p-6 space-y-4">
-          {/* Step 1: Información Básica */}
-          {step === 1 && (
-            <>
-              <h2 className="font-semibold">Información Básica del Evento</h2>
+            {/* Title */}
+            <div className="space-y-xs">
+              <label className="font-label-sm text-label-sm text-secondary uppercase tracking-widest ml-1">Título del Evento *</label>
+              <input
+                className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-white/20"
+                placeholder="Ej: Neón Ritual Night"
+                type="text"
+                value={form.title}
+                onChange={(e) => update("title", e.target.value)}
+                required
+              />
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Título del Evento *</label>
-                <Input
-                  placeholder="Ej: Concierto de Jazz en el Café Central"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Descripción</label>
-                <Textarea
-                  placeholder="Describe el evento, artistas invitados, ambiente..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="min-h-28 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Fecha *</label>
-                  <Input
-                    type="date"
-                    value={formData.date}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hora</label>
-                  <Input
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                  />
+            {/* Category + City */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Categoría *</label>
+                <div className="relative">
+                  <select
+                    className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none appearance-none"
+                    value={form.category}
+                    onChange={(e) => update("category", e.target.value)}
+                    required
+                  >
+                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                  </select>
+                  <span className="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
                 </div>
               </div>
-            </>
-          )}
-
-          {/* Step 2: Ubicación */}
-          {step === 2 && (
-            <>
-              <h2 className="font-semibold">Ubicación del Evento</h2>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Lugar / Venue *</label>
-                <Input
-                  placeholder="Ej: Sala Razzmatazz"
-                  value={formData.venue}
-                  onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Ciudad *</label>
+                <input
+                  className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20"
+                  placeholder="Ej: Madrid, Barcelona..."
+                  type="text"
+                  value={form.city}
+                  onChange={(e) => update("city", e.target.value)}
+                  required
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Ciudad *</label>
-                  <Input
-                    placeholder="Ej: Barcelona"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">País</label>
-                  <Input
-                    placeholder="España"
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Precio de Entrada</label>
-                <Input
-                  placeholder="Ej: 15€ o Entrada libre"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            {/* Date + Time */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Fecha *</label>
+                <input
+                  className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all [color-scheme:dark]"
+                  type="date"
+                  value={form.event_date}
+                  onChange={(e) => update("event_date", e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  required
                 />
               </div>
-            </>
-          )}
-
-          {/* Step 3: Contacto */}
-          {step === 3 && (
-            <>
-              <h2 className="font-semibold">Información de Contacto</h2>
-
-              <Alert>
-                <Mail className="h-4 w-4" />
-                <AlertDescription>
-                  Recibirás un Magic Link para confirmar tu evento. No necesitas crear una cuenta.
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nombre del Promotor</label>
-                <Input
-                  placeholder="Tu nombre o nombre de la organización"
-                  value={formData.promoterName}
-                  onChange={(e) => setFormData({ ...formData, promoterName: e.target.value })}
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Hora (opcional)</label>
+                <input
+                  className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all [color-scheme:dark]"
+                  type="time"
+                  value={form.event_time}
+                  onChange={(e) => update("event_time", e.target.value)}
                 />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Correo Electrónico *</label>
-                <Input
+            {/* Description */}
+            <div className="space-y-xs">
+              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Descripción (opcional)</label>
+              <textarea
+                className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20 min-h-[100px] resize-none"
+                placeholder="Describe el evento, artistas, ambiente esperado..."
+                value={form.description}
+                onChange={(e) => update("description", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Organizer */}
+          <div className="glass-card rounded-xl p-md space-y-md">
+            <h3 className="font-headline-md text-headline-md text-primary">Datos del Organizador</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              Tus datos de contacto nunca se mostrarán públicamente. El Magic Link de confirmación se enviará al email indicado.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Nombre (opcional)</label>
+                <input
+                  className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20"
+                  placeholder="Ej: Sala MuBe Madrid"
+                  type="text"
+                  value={form.organizer_name}
+                  onChange={(e) => update("organizer_name", e.target.value)}
+                />
+              </div>
+              <div className="space-y-xs">
+                <label className="font-label-sm text-label-sm text-secondary uppercase tracking-widest ml-1">Email del Organizador *</label>
+                <input
+                  className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-secondary outline-none transition-all placeholder:text-white/20"
+                  placeholder="tu@email.com"
                   type="email"
-                  placeholder="promotor@email.com"
-                  value={formData.promoterEmail}
-                  onChange={(e) => setFormData({ ...formData, promoterEmail: e.target.value })}
-                />
-                <p className="text-xs text-muted-foreground">Aquí recibirás el Magic Link para confirmar tu evento</p>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Teléfono</label>
-                <Input
-                  type="tel"
-                  placeholder="+34 600 000 000"
-                  value={formData.promoterPhone}
-                  onChange={(e) => setFormData({ ...formData, promoterPhone: e.target.value })}
+                  value={form.organizer_email}
+                  onChange={(e) => update("organizer_email", e.target.value)}
+                  required
                 />
               </div>
-            </>
-          )}
+            </div>
+          </div>
 
-          {/* Step 4: Revisión */}
-          {step === 4 && (
-            <>
-              <h2 className="font-semibold">Revisión del Evento</h2>
-
-              <div className="space-y-3 text-sm">
-                <div className="p-3 bg-muted rounded-md">
-                  <p className="font-medium text-base">{formData.title}</p>
-                  {formData.description && <p className="text-muted-foreground mt-1">{formData.description}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-start gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">Fecha</p>
-                      <p className="text-muted-foreground">{formData.date}{formData.time && ` · ${formData.time}`}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div>
-                      <p className="font-medium">Ubicación</p>
-                      <p className="text-muted-foreground">{formData.venue}, {formData.city}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 p-3 bg-primary/5 border border-primary/20 rounded-md">
-                  <Mail className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <div>
-                    <p className="font-medium text-primary">Confirmación por Magic Link</p>
-                    <p className="text-muted-foreground">
-                      Recibirás un enlace seguro en <strong>{formData.promoterEmail}</strong> para publicar tu evento.
-                      El enlace caduca en 30 minutos.
-                    </p>
-                  </div>
-                </div>
+          {/* Info box */}
+          <div className="glass-card rounded-xl p-md border-l-4 border-secondary/50">
+            <div className="flex items-start gap-sm">
+              <span className="material-symbols-outlined text-secondary">info</span>
+              <div className="space-y-xs">
+                <p className="font-label-sm text-label-sm text-secondary uppercase">¿Cómo funciona?</p>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Tras enviar el formulario, recibirás un <strong className="text-on-surface">Magic Link</strong> en tu email. Al hacer clic en él, el evento quedará publicado automáticamente en el directorio. Caduca a los 30 días.
+                </p>
               </div>
-            </>
-          )}
-        </Card>
+            </div>
+          </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={handlePrev} disabled={step === 1}>
-            Anterior
-          </Button>
-          {step < 4 ? (
-            <Button onClick={handleNext}>Siguiente</Button>
-          ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "Enviando..." : "Enviar Magic Link"}
-            </Button>
+          {error && (
+            <div className="glass-card rounded-xl p-md border-l-4 border-error">
+              <p className="font-body-md text-body-md text-error">{error}</p>
+            </div>
           )}
+
+          <button
+            className="w-full bg-primary text-on-primary py-md rounded-xl font-headline-md text-headline-md bloom-primary hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-sm"
+            type="submit"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <><span className="material-symbols-outlined animate-spin">sync</span> Publicando...</>
+            ) : (
+              <><span className="material-symbols-outlined">send</span> Publicar Evento</>
+            )}
+          </button>
+        </form>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full py-xl bg-surface-dim border-t border-white/5 mt-xl">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</div>
+          <div className="flex gap-md">
+            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"]].map(([label, path]) => (
+              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
+            ))}
+          </div>
+          <div className="font-label-sm text-label-sm text-on-surface opacity-40">© {new Date().getFullYear()} TUESDI. All rights reserved.</div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

@@ -1,140 +1,166 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Mail, Share2, Home as HomeIcon } from "lucide-react";
-import { useLocation, useSearch } from "wouter";
-import { useEffect, useState } from "react";
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Éxito de Publicación (/exito-publicacion?id=xxx)
+ * Diseño: Stitch "Digital Stage" (confirmaci_n_de_evento_tuesdi)
+ *
+ * Se muestra tras publicar un evento. El evento está en status "pending"
+ * hasta que el organizador haga clic en el Magic Link que recibió por email.
+ */
+
 import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+import { useLocation, useSearch } from "wouter";
+
+interface Event {
+  title: string;
+  city: string;
+  event_date: string;
+  organizer_email: string;
+}
 
 export default function ExitoPublicacion() {
   const [, setLocation] = useLocation();
   const search = useSearch();
-  const [event, setEvent] = useState<any>(null);
+  const [event, setEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     const eventId = new URLSearchParams(search).get("id");
     if (!eventId) return;
-
-    const fetchEvent = async () => {
-      const { data, error } = await supabase
-        .from("events")
-        .select("*")
-        .eq("id", eventId)
-        .single();
-
-      if (!error && data) {
-        setEvent(data);
-      }
-    };
-
-    fetchEvent();
+    supabase
+      .from("events")
+      .select("title, city, event_date, organizer_email")
+      .eq("id", eventId)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setEvent(data as Event); });
   }, [search]);
 
   const handleShare = async () => {
-    const shareData = {
-      title: event?.title || "Evento en TUESDI",
-      text: `Estoy publicando mi evento "${event?.title || ""}" en TUESDI`,
-      url: window.location.origin,
-    };
-
     try {
       if (navigator.share) {
-        await navigator.share(shareData);
+        await navigator.share({ title: "TUESDI — Tu Escenario Digital", url: window.location.origin });
       } else {
         await navigator.clipboard.writeText(window.location.origin);
         alert("Enlace copiado al portapapeles");
       }
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
+    } catch { /* cancelled */ }
   };
 
+  const formatDate = (d: string) =>
+    new Date(d + "T00:00:00").toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Background gradient */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+    <div className="flex flex-col min-h-screen bg-background text-on-surface overflow-hidden">
+      {/* Ambient */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]"></div>
+        <div className="absolute inset-0 spotlight opacity-30"></div>
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Card className="bg-card/50 backdrop-blur-sm border-border p-8 text-center">
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg"></div>
-              <Mail className="w-20 h-20 text-primary relative" />
+      {/* Header */}
+      <header className="relative z-10 w-full px-margin py-base flex justify-center md:justify-start">
+        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}>TUESDI</button>
+      </header>
+
+      <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
+        <div className="w-full max-w-xl text-center space-y-xl">
+
+          {/* Icon con glow */}
+          <div className="relative inline-block mx-auto">
+            <div className="absolute inset-0 bg-secondary/20 blur-3xl rounded-full"></div>
+            <div className="relative glass-card w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border border-white/20 mx-auto">
+              <span
+                className="material-symbols-outlined text-secondary"
+                style={{ fontSize: 72, fontVariationSettings: "'FILL' 1" }}
+              >
+                mark_email_read
+              </span>
             </div>
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            ¡Ya casi está!
-          </h1>
-          <p className="text-muted-foreground mb-8">
-            Hemos enviado un <strong>Magic Link</strong> a tu correo
-            {event?.promoter_email ? <> (<strong>{event.promoter_email}</strong>)</> : ""}.
-            Haz clic en el enlace para confirmar y publicar tu evento. El enlace caduca en 30 minutos.
-          </p>
+          {/* Título */}
+          <div className="space-y-md">
+            <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight">
+              ¡Evento Recibido!
+            </h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed">
+              Hemos enviado un <strong className="text-on-surface">enlace de validación</strong> a{" "}
+              {event?.organizer_email
+                ? <span className="text-secondary">{event.organizer_email}</span>
+                : "tu correo"}.
+              {" "}Tu evento será publicado automáticamente una vez que lo confirmes.
+            </p>
+          </div>
 
-          {/* Event Info */}
+          {/* Info del evento */}
           {event && (
-            <Card className="bg-muted/20 border-border p-4 mb-8 text-left">
-              <div className="space-y-3">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Título del Evento</p>
-                  <p className="font-semibold text-foreground">{event.title}</p>
+            <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-sm">
+              <div>
+                <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Evento</p>
+                <p className="font-headline-md text-headline-md text-on-surface">{event.title}</p>
+              </div>
+              <div className="flex items-center gap-md text-on-surface-variant font-body-md text-body-md">
+                <div className="flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-[16px]">calendar_today</span>
+                  {formatDate(event.event_date)}
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Fecha</p>
-                  <p className="font-semibold text-foreground">
-                    {event.event_date}{event.event_time ? ` • ${event.event_time}` : ""}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Ubicación</p>
-                  <p className="font-semibold text-foreground">{event.venue}, {event.city}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Estado</p>
-                  <p className="font-semibold text-amber-500">Pendiente de confirmación</p>
+                <div className="flex items-center gap-xs">
+                  <span className="material-symbols-outlined text-[16px]">location_on</span>
+                  {event.city}
                 </div>
               </div>
-            </Card>
+            </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full border-border hover:bg-muted"
+          {/* Acciones */}
+          <div className="flex flex-col items-center gap-md pt-base">
+            <button
+              className="neon-border rounded-full px-lg py-sm font-label-sm text-label-sm uppercase tracking-widest text-secondary hover:text-white hover:bg-secondary/10 transition-all flex items-center gap-xs"
+              onClick={() => setLocation("/eventos")}
+            >
+              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+              Volver a Eventos
+            </button>
+            <button
+              className="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors flex items-center gap-xs"
               onClick={handleShare}
             >
-              <Share2 className="w-4 h-4 mr-2" />
+              <span className="material-symbols-outlined text-[16px]">share</span>
               Compartir TUESDI
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full text-primary hover:bg-primary/10"
+            </button>
+            <button
+              className="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors"
               onClick={() => setLocation("/publicar-evento")}
             >
-              Publicar Otro Evento
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-full text-foreground hover:bg-muted"
-              onClick={() => setLocation("/")}
-            >
-              <HomeIcon className="w-4 h-4 mr-2" />
-              Ir al Inicio
-            </Button>
+              Publicar otro evento
+            </button>
           </div>
-        </Card>
 
-        {/* Tips */}
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.</p>
+          {/* Status indicator */}
+          <div className="flex items-center justify-center gap-sm opacity-60 pt-md">
+            <div className="w-2 h-2 rounded-full bg-secondary pulse-live shadow-[0_0_8px_rgba(172,237,255,0.8)]"></div>
+            <span className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+              Esperando confirmación
+            </span>
+          </div>
+
+          <p className="font-label-sm text-label-sm text-on-surface-variant/40">
+            💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.
+          </p>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 w-full py-xl border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <span className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</span>
+          <nav className="flex gap-md">
+            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"]].map(([l, p]) => (
+              <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>
+            ))}
+          </nav>
+          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</span>
+        </div>
+      </footer>
     </div>
   );
 }

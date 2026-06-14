@@ -1,157 +1,168 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Confirmación de Evento (/confirmar-evento/:token)
+ * Diseño: Stitch "Digital Stage"
+ *
+ * Recibe el token del Magic Link, invoca la Edge Function confirm-event
+ * (HMAC-SHA256) y publica el evento (status → approved).
+ */
+
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
-import { CheckCircle2, XCircle, Loader2, Calendar, MapPin } from "lucide-react";
+
+type Status = "loading" | "success" | "error";
 
 export default function ConfirmarEvento() {
   const [, params] = useRoute("/confirmar-evento/:token");
   const [, setLocation] = useLocation();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [status, setStatus] = useState<Status>("loading");
+  const [errorMsg, setErrorMsg] = useState("");
   const [event, setEvent] = useState<any>(null);
 
   useEffect(() => {
     const confirm = async () => {
-      if (!params?.token) {
-        setStatus("error");
-        setErrorMessage("Enlace inválido.");
-        return;
-      }
+      if (!params?.token) { setStatus("error"); setErrorMsg("Enlace inválido."); return; }
 
       try {
         const { data, error } = await supabase.functions.invoke("confirm-event", {
           body: { token: params.token },
         });
 
-        // supabase-js no siempre llena `error` para respuestas 4xx/5xx de Edge Functions,
-        // así que revisamos también el cuerpo de la respuesta.
         if (error || !data?.success) {
           setStatus("error");
-          setErrorMessage(
-            data?.error || error?.message || "No se pudo confirmar el evento. Intenta de nuevo."
-          );
+          setErrorMsg(data?.error || error?.message || "No se pudo confirmar el evento.");
           return;
         }
 
         setEvent(data.event);
         setStatus("success");
-      } catch (err) {
-        console.error("Error confirming event:", err);
+      } catch {
         setStatus("error");
-        setErrorMessage("Error inesperado al confirmar el evento.");
+        setErrorMsg("Error inesperado al confirmar el evento.");
       }
     };
 
     confirm();
   }, [params?.token]);
 
+  const formatDate = (d: string) =>
+    new Date(d + "T00:00:00").toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
+
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      {/* Background gradient */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+    <div className="flex flex-col min-h-screen bg-background text-on-surface overflow-hidden">
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 spotlight opacity-30"></div>
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Card className="bg-card/50 backdrop-blur-sm border-border p-8 text-center">
+      <header className="relative z-10 w-full px-margin py-base flex justify-center">
+        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}>TUESDI</button>
+      </header>
+
+      <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
+        <div className="w-full max-w-md text-center space-y-xl">
+
+          {/* Loading */}
           {status === "loading" && (
             <>
-              <div className="flex justify-center mb-6">
-                <Loader2 className="w-16 h-16 text-primary animate-spin" />
+              <div className="mx-auto w-32 h-32 glass-card rounded-full flex items-center justify-center border border-white/20">
+                <span className="material-symbols-outlined text-primary animate-spin" style={{ fontSize: 64 }}>sync</span>
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">
-                Confirmando tu evento...
-              </h1>
-              <p className="text-muted-foreground">
-                Esto solo tomará un momento.
-              </p>
+              <div>
+                <h1 className="font-headline-xl text-headline-xl text-on-surface mb-sm">Confirmando tu evento...</h1>
+                <p className="font-body-lg text-body-lg text-on-surface-variant">Esto solo tomará un momento.</p>
+              </div>
             </>
           )}
 
+          {/* Success */}
           {status === "success" && (
             <>
-              <div className="flex justify-center mb-6">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg"></div>
-                  <CheckCircle2 className="w-20 h-20 text-primary relative" />
+              <div className="relative inline-block mx-auto">
+                <div className="absolute inset-0 bg-secondary/20 blur-3xl rounded-full"></div>
+                <div className="relative glass-card w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border border-white/20 mx-auto bloom-primary">
+                  <span className="material-symbols-outlined text-secondary" style={{ fontSize: 72, fontVariationSettings: "'FILL' 1" }}>verified</span>
                 </div>
               </div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                ¡Evento Publicado!
-              </h1>
-              <p className="text-muted-foreground mb-8">
-                Tu evento ya es visible para todos los usuarios de Tuesdi.
-              </p>
+
+              <div className="space-y-sm">
+                <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight">¡Evento Publicado!</h1>
+                <p className="font-body-lg text-body-lg text-on-surface-variant">
+                  Tu evento ya es visible para todos los usuarios de TUESDI.
+                </p>
+              </div>
 
               {event && (
-                <Card className="bg-muted/20 border-border p-4 mb-8 text-left space-y-3">
+                <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-sm">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Título del Evento</p>
-                    <p className="font-semibold text-foreground">{event.title}</p>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Evento</p>
+                    <p className="font-headline-md text-headline-md text-on-surface">{event.title}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-primary shrink-0" />
-                    <p className="text-sm text-foreground">
-                      {event.event_date}{event.event_time ? ` · ${event.event_time}` : ""}
-                    </p>
+                  <div className="flex flex-wrap gap-md text-on-surface-variant font-label-sm text-label-sm">
+                    <div className="flex items-center gap-xs">
+                      <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                      {formatDate(event.event_date)}
+                    </div>
+                    <div className="flex items-center gap-xs">
+                      <span className="material-symbols-outlined text-[14px]">location_on</span>
+                      {event.city}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary shrink-0" />
-                    <p className="text-sm text-foreground">{event.venue}, {event.city}</p>
-                  </div>
-                </Card>
+                </div>
               )}
 
-              <div className="space-y-2">
-                <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
-                  onClick={() => setLocation(event ? `/eventos/${event.id}` : "/eventos")}
+              <div className="flex flex-col items-center gap-md">
+                <button
+                  className="bg-primary text-on-primary px-xl py-sm rounded-lg font-headline-md text-headline-md bloom-primary hover:opacity-90 transition-all"
+                  onClick={() => event ? setLocation(`/eventos/${event.id}`) : setLocation("/eventos")}
                 >
                   Ver Evento Publicado
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full text-foreground hover:bg-muted"
-                  onClick={() => setLocation("/")}
+                </button>
+                <button
+                  className="neon-border text-secondary px-lg py-sm rounded-full font-label-sm text-label-sm uppercase tracking-widest hover:bg-secondary/10 transition-all"
+                  onClick={() => setLocation("/publicar-evento")}
                 >
-                  Ir al Inicio
-                </Button>
+                  Publicar Otro Evento
+                </button>
               </div>
             </>
           )}
 
+          {/* Error */}
           {status === "error" && (
             <>
-              <div className="flex justify-center mb-6">
-                <XCircle className="w-20 h-20 text-destructive" />
+              <div className="mx-auto w-32 h-32 glass-card rounded-full flex items-center justify-center border border-error/30">
+                <span className="material-symbols-outlined text-error" style={{ fontSize: 64, fontVariationSettings: "'FILL' 1" }}>error</span>
               </div>
-              <h1 className="text-2xl font-bold text-foreground mb-2">
-                No se pudo confirmar
-              </h1>
-              <p className="text-muted-foreground mb-8">{errorMessage}</p>
-
-              <div className="space-y-2">
-                <Button
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              <div className="space-y-sm">
+                <h1 className="font-headline-xl text-headline-xl text-on-surface">No se pudo confirmar</h1>
+                <p className="font-body-lg text-body-lg text-on-surface-variant">{errorMsg}</p>
+              </div>
+              <div className="flex flex-col items-center gap-md">
+                <button
+                  className="bg-primary text-on-primary px-xl py-sm rounded-lg font-headline-md bloom-primary hover:opacity-90 transition-all"
                   onClick={() => setLocation("/publicar-evento")}
                 >
                   Publicar de Nuevo
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="w-full text-foreground hover:bg-muted"
+                </button>
+                <button
+                  className="text-on-surface-variant font-label-sm text-label-sm hover:text-primary transition-colors"
                   onClick={() => setLocation("/")}
                 >
                   Ir al Inicio
-                </Button>
+                </button>
               </div>
             </>
           )}
-        </Card>
-      </div>
+        </div>
+      </main>
+
+      <footer className="relative z-10 w-full py-xl border-t border-white/5">
+        <div className="flex justify-center items-center gap-md px-margin">
+          <span className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</span>
+          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</span>
+        </div>
+      </footer>
     </div>
   );
 }

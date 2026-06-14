@@ -1,238 +1,306 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Directorio de Eventos (/eventos)
+ * Diseño: Stitch "Digital Stage" (directorio_de_eventos_tuesdi_1 + _2)
+ */
+
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { useState, useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Search, Calendar, MapPin, Music2, Sparkles } from "lucide-react";
+
+const CATEGORIES = ["Todas", "Música", "Arte", "Teatro", "Danza", "Magia", "Humor", "Performance", "Otro"];
+const CITIES = ["Todas", "Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Zaragoza", "Málaga"];
+const PAGE_SIZE = 12;
+
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  city: string;
+  country: string | null;
+  event_date: string;
+  event_time: string | null;
+  image_url: string | null;
+  organizer_name: string | null;
+  status: string;
+}
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  const month = d.toLocaleDateString("es-ES", { month: "short" }).toUpperCase().replace(".", "");
+  const day = d.getDate().toString().padStart(2, "0");
+  return { month, day };
+}
 
 export default function Eventos() {
   const [, setLocation] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [events, setEvents] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [page, setPage] = useState(0);
 
-  const cities = [
-    "Todas",
-    "Madrid",
-    "Barcelona",
-    "Valencia",
-    "Sevilla",
-    "Bilbao",
-    "Málaga",
-  ];
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("Todas");
+  const [city, setCity] = useState("Todas");
 
-  // Fetch events with filters
   useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoading(true);
-      try {
-        let query = supabase.from("events").select("*");
+    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthenticated(!!session));
+  }, []);
 
-        if (selectedCity && selectedCity !== "Todas") {
-          query = query.eq("city", selectedCity);
-        }
+  const fetchEvents = useCallback(async (currentPage: number, reset: boolean) => {
+    setIsLoading(true);
+    const today = new Date().toISOString().split("T")[0];
 
-        if (searchTerm) {
-          query = query.or(
-            `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,venue.ilike.%${searchTerm}%`
-          );
-        }
+    let query = supabase
+      .from("events")
+      .select("id, title, description, category, city, country, event_date, event_time, image_url, organizer_name, status")
+      .eq("status", "approved")
+      .gte("event_date", today)
+      .order("event_date", { ascending: true })
+      .range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
 
-        if (startDate) {
-          query = query.gte("event_date", startDate);
-        }
+    if (search) query = query.ilike("title", `%${search}%`);
+    if (category !== "Todas") query = query.eq("category", category);
+    if (city !== "Todas") query = query.ilike("city", `%${city}%`);
 
-        if (endDate) {
-          query = query.lte("event_date", endDate);
-        }
+    const { data, error } = await query;
+    if (!error && data) {
+      setEvents(reset ? data : (prev) => [...prev, ...data]);
+      setHasMore(data.length === PAGE_SIZE);
+    }
+    setIsLoading(false);
+  }, [search, category, city]);
 
-        const { data, error } = await query.limit(50);
+  useEffect(() => {
+    setPage(0);
+    fetchEvents(0, true);
+  }, [fetchEvents]);
 
-        if (error) {
-          console.error("Error fetching events:", error);
-          setEvents([]);
-        } else {
-          setEvents(data || []);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        setEvents([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const applyFilters = () => {
+    setSearch(searchInput);
+    setPage(0);
+  };
 
-    fetchEvents();
-  }, [searchTerm, selectedCity, startDate, endDate]);
+  const clearFilters = () => {
+    setSearchInput(""); setSearch("");
+    setCategory("Todas"); setCity("Todas");
+    setPage(0);
+  };
+
+  const loadMore = () => {
+    const next = page + 1;
+    setPage(next);
+    fetchEvents(next, false);
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
-            <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 md:h-12 object-contain" />
+    <div className="bg-background text-on-surface min-h-screen selection:bg-primary/30">
+      {/* Nav */}
+      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}>TUESDI</button>
+          <div className="hidden md:flex items-center gap-lg">
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
+            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">Eventos</button>
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/planes")}>Planes</button>
           </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="/explorar-artistas" className="text-foreground hover:text-primary transition-colors">Artistas</a>
-            <a href="/eventos" className="text-primary font-medium">Eventos</a>
-            <a href="/precios" className="text-foreground hover:text-primary transition-colors">Precios</a>
-          </nav>
-          <Button size="sm" onClick={() => setLocation("/dashboard")}>Panel</Button>
-        </div>
+          <div className="flex items-center gap-md">
+            <button
+              className="font-body-md text-body-md text-primary hover:opacity-80 transition-all active:scale-95 px-md py-xs rounded-lg neon-border"
+              onClick={() => setLocation(isAuthenticated ? "/dashboard" : "/acceso")}
+            >
+              {isAuthenticated ? "Mi Panel" : "Acceso"}
+            </button>
+          </div>
+        </nav>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-12">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">Próximos Eventos</h2>
-          <p className="text-xl text-muted-foreground">Descubre las mejores actuaciones y oportunidades en directo.</p>
-        </div>
+      <main className="pt-xl min-h-screen">
+        {/* Hero */}
+        <section className="relative px-margin py-xl max-w-7xl mx-auto overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 blur-[100px] rounded-full"></div>
+          <div className="absolute top-20 -left-20 w-72 h-72 bg-secondary/5 blur-[80px] rounded-full"></div>
+          <div className="relative z-10 text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-sm mb-base">
+              <div className="w-2 h-2 rounded-full bg-secondary pulse-live"></div>
+              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">En Vivo</span>
+            </div>
+            <h1 className="font-headline-xl text-headline-xl text-on-surface mb-md">
+              Descubre oportunidades y <span className="text-primary">eventos culturales</span>
+            </h1>
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+              Explora la agenda de eventos culturales y artísticos. Publicación gratuita, sin comisiones.
+            </p>
+          </div>
+        </section>
 
-        {/* Search & Filters */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Filters */}
-          <div className="space-y-8">
-            <div className="bg-card/30 p-6 rounded-xl border border-border">
-              <div className="relative mb-6">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar eventos..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-background border-border"
-                />
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-4 uppercase tracking-wider">Ciudad</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {cities.map((city) => (
-                      <Button
-                        key={city}
-                        variant={selectedCity === city ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedCity(city)}
-                        className="text-xs"
-                      >
-                        {city}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Rango de Fechas</h3>
-                  <div>
-                    <label className="text-xs text-muted-foreground block mb-1">Desde</label>
-                    <Input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="bg-background border-border text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-muted-foreground block mb-1">Hasta</label>
-                    <Input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="bg-background border-border text-xs"
-                    />
-                  </div>
-                </div>
-              </div>
+        {/* Search & Filter */}
+        <section className="px-margin mb-lg max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-md items-center glass-card p-sm rounded-xl mb-md">
+            <div className="flex-1 relative w-full">
+              <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">search</span>
+              <input
+                className="w-full bg-surface-container-lowest border-none rounded-lg pl-xl pr-md py-sm focus:ring-2 focus:ring-primary text-on-surface placeholder:text-outline/50 font-body-md outline-none"
+                placeholder="Buscar por evento, ciudad o artista..."
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && applyFilters()}
+              />
+            </div>
+            <div className="flex flex-wrap md:flex-nowrap gap-sm w-full md:w-auto">
+              <select
+                className="bg-surface-container-lowest border border-outline-variant rounded-lg py-sm px-base text-on-surface-variant focus:border-primary outline-none min-w-[140px]"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c === "Todas" ? "Categoría" : c}</option>)}
+              </select>
+              <select
+                className="bg-surface-container-lowest border border-outline-variant rounded-lg py-sm px-base text-on-surface-variant focus:border-primary outline-none min-w-[140px]"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              >
+                {CITIES.map((c) => <option key={c} value={c}>{c === "Todas" ? "Ciudad" : c}</option>)}
+              </select>
+              <button
+                className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary hover:opacity-90 transition-all flex items-center gap-xs whitespace-nowrap"
+                onClick={applyFilters}
+              >
+                <span className="material-symbols-outlined">search</span> Buscar
+              </button>
             </div>
           </div>
 
-          {/* Events Grid */}
-          <div className="lg:col-span-3">
-            {isLoading ? (
-              <div className="flex justify-center items-center min-h-[400px]">
-                <Spinner />
-              </div>
-            ) : events.length === 0 ? (
-              <div className="text-center py-20 bg-card/30 rounded-xl border border-dashed border-border">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                <p className="text-muted-foreground text-lg">
-                  No se encontraron eventos con los filtros seleccionados
-                </p>
-                <Button 
-                  variant="link" 
-                  onClick={() => {
-                    setSelectedCity("Todas");
-                    setStartDate("");
-                    setEndDate("");
-                    setSearchTerm("");
-                  }}
+          <div className="flex justify-between items-center">
+            <p className="font-label-sm text-label-sm text-on-surface-variant">
+              {isLoading ? "Buscando..." : `${events.length}${hasMore ? "+" : ""} eventos encontrados`}
+            </p>
+            <button
+              className="bg-secondary text-black px-md py-xs rounded-full font-label-sm text-label-sm font-bold hover:opacity-90 transition-all flex items-center gap-xs"
+              onClick={() => setLocation("/publicar-evento")}
+            >
+              <span className="material-symbols-outlined text-[16px]">add_circle</span>
+              Publicar Evento
+            </button>
+          </div>
+        </section>
+
+        {/* Grid */}
+        <section className="max-w-7xl mx-auto px-margin pb-xl">
+          {isLoading && events.length === 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">
+                  <div className="h-48 bg-surface-container"></div>
+                  <div className="p-md space-y-sm">
+                    <div className="h-3 bg-surface-container rounded w-1/3"></div>
+                    <div className="h-4 bg-surface-container rounded w-3/4"></div>
+                    <div className="h-3 bg-surface-container rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : events.length === 0 ? (
+            <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
+              <span className="material-symbols-outlined text-[64px] mb-md block">event_busy</span>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">Sin eventos próximos</h3>
+              <p className="font-body-md text-body-md mb-lg">No hay eventos que coincidan con tu búsqueda.</p>
+              <div className="flex flex-col sm:flex-row gap-md justify-center">
+                <button className="text-primary font-label-sm text-label-sm underline" onClick={clearFilters}>Limpiar filtros</button>
+                <button
+                  className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary"
+                  onClick={() => setLocation("/publicar-evento")}
                 >
-                  Limpiar filtros
-                </Button>
+                  Publicar el primero
+                </button>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {events.map((event) => (
-                  <Card
-                    key={event.id}
-                    className="bg-card/50 border-border overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
-                    onClick={() => setLocation(`/eventos/${event.id}`)}
-                  >
-                    <div className="relative h-44 bg-gradient-to-br from-primary/20 to-secondary/20 overflow-hidden">
-                      {event.image_url ? (
-                        <img
-                          src={event.image_url}
-                          alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-primary/40">
-                          <Music2 size={48} />
-                        </div>
-                      )}
-                      {event.price && (
-                        <div className="absolute top-4 right-4 bg-background/90 backdrop-blur-sm text-primary font-bold px-3 py-1 rounded-full text-sm shadow-lg">
-                          {event.price}
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5">
-                      <h3 className="text-xl font-bold text-foreground mb-3 line-clamp-1 group-hover:text-primary transition-colors">
-                        {event.title}
-                      </h3>
-                      <div className="space-y-2 text-sm text-muted-foreground mb-6">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-primary" />
-                          <span>
-                            {event.event_date} {event.event_time && `• ${event.event_time}`}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary" />
-                          <span className="line-clamp-1">{event.venue}</span>
-                        </div>
-                        <div className="flex items-center gap-2 font-medium text-foreground/80">
-                          <MapPin className="w-4 h-4 text-primary" />
-                          <span>{event.city}</span>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
+                {events.map((event) => {
+                  const { month, day } = formatDate(event.event_date);
+                  return (
+                    <div
+                      key={event.id}
+                      className="glass-card rounded-xl overflow-hidden flex flex-col group cursor-pointer"
+                      onClick={() => setLocation(`/eventos/${event.id}`)}
+                    >
+                      <div className="relative h-48 overflow-hidden bg-surface-container">
+                        {event.image_url ? (
+                          <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={event.image_url} alt={event.title} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center spotlight">
+                            <span className="material-symbols-outlined text-[48px] text-primary/30">event</span>
+                          </div>
+                        )}
+                        <div className="absolute top-base right-base bg-background/80 backdrop-blur-md px-sm py-xs rounded text-center min-w-[50px]">
+                          <span className="block font-label-sm text-label-sm text-primary">{month}</span>
+                          <span className="block font-headline-md text-headline-md leading-none">{day}</span>
                         </div>
                       </div>
-                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2">
-                        <Sparkles size={16} />
-                        Ver Detalles
-                      </Button>
+                      <div className="p-md flex flex-col flex-1">
+                        <div className="flex items-center gap-xs mb-base">
+                          <span className="font-label-sm text-label-sm px-sm py-1 rounded-full border border-white/10 text-on-surface-variant uppercase">{event.category}</span>
+                        </div>
+                        <h3 className="font-headline-md text-headline-md text-on-surface mb-xs group-hover:text-primary transition-colors">{event.title}</h3>
+                        <div className="flex items-center gap-xs text-on-surface-variant mb-base">
+                          <span className="material-symbols-outlined text-[18px]">location_on</span>
+                          <span className="font-body-md text-body-md">{event.city}</span>
+                        </div>
+                        {event.event_time && (
+                          <div className="flex items-center gap-xs text-on-surface-variant mb-md">
+                            <span className="material-symbols-outlined text-[18px]">schedule</span>
+                            <span className="font-label-sm text-label-sm">{event.event_time}</span>
+                          </div>
+                        )}
+                        <div className="mt-auto pt-md border-t border-white/5">
+                          <button className="w-full py-sm rounded-lg bg-white/5 border border-white/10 hover:border-primary hover:text-primary transition-all font-bold text-white">
+                            Ver Evento
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </Card>
-                ))}
+                  );
+                })}
               </div>
-            )}
+
+              {hasMore && (
+                <div className="flex justify-center mt-xl">
+                  <button
+                    className="neon-border text-secondary px-xl py-sm rounded-lg font-bold hover:bg-secondary/10 transition-all flex items-center gap-sm disabled:opacity-50"
+                    onClick={loadMore}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <><span className="material-symbols-outlined animate-spin">sync</span> Cargando...</>
+                    ) : (
+                      <><span className="material-symbols-outlined">expand_more</span> Cargar más eventos</>
+                    )}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</div>
+          <div className="flex gap-md">
+            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([label, path]) => (
+              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
+            ))}
           </div>
+          <div className="font-label-sm text-label-sm text-on-surface opacity-40">© {new Date().getFullYear()} TUESDI. All rights reserved.</div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

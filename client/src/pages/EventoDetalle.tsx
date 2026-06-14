@@ -1,262 +1,244 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Detalle de Evento (/eventos/:id)
+ * Diseño: Stitch "Digital Stage"
+ */
+
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
-import { Calendar, MapPin, Users, Share2, Heart, Sparkles, Music2 } from "lucide-react";
+
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  city: string;
+  country: string | null;
+  event_date: string;
+  event_time: string | null;
+  image_url: string | null;
+  organizer_name: string | null;
+  organizer_email: string;
+  status: string;
+}
+
+function formatFullDate(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+}
+
+function formatDateBadge(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  const month = d.toLocaleDateString("es-ES", { month: "short" }).toUpperCase().replace(".", "");
+  const day = d.getDate().toString().padStart(2, "0");
+  return { month, day };
+}
 
 export default function EventoDetalle() {
-  const [route, params] = useRoute("/eventos/:id");
+  const [, params] = useRoute("/eventos/:id");
   const [, setLocation] = useLocation();
-  const [liked, setLiked] = useState(false);
-  const [event, setEvent] = useState<any>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const handleShare = async () => {
-    const shareUrl = window.location.href;
-    const shareData = {
-      title: event?.title || "Evento en TUESDI",
-      text: `Mira este evento en TUESDI: ${event?.title || ""}`,
-      url: shareUrl,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        alert("Enlace copiado al portapapeles");
-      }
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
-
-  const handleBuyTicket = () => {
-    if (event?.promoter_email) {
-      const subject = encodeURIComponent(`Entradas: ${event.title}`);
-      const body = encodeURIComponent(
-        `Hola, estoy interesado/a en entradas para "${event.title}" el ${event.event_date}. ¿Podrías darme más información?`
-      );
-      window.location.href = `mailto:${event.promoter_email}?subject=${subject}&body=${body}`;
-    } else {
-      alert("Este evento aún no tiene un método de compra configurado. Contacta al organizador para más información.");
-    }
-  };
+  const [notFound, setNotFound] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
-    const fetchEvent = async () => {
-      if (!params?.id) return;
+    if (!params?.id) return;
+    const load = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("id", params.id)
+        .maybeSingle();
 
-      try {
-        const { data, error } = await supabase
-          .from("events")
-          .select("*, artists(name, verified, avatar_url)")
-          .eq("id", params.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching event:", error);
-        } else {
-          setEvent(data);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      } finally {
-        setLoading(false);
-      }
+      if (error || !data) { setNotFound(true); setLoading(false); return; }
+      setEvent(data as Event);
+      setLoading(false);
     };
-
-    fetchEvent();
+    load();
   }, [params?.id]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) await navigator.share({ title: event?.title, url });
+      else { await navigator.clipboard.writeText(url); alert("Enlace copiado al portapapeles"); }
+    } catch { /* user cancelled */ }
+  };
 
-  if (!event) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-          <div className="max-w-4xl mx-auto px-4 py-4">
-            <Button
-              variant="ghost"
-              className="text-primary hover:bg-primary/10"
-              onClick={() => setLocation("/eventos")}
-            >
-              ← Volver
-            </Button>
-          </div>
-        </div>
-        <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-          <p className="text-muted-foreground">Evento no encontrado</p>
-        </div>
-      </div>
-    );
-  }
+  const handleContact = () => {
+    if (!event?.organizer_email) return;
+    const subject = encodeURIComponent(`Interés en: ${event.title}`);
+    const body = encodeURIComponent(`Hola,\n\nEstoy interesado/a en el evento "${event.title}" el ${formatFullDate(event.event_date)}.\n\n¿Podría facilitarme más información?`);
+    window.location.href = `mailto:${event.organizer_email}?subject=${subject}&body=${body}`;
+  };
+
+  if (loading) return (
+    <div className="bg-background min-h-screen flex items-center justify-center text-on-surface-variant">Cargando evento...</div>
+  );
+
+  if (notFound || !event) return (
+    <div className="bg-background min-h-screen flex flex-col items-center justify-center text-center px-margin gap-md">
+      <h1 className="font-headline-lg text-headline-lg text-on-surface">Evento no encontrado</h1>
+      <p className="font-body-md text-body-md text-on-surface-variant">Este evento no existe o ya ha caducado.</p>
+      <button className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary" onClick={() => setLocation("/eventos")}>Ver Eventos</button>
+    </div>
+  );
+
+  const { month, day } = formatDateBadge(event.event_date);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              className="text-primary hover:bg-primary/10"
-              onClick={() => setLocation("/eventos")}
-            >
-              ← Volver
-            </Button>
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setLocation("/")}>
-              <img src="/logo-horizontal.png" alt="TUESDI" className="h-8 object-contain" />
-            </div>
+    <div className="bg-background text-on-surface min-h-screen">
+      {/* Nav */}
+      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}>TUESDI</button>
+          <div className="flex items-center gap-md">
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
+            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" onClick={() => setLocation("/eventos")}>Eventos</button>
           </div>
+          <button className="font-body-md text-body-md text-primary hover:opacity-80 transition-all px-md py-xs rounded-lg neon-border" onClick={() => setLocation("/acceso")}>Acceso</button>
+        </nav>
+      </header>
+
+      {/* Hero */}
+      <div className="relative h-[60vh] min-h-[400px] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10"></div>
+        {event.image_url ? (
+          <img className="absolute inset-0 w-full h-full object-cover" src={event.image_url} alt={event.title} />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface to-secondary/10 spotlight"></div>
+        )}
+        <div className="absolute top-md right-md z-20 flex gap-sm">
+          <button
+            className="w-10 h-10 glass-card rounded-full flex items-center justify-center hover:border-primary transition-colors"
+            onClick={() => setLiked(!liked)}
+          >
+            <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: liked ? "'FILL' 1" : "'FILL' 0", color: liked ? "#ef4444" : undefined }}>favorite</span>
+          </button>
+          <button className="w-10 h-10 glass-card rounded-full flex items-center justify-center hover:border-primary transition-colors" onClick={handleShare}>
+            <span className="material-symbols-outlined text-[20px]">share</span>
+          </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Hero Image */}
-        <div className="relative h-96 rounded-lg overflow-hidden mb-8 bg-gradient-to-br from-primary/20 to-secondary/20">
-          {event.image_url ? (
-            <img
-              src={event.image_url}
-              alt={event.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-primary/30">
-              <Sparkles size={64} />
-            </div>
-          )}
-          <div className="absolute top-4 right-4 flex gap-2">
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card"
-              onClick={() => setLiked(!liked)}
-            >
-              <Heart className={`w-4 h-4 ${liked ? "fill-current text-red-500" : ""}`} />
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card"
-              onClick={handleShare}
-            >
-              <Share2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2">
-            {/* Title and Category */}
-            <div className="mb-6">
-              <span className="text-xs bg-secondary/20 text-secondary-foreground px-3 py-1 rounded inline-block mb-3">
-                {event.category}
-              </span>
-              <h1 className="text-4xl font-bold text-foreground mb-2">{event.title}</h1>
-            </div>
-
-            {/* Event Details */}
-            <Card className="bg-card/50 border-border p-6 mb-8">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha</p>
-                    <p className="font-semibold text-foreground">{event.event_date} • {event.event_time}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Ubicación</p>
-                    <p className="font-semibold text-foreground">{event.venue}, {event.city}</p>
-                  </div>
-                </div>
+      <main className="max-w-7xl mx-auto px-margin pb-xl -mt-xl relative z-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
+          {/* Content */}
+          <div className="lg:col-span-8 space-y-lg">
+            <div>
+              <div className="flex flex-wrap gap-xs mb-md">
+                <span className="bg-secondary/20 text-secondary border border-secondary/30 px-sm py-1 rounded-full font-label-sm text-label-sm uppercase">{event.category}</span>
+                {event.status === "approved" && (
+                  <span className="bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> Verificado
+                  </span>
+                )}
               </div>
-              <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-primary" />
+              <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-md">{event.title}</h1>
+              {event.description && (
+                <p className="font-body-lg text-body-lg text-on-surface-variant whitespace-pre-line">{event.description}</p>
+              )}
+            </div>
+
+            <div className="glass-card rounded-xl p-md grid grid-cols-1 sm:grid-cols-3 gap-md">
+              <div className="flex items-center gap-sm">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary">calendar_today</span>
+                </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Asistentes</p>
-                  <p className="font-semibold text-foreground">{event.attendees || 0} personas interesadas</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Fecha</p>
+                  <p className="font-headline-md text-headline-md text-on-surface capitalize">{formatFullDate(event.event_date)}</p>
                 </div>
               </div>
-            </Card>
-
-            {/* Description */}
-            <Card className="bg-card/50 border-border p-6 mb-8">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Sobre este evento</h2>
-              <p className="text-foreground leading-relaxed">{event.description}</p>
-            </Card>
-
-            {/* Artist Info */}
-            {event.artists && (
-              <Card className="bg-card/50 border-border p-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Artista</h2>
-                <div className="flex items-center gap-4">
-                  {event.artists.avatar_url ? (
-                    <img
-                      src={event.artists.avatar_url}
-                      alt={event.artists.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center text-primary">
-                      <Music2 size={24} />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">{event.artists.name}</h3>
-                      {event.artists.verified && (
-                        <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded">
-                          Verificado
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Artista</p>
+              {event.event_time && (
+                <div className="flex items-center gap-sm">
+                  <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-secondary">schedule</span>
                   </div>
-                  <Button
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={() => setLocation(`/artista/${event.artist_id}`)}
-                  >
-                    Ver Perfil
-                  </Button>
+                  <div>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Hora</p>
+                    <p className="font-headline-md text-headline-md text-on-surface">{event.event_time}</p>
+                  </div>
                 </div>
-              </Card>
+              )}
+              <div className="flex items-center gap-sm">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary">location_on</span>
+                </div>
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Ciudad</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">{event.city}{event.country ? `, ${event.country}` : ""}</p>
+                </div>
+              </div>
+            </div>
+
+            {event.organizer_name && (
+              <div className="glass-card rounded-xl p-md flex items-center gap-md">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-primary">person</span>
+                </div>
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Organizado por</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">{event.organizer_name}</p>
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Right Column - Booking */}
-          <div>
-            <Card className="bg-card/50 border-border p-6 sticky top-20">
-              <p className="text-3xl font-bold text-foreground mb-6">{event.price}</p>
-              <Button
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mb-3 py-6"
-                onClick={handleBuyTicket}
+          {/* Sidebar */}
+          <div className="lg:col-span-4 sticky top-32 space-y-md">
+            <div className="glass-card rounded-xl p-md bloom-primary">
+              <div className="flex justify-center mb-md">
+                <div className="bg-background/80 backdrop-blur-md px-lg py-md rounded-xl text-center min-w-[80px]">
+                  <span className="block font-label-sm text-label-sm text-primary">{month}</span>
+                  <span className="block font-headline-xl text-headline-xl leading-none text-on-surface">{day}</span>
+                </div>
+              </div>
+              <button
+                className="w-full bg-primary text-on-primary py-md rounded-lg font-headline-md text-headline-md hover:opacity-90 transition-all bloom-primary mb-sm"
+                onClick={handleContact}
               >
-                Comprar Entrada
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-border hover:bg-muted"
+                Contactar Organizador
+              </button>
+              <button
+                className="w-full neon-border text-secondary py-sm rounded-lg font-label-sm text-label-sm font-bold hover:bg-secondary/10 transition-all flex items-center justify-center gap-xs"
                 onClick={handleShare}
               >
-                Compartir Evento
-              </Button>
-            </Card>
+                <span className="material-symbols-outlined text-[18px]">share</span> Compartir Evento
+              </button>
+              <p className="mt-md text-center font-label-sm text-label-sm text-on-surface-variant/60">
+                La comunicación es directa entre partes. TUESDI no intermedia.
+              </p>
+            </div>
+
+            <button
+              className="w-full glass-card rounded-xl p-md flex items-center gap-md hover:border-primary transition-colors group"
+              onClick={() => setLocation("/publicar-evento")}
+            >
+              <span className="material-symbols-outlined text-primary text-[32px]">add_circle</span>
+              <div className="text-left">
+                <p className="font-headline-md text-headline-md text-on-surface group-hover:text-primary transition-colors">¿Tienes un evento?</p>
+                <p className="font-label-sm text-label-sm text-on-surface-variant">Publícalo gratis en TUESDI</p>
+              </div>
+            </button>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</div>
+          <div className="flex gap-md">
+            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"]].map(([label, path]) => (
+              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
+            ))}
+          </div>
+          <div className="font-label-sm text-label-sm text-on-surface opacity-40">© {new Date().getFullYear()} TUESDI. All rights reserved.</div>
+        </div>
+      </footer>
     </div>
   );
 }
