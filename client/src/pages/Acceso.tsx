@@ -29,10 +29,15 @@ export default function Acceso() {
     setStatus("sending");
     setErrorMsg("");
 
+    const redirectTo =
+      window.location.hostname === "localhost"
+        ? `${window.location.origin}/dashboard`
+        : "https://tuesdi-artist-platform.vercel.app/dashboard";
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: redirectTo,
       },
     });
 
