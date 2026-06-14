@@ -56,7 +56,7 @@ export default function ConfirmarEvento() {
       </div>
 
       <header className="relative z-10 w-full px-margin py-base flex justify-center">
-        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo.png" alt="" className="h-7 w-7 object-contain inline-block mr-1" style={{filter:"brightness(1.05)"}} />TUESDI</button>
+        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</button>
       </header>
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
@@ -159,7 +159,7 @@ export default function ConfirmarEvento() {
 
       <footer className="relative z-10 w-full py-xl border-t border-white/5">
         <div className="flex justify-center items-center gap-md px-margin">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo.png" alt="" className="h-7 w-7 object-contain inline-block mr-1" style={{filter:"brightness(1.05)"}} />TUESDI</span>
+          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</span>
           <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</span>
         </div>
       </footer>

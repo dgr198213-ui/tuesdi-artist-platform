@@ -140,7 +140,7 @@ export default function Home() {
             onClick={() => setLocation("/")}
           >
             <img
-              src="/isotipo.png"
+              src="/isotipo-nuevo.jpg"
               alt="TUESDI"
               className="h-8 w-8 object-contain"
               style={{ filter: "drop-shadow(0 0 0 #000) brightness(1.05)" }}

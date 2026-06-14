@@ -61,7 +61,7 @@ export default function DashboardShell({ active, title, children }: DashboardShe
       <nav className="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-md flex flex-col py-md px-base z-50">
         <div className="mb-xl px-base">
           <button onClick={() => setLocation("/")} className="text-left flex items-center gap-xs">
-            <img src="/isotipo.png" alt="" className="h-8 w-8 object-contain" style={{ filter: "brightness(1.05)" }} />
+            <img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain"  />
             <h1 className="font-headline-md text-headline-md font-bold text-secondary-container tracking-tight">TUESDI</h1>
           </button>
           <p className="text-on-surface-variant font-label-sm text-[10px] uppercase tracking-[0.2em]">Artist Dashboard</p>
