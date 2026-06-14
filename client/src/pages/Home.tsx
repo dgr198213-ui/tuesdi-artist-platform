@@ -37,21 +37,21 @@ const MOCK_ARTISTS: FeaturedArtist[] = [
     artist_name: "Elena Rivers",
     category: "Singer / Songwriter",
     bio: "Vocalista Jazz & Soul con más de 10 años de experiencia en salas nacionales.",
-    profile_image: "/gallery/cantante-guitarra-escenario.jpg",
+    profile_image: "/gallery/dj-publico-verde.jpg",       // cantante con micro
   },
   {
     slug: "echo-pulse",
     artist_name: "Echo Pulse",
     category: "DJ / Producer",
     bio: "Especialista en Techno Melódico y House Progresivo. Residente en SoundSystem.",
-    profile_image: "/gallery/dj-publico-verde.jpg",
+    profile_image: "/gallery/guitarrista-humo-escenario.jpg", // DJ de espaldas con público
   },
   {
     slug: "lunar-riot",
     artist_name: "Lunar Riot",
     category: "Rock Band",
     bio: "Cuarteto de Rock Alternativo. Potencia y melodía en cada directo.",
-    profile_image: "/gallery/guitarrista-humo-escenario.jpg",
+    profile_image: "/gallery/cantante-guitarra-escenario.jpg", // guitarrista en escenario
   },
 ];
 
@@ -136,10 +136,16 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
         <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
           <button
-            className="font-headline-md text-headline-md font-bold text-primary"
+            className="flex items-center gap-xs"
             onClick={() => setLocation("/")}
           >
-            TUESDI
+            <img
+              src="/isotipo.png"
+              alt="TUESDI"
+              className="h-8 w-8 object-contain"
+              style={{ filter: "drop-shadow(0 0 0 #000) brightness(1.05)" }}
+            />
+            <span className="font-headline-md text-headline-md font-bold text-primary">TUESDI</span>
           </button>
           <div className="hidden md:flex items-center gap-md">
             <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">
@@ -211,11 +217,15 @@ export default function Home() {
                 En Vivo: Beta Abierta
               </span>
             </div>
-            <h1 className="font-headline-xl text-headline-xl text-on-surface mb-md leading-tight">
-              Tu escaparate digital para <span className="text-primary italic">artistas</span>
+            <h1 className="font-headline-xl text-[40px] md:text-headline-xl text-on-surface mb-md leading-[1.15]">
+              Tu Escenario Digital.<br />
+              <span className="text-primary italic">Visibilidad profesional</span><br className="hidden md:block" /> sin intermediarios.
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-2xl mx-auto">
-              Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales. La plataforma profesional definitiva.
+            <p className="font-body-lg text-body-lg text-on-surface-variant mb-xs max-w-2xl mx-auto">
+              Muestra tu trabajo. Protege tu privacidad. Recibe oportunidades.
+            </p>
+            <p className="font-label-sm text-label-sm text-on-surface-variant/60 mb-lg max-w-xl mx-auto uppercase tracking-wide">
+              Sin comisiones &nbsp;·&nbsp; Sin exponer tus datos &nbsp;·&nbsp; Sin algoritmos
             </p>
             <div className="flex flex-col md:flex-row gap-md justify-center">
               <button
