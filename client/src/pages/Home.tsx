@@ -35,26 +35,23 @@ const MOCK_ARTISTS: FeaturedArtist[] = [
   {
     slug: "elena-rivers",
     artist_name: "Elena Rivers",
-    category: "Singer",
+    category: "Singer / Songwriter",
     bio: "Vocalista Jazz & Soul con más de 10 años de experiencia en salas nacionales.",
-    profile_image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCTTzoI6munHlAZ7yuPLlbL_dJCKwhjkNiwVuAA1gDaUJHEJX2_gwy_pXkxcTHv-Sm3cyuTyTgdwxAlVxxfeFX5XHHUU1Lvpx_y0maz6EiNgm09Rqv6TJ3DV9tbt2i7Rr6IC2N-B0pK0x71SGfy-PXK8yjD5dmR3ZinDx9B_08ah-l3Z0P7-r2HOy3iY9YpU1PHS48RsKloDCOzrs9yD0fqwY2DNnQHa_mUJn5k0RwbEYYfvqsdGdzhnVon4_GlY35vurCEfrD3cglf",
+    profile_image: "/gallery/cantante-guitarra-escenario.jpg",
   },
   {
     slug: "echo-pulse",
     artist_name: "Echo Pulse",
     category: "DJ / Producer",
     bio: "Especialista en Techno Melódico y House Progresivo. Residente en SoundSystem.",
-    profile_image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDe_HnKwQnjV1XfmaRK9TpnXKk-L7InLjUWDOGrstR0N8Plbz9IPdUlN_zg5JHrcr5NAIhG63QkIdhM1qVkwwa2ZQV4Y2m54X11LjFlBepMnDjq_-Q4X3avcuwh4a36PigURJxguq7fK44Nn4qEO-ovRAd8G83uuTVcXiG7jy8AfegZg3TjNnvltcYikfUf25ZmjedDFTPUFFW0R4tZf8pWtU9DLeePDYh_hitPkzimJeg4v0EpuFCmLCFIQE27xaO3piN-GNM_GpIz",
+    profile_image: "/gallery/dj-publico-verde.jpg",
   },
   {
     slug: "lunar-riot",
     artist_name: "Lunar Riot",
     category: "Rock Band",
     bio: "Cuarteto de Rock Alternativo. Potencia y melodía en cada directo.",
-    profile_image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCTP4cpBzrtqIPsqsQJbKxuKIZWsPZQCNTtgtdfRg1DM7JSMT_JH9DlERik3sDP9psa37MBgPB546PiH1x7eegLDjzy7sjwpLqu0o7UdVZhce30fKsdCtl9Mak5MPLfk82ooo5piiq1QoLzo6wvK-3KM3Kb_YDzDLlkGxuTJNIhi3Q78ypIZNqUdHLr-Y5gs0RrkVkulMX9x2hEdZE8NmRwSdKVBF1qXXIK0QbwLLIChDDYC3cKdLwgbs2uM8egpod007DA8HunqB9V",
+    profile_image: "/gallery/guitarrista-humo-escenario.jpg",
   },
 ];
 
@@ -196,6 +193,15 @@ export default function Home() {
       <main className="overflow-x-hidden">
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-xl px-margin overflow-hidden">
+          {/* Real background photo */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/gallery/concierto-confeti-luces.jpg"
+              alt=""
+              className="w-full h-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30"></div>
+          </div>
           <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full"></div>
           <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full"></div>
           <div className="max-w-4xl text-center z-10">
@@ -460,7 +466,15 @@ export default function Home() {
 
         {/* Final CTA */}
         <section className="py-xl relative overflow-hidden">
-          <div className="absolute inset-0 spotlight opacity-30"></div>
+          <div className="absolute inset-0 z-0">
+            <img
+              src="/gallery/artista-guitarrista-luces.jpg"
+              alt=""
+              className="w-full h-full object-cover opacity-15"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/50"></div>
+          </div>
+          <div className="absolute inset-0 spotlight opacity-20"></div>
           <div className="max-w-4xl mx-auto px-margin text-center z-10 relative">
             <h2 className="font-headline-xl text-headline-xl text-on-surface mb-md">
               Únete a la revolución artística
