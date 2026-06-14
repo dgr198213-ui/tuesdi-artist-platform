@@ -17,6 +17,9 @@ import Acceso from "./pages/Acceso";
 import EnlaceEnviado from "./pages/EnlaceEnviado";
 import Dashboard from "./pages/Dashboard";
 import EditorPerfil from "./pages/EditorPerfil";
+import BandejaContactos from "./pages/BandejaContactos";
+import GestionMedia from "./pages/GestionMedia";
+import Analitica from "./pages/Analitica";
 import ExplorarArtistas from "./pages/ExplorarArtistas";
 import Eventos from "./pages/Eventos";
 import EventoDetalle from "./pages/EventoDetalle";
@@ -91,6 +94,9 @@ function Router() {
       {/* Dashboard Privado */}
       <Route path={"/dashboard"} component={ProtectedRoute(Dashboard)} />
       <Route path={"/dashboard/perfil"} component={ProtectedRoute(EditorPerfil)} />
+      <Route path={"/dashboard/contactos"} component={ProtectedRoute(BandejaContactos)} />
+      <Route path={"/dashboard/media"} component={ProtectedRoute(GestionMedia)} />
+      <Route path={"/dashboard/analitica"} component={ProtectedRoute(Analitica)} />
 
       {/* 404 */}
       <Route path={"/404"} component={NotFound} />

@@ -1,396 +1,320 @@
+/**
+ * TUESDI - Tu Escenario Digital v3.0
+ * Dashboard Overview (/dashboard)
+ * Diseño: Stitch "Digital Stage" (dashboard_overview_tuesdi)
+ */
+
 import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Music2, Calendar, MessageSquare, Eye, Settings, LogOut, LayoutDashboard, User, PlusCircle, MapPin, AlertCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import DashboardShell from "@/components/DashboardShell";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+
+interface ArtistData {
+  id: string;
+  artist_name: string;
+  subscription_plan: string | null;
+  profile_image: string | null;
+}
+
+interface MetricsData {
+  profile_views: number;
+  search_impressions: number;
+  contact_clicks: number;
+  contacts_received: number;
+}
+
+interface ContactRequest {
+  id: string;
+  sender_name: string;
+  sender_email: string;
+  subject: string | null;
+  created_at: string;
+  status: string;
+}
+
+interface MediaItem {
+  id: string;
+  type: string;
+  url: string;
+  thumbnail: string | null;
+}
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
-  const [user, setUser] = useState<any>(null);
-  const [artistProfile, setArtistProfile] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("overview");
-  const [events, setEvents] = useState<any[]>([]);
-  const [inquiries, setInquiries] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState({
-    views: 0,
-    inquiries: 0,
-    events: 0,
-    followers: 0,
-  });
+  const [artist, setArtist] = useState<ArtistData | null>(null);
+  const [metrics, setMetrics] = useState<MetricsData | null>(null);
+  const [contacts, setContacts] = useState<ContactRequest[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [noProfile, setNoProfile] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      setIsLoading(true);
+    const load = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
+      if (!session) return;
 
-        // Fetch artist profile
-        const { data: artistData, error: artistError } = await supabase
-          .from("artists")
-          .select("*")
-          .eq("user_id", session.user.id)
-          .single();
+      const { data: artistData } = await supabase
+        .from("artists")
+        .select("id, artist_name, subscription_plan, profile_image")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
 
-        if (artistData) {
-          setArtistProfile(artistData);
-          setStats({
-            views: artistData.views || 0,
-            inquiries: artistData.inquiries || 0,
-            events: artistData.events_count || 0,
-            followers: artistData.followers || 0,
-          });
+      if (!artistData) { setNoProfile(true); setLoading(false); return; }
+      setArtist(artistData as ArtistData);
 
-          // Fetch user's events
-          const { data: eventsData } = await supabase
-            .from("events")
-            .select("*")
-            .eq("artist_id", artistData.id)
-            .order("event_date", { ascending: true })
-            .limit(10);
+      const [{ data: metricsData }, { data: contactsData }, { data: mediaData }] = await Promise.all([
+        supabase
+          .from("metrics")
+          .select("profile_views, search_impressions, contact_clicks, contacts_received")
+          .eq("artist_id", artistData.id)
+          .order("recorded_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("contact_requests")
+          .select("id, sender_name, sender_email, subject, created_at, status")
+          .eq("artist_id", artistData.id)
+          .order("created_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("media")
+          .select("id, type, url, thumbnail")
+          .eq("artist_id", artistData.id)
+          .order("position", { ascending: true })
+          .limit(4),
+      ]);
 
-          setEvents(eventsData || []);
-
-          // Fetch user's inquiries
-          const { data: inquiriesData } = await supabase
-            .from("inquiries")
-            .select("*")
-            .eq("artist_id", artistData.id)
-            .order("created_at", { ascending: false })
-            .limit(10);
-
-          setInquiries(inquiriesData || []);
-        }
-      } else {
-        setLocation("/login");
-      }
-      setIsLoading(false);
+      if (metricsData) setMetrics(metricsData as MetricsData);
+      setContacts((contactsData || []) as ContactRequest[]);
+      setMedia((mediaData || []) as MediaItem[]);
+      setLoading(false);
     };
+    load();
+  }, []);
 
-    fetchUserData();
-  }, [setLocation]);
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setLocation("/");
-  };
+  const initials = (name: string) =>
+    name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
-  const createProfile = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from("artists")
-      .insert([
-        {
-          user_id: user.id,
-          name: user.email.split('@')[0],
-          bio: "Nuevo artista en TUESDI",
-          genres: [],
-        },
-      ])
-      .select()
-      .single();
-    
-    if (data) {
-      setArtistProfile(data);
-      window.location.reload();
-    } else {
-      alert("Error al crear el perfil: " + error.message);
-    }
-  };
+  const newCount = contacts.filter((c) => c.status === "new").length;
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary"></div>
-      </div>
+      <DashboardShell active="overview" title="Overview">
+        <div className="flex items-center justify-center h-64 text-on-surface-variant">Cargando...</div>
+      </DashboardShell>
     );
   }
 
-  const recentEvents = events.slice(0, 3);
-  const recentInquiries = inquiries.slice(0, 3);
+  if (noProfile) {
+    return (
+      <DashboardShell active="overview" title="Overview">
+        <div className="flex flex-col items-center justify-center h-64 gap-lg text-center">
+          <div className="w-24 h-24 glass-card rounded-full flex items-center justify-center">
+            <span className="material-symbols-outlined text-primary text-[48px]">person_add</span>
+          </div>
+          <div>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Crea tu perfil artístico</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-sm">
+              Aún no tienes un perfil en TUESDI. Crea el tuyo en menos de 2 minutos.
+            </p>
+          </div>
+          <button
+            className="bg-primary text-on-primary px-xl py-sm rounded-lg font-bold bloom-primary hover:opacity-90"
+            onClick={() => setLocation("/dashboard/perfil")}
+          >
+            Crear mi Perfil
+          </button>
+        </div>
+      </DashboardShell>
+    );
+  }
+
+  const planLabel = artist?.subscription_plan === "pro" ? "TUESDI Pro" : artist?.subscription_plan === "standard" ? "TUESDI Standard" : "TUESDI Beta";
+
+  const metricCards = [
+    { icon: "visibility", label: "Profile Views", value: metrics?.profile_views ?? 0, trend: "+12%", up: true },
+    { icon: "search_check", label: "Search Appearances", value: metrics?.search_impressions ?? 0, trend: "+5.2%", up: true },
+    { icon: "ads_click", label: "Contact Clicks", value: metrics?.contact_clicks ?? 0, trend: "-2.1%", up: false },
+    { icon: "group_add", label: "New Contacts", value: metrics?.contacts_received ?? newCount, trend: "+22%", up: true },
+  ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
-      {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-card border-b md:border-b-0 md:border-r border-white/5 flex flex-col sticky top-0 h-auto md:h-screen z-50">
-        <div className="p-6 flex items-center gap-3 cursor-pointer" onClick={() => setLocation("/")}>
-          <img src="/logo-horizontal.png" alt="TUESDI" className="h-10 object-contain" />
+    <DashboardShell active="overview" title="Overview">
+      {/* Welcome */}
+      <section className="flex flex-col md:flex-row justify-between items-start md:items-end mb-xl gap-md">
+        <div>
+          <h2 className="font-headline-lg text-headline-lg mb-xs">
+            Welcome back, {artist?.artist_name?.split(" ")[0] ?? "Artista"}
+          </h2>
+          <p className="text-on-surface-variant font-body-md">
+            {newCount > 0
+              ? `Tienes ${newCount} solicitud${newCount > 1 ? "es" : ""} de contacto sin leer.`
+              : "Todo al día — sin mensajes nuevos pendientes."}
+          </p>
         </div>
-        
-        <nav className="flex-1 px-4 space-y-2">
-          <Button 
-            variant={activeTab === "overview" ? "secondary" : "ghost"} 
-            className="w-full justify-start gap-3" 
-            onClick={() => setActiveTab("overview")}
-          >
-            <LayoutDashboard size={18} />
-            Resumen
-          </Button>
-          <Button 
-            variant={activeTab === "events" ? "secondary" : "ghost"} 
-            className="w-full justify-start gap-3" 
-            onClick={() => setActiveTab("events")}
-            disabled={!artistProfile}
-          >
-            <Calendar size={18} />
-            Mis Eventos
-          </Button>
-          <Button 
-            variant={activeTab === "inquiries" ? "secondary" : "ghost"} 
-            className="w-full justify-start gap-3" 
-            onClick={() => setActiveTab("inquiries")}
-            disabled={!artistProfile}
-          >
-            <MessageSquare size={18} />
-            Consultas
-          </Button>
-          <Button 
-            variant={activeTab === "profile" ? "secondary" : "ghost"} 
-            className="w-full justify-start gap-3" 
-            onClick={() => setActiveTab("profile")}
-            disabled={!artistProfile}
-          >
-            <User size={18} />
-            Perfil
-          </Button>
-        </nav>
-
-        <div className="p-4 border-t border-border space-y-2">
-          <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground" onClick={() => setActiveTab("profile")} disabled={!artistProfile}>
-            <Settings size={18} />
-            Configuración
-          </Button>
-          <Button variant="ghost" className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-            <LogOut size={18} />
-            Cerrar Sesión
-          </Button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Top Header */}
-        <header className="bg-card/50 backdrop-blur-sm border-b border-border p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="px-md py-sm bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-sm shrink-0">
+          <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
           <div>
-            <h2 className="text-2xl font-bold text-foreground capitalize">
-              {activeTab === "overview" && "Bienvenido de nuevo"}
-              {activeTab === "events" && "Gestión de Eventos"}
-              {activeTab === "inquiries" && "Mensajes y Consultas"}
-              {activeTab === "profile" && "Configuración de Perfil"}
-            </h2>
-            <p className="text-muted-foreground text-sm">{user?.email}</p>
+            <p className="font-label-sm text-label-sm uppercase tracking-tighter text-outline">Current Plan</p>
+            <p className="font-bold text-primary">{planLabel}</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2" 
-              onClick={() => setLocation("/publicar-evento")}
-              disabled={!artistProfile}
-            >
-              <PlusCircle size={18} />
-              Publicar Evento
-            </Button>
-          </div>
-        </header>
+        </div>
+      </section>
 
-        <div className="p-6 md:p-8">
-          {!artistProfile && (
-            <Card className="p-8 border-primary/20 bg-primary/5 mb-8">
-              <div className="flex items-start gap-4">
-                <AlertCircle className="text-primary w-6 h-6 mt-1" />
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground">Perfil de Artista no detectado</h3>
-                    <p className="text-muted-foreground">Para publicar eventos y recibir consultas, necesitas activar tu perfil de artista.</p>
-                  </div>
-                  <Button onClick={createProfile}>Activar Perfil de Artista Ahora</Button>
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {activeTab === "overview" && (
-            <div className="space-y-8">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="p-6 border-border bg-card/50 hover:border-primary/50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                      <Eye size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Vistas Perfil</p>
-                      <p className="text-2xl font-bold">{stats.views}</p>
-                    </div>
-                  </div>
-                </Card>
-                <Card className="p-6 border-border bg-card/50 hover:border-primary/50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-secondary/10 text-secondary">
-                      <MessageSquare size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Consultas</p>
-                      <p className="text-2xl font-bold">{stats.inquiries}</p>
-                    </div>
-                  </div>
-                </Card>
-                <Card className="p-6 border-border bg-card/50 hover:border-primary/50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-accent/10 text-accent">
-                      <Calendar size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Eventos</p>
-                      <p className="text-2xl font-bold">{stats.events}</p>
-                    </div>
-                  </div>
-                </Card>
-                <Card className="p-6 border-border bg-card/50 hover:border-primary/50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                      <Music2 size={24} />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Seguidores</p>
-                      <p className="text-2xl font-bold">{stats.followers}</p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Recent Events List */}
-                <Card className="p-6 bg-card/50 border-border">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold">Eventos Recientes</h3>
-                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("events")} disabled={!artistProfile}>Ver todos</Button>
-                  </div>
-                  <div className="space-y-4">
-                    {recentEvents.length > 0 ? (
-                      recentEvents.map((event) => (
-                        <div key={event.id} className="flex items-center justify-between p-4 bg-background/50 rounded-xl border border-border group hover:border-primary/30 transition-all">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                              <Calendar size={20} />
-                            </div>
-                            <div>
-                              <p className="font-bold text-foreground group-hover:text-primary transition-colors">{event.title}</p>
-                              <p className="text-xs text-muted-foreground">{event.venue} • {event.event_date}</p>
-                            </div>
-                          </div>
-                          <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-full ${
-                            event.status === "published"
-                              ? "bg-secondary/20 text-secondary-foreground"
-                              : "bg-muted/50 text-muted-foreground"
-                          }`}>
-                            {event.status === "published" ? "Publicado" : "Borrador"}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-10 text-muted-foreground">
-                        <Calendar className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                        <p>No hay eventos registrados</p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-
-                {/* Recent Inquiries List */}
-                <Card className="p-6 bg-card/50 border-border">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold">Consultas Recientes</h3>
-                    <Button variant="link" className="text-primary" onClick={() => setActiveTab("inquiries")} disabled={!artistProfile}>Ver todas</Button>
-                  </div>
-                  <div className="space-y-4">
-                    {recentInquiries.length > 0 ? (
-                      recentInquiries.map((inquiry) => (
-                        <div key={inquiry.id} className="flex items-center justify-between p-4 bg-background/50 rounded-xl border border-border group hover:border-primary/30 transition-all">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-bold">
-                              {inquiry.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-bold text-foreground group-hover:text-primary transition-colors">{inquiry.name}</p>
-                              <p className="text-xs text-muted-foreground line-clamp-1">{inquiry.subject}</p>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">{inquiry.created_at}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-10 text-muted-foreground">
-                        <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                        <p>No hay mensajes nuevos</p>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </div>
+      {/* Metric Bento Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md mb-xl">
+        {metricCards.map((m) => (
+          <div key={m.label} className="glass-card rounded-xl p-md flex flex-col justify-between h-40">
+            <div className="flex justify-between">
+              <span className="material-symbols-outlined text-outline">{m.icon}</span>
+              <span className={`${m.up ? "text-secondary" : "text-error"} font-label-sm text-label-sm font-bold flex items-center gap-xs`}>
+                {m.trend}
+                <span className="material-symbols-outlined text-[14px]">{m.up ? "trending_up" : "trending_down"}</span>
+              </span>
             </div>
-          )}
-
-          {activeTab === "events" && artistProfile && (
-            <Card className="p-8 bg-card/50 border-border">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-xl font-bold">Mis Eventos</h3>
-                  <p className="text-sm text-muted-foreground">Gestiona y publica tus próximas presentaciones.</p>
-                </div>
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setLocation("/publicar-evento")}>
-                  Crear Nuevo Evento
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {events.length > 0 ? (
-                  events.map((event) => (
-                    <div key={event.id} className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-background/50 rounded-xl border border-border hover:border-primary/50 transition-all gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-primary">
-                          <Music2 size={32} />
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-bold text-foreground">{event.title}</h4>
-                          <p className="text-sm text-muted-foreground flex items-center gap-2">
-                            <Calendar size={14} /> {event.event_date} • <MapPin size={14} /> {event.venue}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          event.status === "published"
-                            ? "bg-secondary/20 text-secondary-foreground"
-                            : "bg-muted/50 text-muted-foreground"
-                        }`}>
-                          {event.status === "published" ? "Publicado" : "Borrador"}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setLocation(`/eventos/${event.id}`)}
-                        >
-                          Ver
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-20 bg-background/30 rounded-xl border border-dashed border-border">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 opacity-10" />
-                    <p className="text-muted-foreground">Aún no has publicado ningún evento.</p>
-                    <Button variant="link" className="text-primary mt-2" onClick={() => setLocation("/publicar-evento")}>Publicar mi primer evento</Button>
+            <div>
+              <h4 className="text-outline font-label-sm text-label-sm uppercase mb-xs">{m.label}</h4>
+              <div className="flex items-end justify-between">
+                <span className="font-headline-md text-headline-md font-bold">{m.value.toLocaleString("es-ES")}</span>
+                {m.label === "Profile Views" && (
+                  <div className="h-8 w-24 flex items-end gap-[2px]">
+                    {[40, 60, 30, 80, 50, 100].map((h, i) => (
+                      <div key={i} className={`w-[4px] rounded-t-sm ${i === 5 ? "bg-primary bloom-primary" : "bg-primary/40"}`} style={{ height: `${h}%` }}></div>
+                    ))}
                   </div>
                 )}
               </div>
-            </Card>
-          )}
+            </div>
+          </div>
+        ))}
+      </section>
 
-          {/* Additional tabs like inquiries and profile would go here */}
+      {/* Lower Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 glass-card rounded-xl p-lg overflow-hidden">
+          <div className="flex justify-between items-center mb-md">
+            <h3 className="font-headline-md text-headline-md">Recent Activity</h3>
+            <button className="text-primary font-bold font-label-sm text-label-sm uppercase hover:underline" onClick={() => setLocation("/dashboard/contactos")}>
+              View All
+            </button>
+          </div>
+          {contacts.length === 0 ? (
+            <div className="text-center py-xl text-on-surface-variant">
+              <span className="material-symbols-outlined text-[48px] block mb-sm">inbox</span>
+              <p className="font-body-md">Aún no has recibido ninguna solicitud de contacto.</p>
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="border-b border-outline-variant/10">
+                  <tr>
+                    <th className="pb-md text-outline font-label-sm text-label-sm uppercase">Remitente</th>
+                    <th className="pb-md text-outline font-label-sm text-label-sm uppercase">Fecha</th>
+                    <th className="pb-md text-outline font-label-sm text-label-sm uppercase text-right">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/5">
+                  {contacts.map((c) => (
+                    <tr key={c.id} className="hover:bg-surface-container/50 transition-colors cursor-pointer" onClick={() => setLocation("/dashboard/contactos")}>
+                      <td className="py-md">
+                        <div className="flex items-center gap-sm">
+                          <div className="h-8 w-8 rounded-full bg-surface-container-highest flex items-center justify-center font-bold font-label-sm text-label-sm shrink-0">
+                            {initials(c.sender_name)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-on-surface truncate">{c.sender_name}</p>
+                            <p className="font-label-sm text-[11px] text-outline truncate">{c.subject || c.sender_email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-md text-on-surface-variant font-body-md text-sm whitespace-nowrap">{formatDate(c.created_at)}</td>
+                      <td className="py-md text-right">
+                        {c.status === "new" ? (
+                          <span className="px-sm py-1 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-[10px] font-bold uppercase tracking-widest">New</span>
+                        ) : c.status === "archived" ? (
+                          <span className="px-sm py-1 rounded-full bg-surface-container-highest text-outline font-label-sm text-[10px] font-bold uppercase tracking-widest">Archived</span>
+                        ) : (
+                          <span className="px-sm py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-[10px] font-bold uppercase tracking-widest">Read</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+
+        {/* Multimedia Card */}
+        <div className="glass-card rounded-xl p-lg flex flex-col">
+          <div className="flex justify-between items-center mb-md">
+            <h3 className="font-headline-md text-headline-md">Multimedia</h3>
+            <span className="font-label-sm text-[10px] font-bold text-primary uppercase bg-primary/10 px-sm py-1 rounded">
+              {planLabel.replace("TUESDI ", "")}
+            </span>
+          </div>
+          <div className="space-y-md flex-1">
+            {(() => {
+              const photos = media.filter((m) => m.type === "photo");
+              const videos = media.filter((m) => m.type === "video");
+              const photoLimit = artist?.subscription_plan === "pro" ? 3 : artist?.subscription_plan === "standard" ? 3 : 1;
+              const videoLimit = artist?.subscription_plan === "pro" ? 3 : artist?.subscription_plan === "standard" ? 1 : 0;
+              return (
+                <>
+                  <div>
+                    <div className="flex justify-between font-label-sm text-label-sm mb-xs">
+                      <span className="text-outline">Fotos</span>
+                      <span className="font-bold">{photos.length} / {photoLimit}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+                      <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min((photos.length / photoLimit) * 100, 100)}%` }}></div>
+                    </div>
+                  </div>
+                  {videoLimit > 0 && (
+                    <div>
+                      <div className="flex justify-between font-label-sm text-label-sm mb-xs">
+                        <span className="text-outline">Vídeos</span>
+                        <span className="font-bold">{videos.length} / {videoLimit}</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+                        <div className="h-full bg-primary transition-all" style={{ width: `${Math.min((videos.length / videoLimit) * 100, 100)}%` }}></div>
+                      </div>
+                    </div>
+                  )}
+                  {media.length > 0 ? (
+                    <div className="pt-md grid grid-cols-2 gap-sm">
+                      {media.slice(0, 4).map((item) => (
+                        <div key={item.id} className="aspect-video relative rounded-lg overflow-hidden group">
+                          <img className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.thumbnail || item.url} alt="" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="material-symbols-outlined text-white">{item.type === "video" ? "play_circle" : "visibility"}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="pt-md text-center text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[32px] block mb-xs">photo_library</span>
+                      <p className="font-label-sm text-label-sm">Sin archivos todavía</p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+          <button
+            className="mt-lg w-full py-sm border border-outline-variant hover:bg-surface-variant transition-colors rounded-lg flex items-center justify-center gap-sm font-bold"
+            onClick={() => setLocation("/dashboard/media")}
+          >
+            <span className="material-symbols-outlined">upload</span>
+            Gestionar Galería
+          </button>
+        </div>
+      </div>
+    </DashboardShell>
   );
 }
