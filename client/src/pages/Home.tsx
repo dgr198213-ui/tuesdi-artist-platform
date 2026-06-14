@@ -369,99 +369,83 @@ export default function Home() {
         {/* Pricing Section */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="text-center mb-xl">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface">Planes Profesionales</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant">
-              Elige el plan que mejor se adapte a tu carrera
+            <div className="inline-flex items-center gap-xs px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
+              <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
+              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">🚀 Beta Abierta Activa</span>
+            </div>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">Empieza Gratis. Sin Límites.</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-sm">
+              Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-center">
             {/* Beta */}
-            <div className="glass-card p-lg rounded-xl flex flex-col h-full">
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full border-primary/40 shadow-[0_0_30px_rgba(0,129,255,0.15)] md:scale-105 z-10">
+              <div className="flex items-center gap-xs mb-md">
+                <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
+                <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Activo ahora</span>
+              </div>
               <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Beta</h3>
               <div className="mb-lg">
                 <span className="text-[48px] font-bold text-on-surface">0€</span>
                 <span className="text-on-surface-variant">/mes</span>
               </div>
-              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Perfil público de artista
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> 1 fotografía
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Formulario de contacto
-                </li>
+              <ul className="space-y-sm mb-xl flex-grow flex flex-col gap-sm">
+                {["Perfil completo", "Galería multimedia", "Contacto privado", "Dashboard + Analíticas", "Publicación de eventos"].map((f) => (
+                  <li key={f} className="flex items-center gap-xs font-body-md text-body-md">
+                    <span className="material-symbols-outlined text-primary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> {f}
+                  </li>
+                ))}
               </ul>
               <button
-                className="w-full py-sm rounded-lg border border-white/10 hover:bg-white/5 transition-all font-label-sm text-label-sm"
-                onClick={() => setLocation("/registro")}
+                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary font-label-sm text-label-sm font-bold hover:opacity-90 transition-all"
+                onClick={() => setLocation("/acceso")}
               >
-                Empezar Gratis
+                Crear Perfil Gratis
               </button>
             </div>
 
-            {/* Standard */}
-            <div className="glass-card p-lg rounded-xl flex flex-col h-full border-primary/50 relative shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-md py-1 rounded-full font-label-sm text-label-sm shadow-lg pulse-live">
-                MÁS POPULAR
-              </div>
-              <h3 className="font-headline-md text-headline-md text-primary mb-xs">Standard</h3>
+            {/* Standard - Coming Soon */}
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full opacity-50">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Standard</h3>
               <div className="mb-lg">
-                <span className="text-[48px] font-bold text-on-surface">6€</span>
-                <span className="text-on-surface-variant">/mes</span>
+                <span className="text-[48px] font-bold text-on-surface/30">6€</span>
+                <span className="text-on-surface-variant/50">/mes</span>
               </div>
-              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Todo lo del plan Beta
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> 3 fotografías + 1 vídeo
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Mejor posicionamiento
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Métricas ampliadas
-                </li>
+              <ul className="space-y-sm mb-xl flex-grow flex flex-col gap-sm">
+                {["Mejor posicionamiento", "Analíticas avanzadas", "Difusión en canales TUESDI"].map((f) => (
+                  <li key={f} className="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant/60">
+                    <span className="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span> {f}
+                  </li>
+                ))}
               </ul>
-              <button
-                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary transition-all font-label-sm text-label-sm"
-                onClick={() => setLocation("/planes")}
-              >
-                Seleccionar Plan
-              </button>
+              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+                Próximamente
+              </div>
             </div>
 
-            {/* Pro */}
-            <div className="glass-card p-lg rounded-xl flex flex-col h-full border-secondary/20 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-              <h3 className="font-headline-md text-headline-md text-secondary mb-xs">Pro</h3>
+            {/* Pro - Coming Soon */}
+            <div className="glass-card p-lg rounded-xl flex flex-col h-full opacity-50">
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Pro</h3>
               <div className="mb-lg">
-                <span className="text-[48px] font-bold text-on-surface">9,99€</span>
-                <span className="text-on-surface-variant">/mes</span>
+                <span className="text-[48px] font-bold text-on-surface/30">9,99€</span>
+                <span className="text-on-surface-variant/50">/mes</span>
               </div>
-              <ul className="space-y-sm mb-xl flex-grow gap-sm flex flex-col">
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Todo lo de Standard
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> 3 fotografías + 3 vídeos
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Prioridad interna + distintivo Pro
-                </li>
-                <li className="flex items-center gap-xs font-body-md text-body-md">
-                  <span className="material-symbols-outlined text-primary">check_circle</span> Analítica avanzada
-                </li>
+              <ul className="space-y-sm mb-xl flex-grow flex flex-col gap-sm">
+                {["Prioridad en directorios", "Distintivo Pro verificado", "4 difusiones/mes en redes TUESDI", "Campañas especiales"].map((f) => (
+                  <li key={f} className="flex items-center gap-xs font-body-md text-body-md text-on-surface-variant/60">
+                    <span className="material-symbols-outlined text-outline text-[18px]">radio_button_unchecked</span> {f}
+                  </li>
+                ))}
               </ul>
-              <button
-                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary transition-all font-label-sm text-label-sm hover:scale-105"
-                onClick={() => setLocation("/planes")}
-              >
-                Go Pro
-              </button>
+              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+                Próximamente
+              </div>
             </div>
           </div>
+          <p className="text-center font-label-sm text-label-sm text-on-surface-variant/50 mt-lg">
+            Los datos y perfiles creados durante la Beta se mantienen al activarse los planes de pago.
+          </p>
         </section>
 
         {/* Final CTA */}

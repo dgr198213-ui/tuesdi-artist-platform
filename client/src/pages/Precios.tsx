@@ -1,373 +1,258 @@
 /**
  * TUESDI - Tu Escenario Digital v3.0
- * Página de Precios / Planes
+ * Planes (/planes)
  *
- * URL: /planes
- * Planes de suscripción:
- * - Beta: 0€/mes (perfil básico)
- * - Standard: 6€/mes (más contenido y visibilidad)
- * - Pro: 9,99€/mes (máxima exposición)
+ * Estrategia de lanzamiento Beta Abierta:
+ * - Beta: activo, gratuito, con todo incluido durante el periodo de validación
+ * - Standard / Pro: "Próximamente" — sin precio activo ni botón de pago
  */
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Check, Star, Shield, TrendingUp } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function Precios() {
   const [, setLocation] = useLocation();
 
-  const plans = [
-    {
-      name: "Beta",
-      price: "0€",
-      period: "/mes",
-      description: "Perfecto para empezar",
-      features: [
-        "Perfil público",
-        "1 fotografía",
-        "Biografía básica",
-        "Categoría y ciudad",
-        "Caché orientativo",
-        "Formulario de contacto privado",
-        "Métricas básicas",
-      ],
-      buttonText: "Empezar gratis",
-      highlighted: false,
-    },
-    {
-      name: "Standard",
-      price: "6€",
-      period: "/mes",
-      description: "Más visibilidad",
-      features: [
-        "Todo lo de Beta",
-        "3 fotografías",
-        "1 vídeo",
-        "Mejor posicionamiento",
-        "Métricas ampliadas",
-        "Evolución semanal",
-        "Histórico",
-      ],
-      buttonText: "Elegir Standard",
-      highlighted: true,
-    },
-    {
-      name: "Pro",
-      price: "9,99€",
-      period: "/mes",
-      description: "Máxima exposición",
-      features: [
-        "Todo lo de Standard",
-        "3 vídeos",
-        "Prioridad en búsquedas",
-        "Distintivo Pro",
-        "Analítica avanzada",
-        "Tendencias",
-        "Histórico completo",
-      ],
-      buttonText: "Elegir Pro",
-      highlighted: false,
-    },
-  ];
-
-  const handleSubscribe = (planName: string) => {
-    console.log("Selected plan:", planName);
-    setLocation("/registro");
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation Header */}
-      <header className="border-b border-white/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setLocation("/")}
+    <div className="min-h-screen bg-background text-on-surface">
+      {/* Nav */}
+      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
+        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}>TUESDI</button>
+          <div className="hidden md:flex gap-md items-center">
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
+            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/eventos")}>Eventos</button>
+            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">Planes</button>
+          </div>
+          <button
+            className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:opacity-90"
+            onClick={() => setLocation("/acceso")}
           >
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">T</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight">
-                TUESDI
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                Tu Escenario Digital
-              </span>
-            </div>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="/artistas"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Artistas
-            </a>
-            <a
-              href="/eventos"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Eventos
-            </a>
-            <a
-              href="/planes"
-              className="text-sm font-medium text-primary"
-            >
-              Planes
-            </a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/login")}
-            >
-              Acceso
-            </Button>
-            <Button
-              size="sm"
-              className="bg-primary text-white hover:bg-primary/90"
-              onClick={() => setLocation("/registro")}
-            >
-              Registro
-            </Button>
-          </div>
-        </div>
+            Acceso
+          </button>
+        </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className="py-20 border-b border-white/10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
-        <div className="max-w-4xl mx-auto px-4 text-center relative">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight">
-            Planes de suscripción
+      {/* Hero */}
+      <section className="relative pt-[140px] pb-xl px-margin text-center overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/8 blur-[120px] rounded-full pointer-events-none"></div>
+        <div className="relative z-10 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-xs px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
+            <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
+            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">🚀 Beta Abierta Activa</span>
+          </div>
+          <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-md">
+            Empieza gratis.<br />
+            <span className="text-primary">Sin límites ahora.</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Elige el plan que mejor se adapte a tus necesidades. Sin comisiones,
-            sin intermediarios.
+          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
+            Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita. Sin tarjeta. Sin fecha de caducidad.
           </p>
         </div>
       </section>
 
       {/* Plans Grid */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan) => (
-              <Card
-                key={plan.name}
-                className={`relative transition-all duration-300 overflow-hidden ${
-                  plan.highlighted
-                    ? "bg-gradient-to-b from-primary/10 to-card border-primary/50 shadow-xl shadow-primary/10"
-                    : "bg-card border-white/10"
-                }`}
+      <section className="max-w-6xl mx-auto px-margin pb-xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-start">
+
+          {/* BETA — ACTIVO */}
+          <div className="relative glass-card rounded-2xl overflow-hidden border-primary/40 shadow-[0_0_40px_rgba(0,129,255,0.2)] md:scale-105 md:-translate-y-2 z-10">
+            {/* Badge */}
+            <div className="bg-primary text-on-primary text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest flex items-center justify-center gap-xs">
+              <span className="w-2 h-2 rounded-full bg-on-primary pulse-live"></span>
+              Disponible Ahora
+            </div>
+            <div className="p-lg">
+              <div className="mb-lg">
+                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Beta</h2>
+                <p className="font-body-md text-body-md text-on-surface-variant">Todo lo que necesitas para empezar.</p>
+              </div>
+              <div className="mb-lg">
+                <span className="text-[56px] font-bold text-on-surface leading-none">0€</span>
+                <span className="text-on-surface-variant font-body-md"> /mes</span>
+                <p className="font-label-sm text-label-sm text-secondary mt-xs uppercase tracking-widest">Gratis durante la Beta</p>
+              </div>
+
+              <ul className="space-y-sm mb-xl">
+                {[
+                  "Perfil artístico público completo",
+                  "Galería multimedia (fotos + vídeos)",
+                  "Formulario de contacto privado",
+                  "Dashboard con analíticas",
+                  "Publicación de eventos gratuita",
+                  "Visibilidad en el directorio",
+                  "Sin comisiones ni intermediarios",
+                ].map((feat) => (
+                  <li key={feat} className="flex items-center gap-sm font-body-md text-body-md">
+                    <span className="material-symbols-outlined text-primary text-[20px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    {feat}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                className="w-full py-md rounded-xl bg-primary text-on-primary font-headline-md text-headline-md bloom-primary hover:opacity-90 transition-all"
+                onClick={() => setLocation("/acceso")}
               >
-                {plan.highlighted && (
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-b-full text-xs font-bold uppercase">
-                    Más popular
-                  </div>
-                )}
+                Crear Perfil Gratis
+              </button>
+              <p className="text-center font-label-sm text-label-sm text-on-surface-variant/60 mt-sm">
+                Sin tarjeta de crédito
+              </p>
+            </div>
+          </div>
 
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {plan.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    {plan.description}
-                  </p>
+          {/* STANDARD — PRÓXIMAMENTE */}
+          <div className="glass-card rounded-2xl overflow-hidden opacity-60">
+            <div className="bg-surface-container-high text-on-surface-variant text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest">
+              Próximamente
+            </div>
+            <div className="p-lg">
+              <div className="mb-lg">
+                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Standard</h2>
+                <p className="font-body-md text-body-md text-on-surface-variant">Para artistas que quieren destacar.</p>
+              </div>
+              <div className="mb-lg">
+                <span className="text-[56px] font-bold text-on-surface/30 leading-none">6€</span>
+                <span className="text-on-surface-variant/50 font-body-md"> /mes</span>
+              </div>
 
-                  <div className="mb-8">
-                    <span className="text-5xl font-bold text-white">
-                      {plan.price}
-                    </span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
+              <ul className="space-y-sm mb-xl">
+                {[
+                  "Todo lo del plan Beta",
+                  "Mejor posicionamiento en búsquedas",
+                  "Analíticas avanzadas e historial",
+                  "Difusión mensual en canales TUESDI",
+                  "Distintivo Standard en el perfil",
+                ].map((feat) => (
+                  <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
+                    <span className="material-symbols-outlined text-outline text-[20px] shrink-0">radio_button_unchecked</span>
+                    {feat}
+                  </li>
+                ))}
+              </ul>
 
-                  <Button
-                    className={`w-full mb-8 h-12 font-semibold transition-all ${
-                      plan.highlighted
-                        ? "bg-primary text-white hover:bg-primary/90"
-                        : "bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                    onClick={() => handleSubscribe(plan.name)}
-                  >
-                    {plan.buttonText}
-                  </Button>
+              <div className="w-full py-md rounded-xl border border-outline-variant bg-surface-container-lowest text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+                Disponible pronto
+              </div>
+            </div>
+          </div>
 
-                  <div className="space-y-4">
-                    {plan.features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="bg-secondary/20 p-0.5 rounded-full mt-0.5">
-                          <Check className="w-4 h-4 text-secondary" />
-                        </div>
-                        <span className="text-sm text-muted-foreground">
-                          {feature}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            ))}
+          {/* PRO — PRÓXIMAMENTE */}
+          <div className="glass-card rounded-2xl overflow-hidden opacity-60">
+            <div className="bg-surface-container-high text-on-surface-variant text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest">
+              Próximamente
+            </div>
+            <div className="p-lg">
+              <div className="mb-lg">
+                <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Pro</h2>
+                <p className="font-body-md text-body-md text-on-surface-variant">Máxima visibilidad y promoción activa.</p>
+              </div>
+              <div className="mb-lg">
+                <span className="text-[56px] font-bold text-on-surface/30 leading-none">9,99€</span>
+                <span className="text-on-surface-variant/50 font-body-md"> /mes</span>
+              </div>
+
+              <ul className="space-y-sm mb-xl">
+                {[
+                  "Todo lo del plan Standard",
+                  "Prioridad en directorios y búsquedas",
+                  "Distintivo Pro verificado",
+                  "4 difusiones mensuales en redes TUESDI",
+                  "Analítica avanzada con tendencias",
+                  "Promoción destacada en campañas especiales",
+                ].map((feat) => (
+                  <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
+                    <span className="material-symbols-outlined text-outline text-[20px] shrink-0">radio_button_unchecked</span>
+                    {feat}
+                  </li>
+                ))}
+              </ul>
+
+              <div className="w-full py-md rounded-xl border border-outline-variant bg-surface-container-lowest text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+                Disponible pronto
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 border-t border-white/10 bg-white/[0.02]">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              ¿Por qué elegir TUESDI?
-            </h2>
-            <p className="text-muted-foreground">
-              La plataforma de visibilidad artística sin intermediarios.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <TrendingUp className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Visibilidad real
-              </h3>
-              <p className="text-muted-foreground">
-                Tu perfil aparece en el directorio y recibe visitas de promotores
-                y organizadores interesados.
+      {/* Beta explanation */}
+      <section className="max-w-4xl mx-auto px-margin pb-xl">
+        <div className="glass-card rounded-2xl p-lg md:p-xl border-l-4 border-secondary/50">
+          <div className="flex items-start gap-md">
+            <span className="material-symbols-outlined text-secondary text-[36px] shrink-0">info</span>
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">¿Por qué la Beta es gratuita?</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                TUESDI está en su fase de validación. Antes de activar los planes de pago, queremos demostrar que la plataforma genera valor real: perfiles activos, contactos generados, eventos publicados. Durante este periodo, todos los artistas tienen acceso completo sin coste.
               </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Shield className="w-8 h-8 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Privacidad protegida
-              </h3>
-              <p className="text-muted-foreground">
-                Tus datos personales nunca se exponen. Las solicitudes llegan a
-                tu panel de forma privada.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Star className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-3">
-                Sin compromiso
-              </h3>
-              <p className="text-muted-foreground">
-                Cancela o cambia tu suscripción cuando quieras. Sin penalizaciones
-                ni complicaciones.
+              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed mt-sm">
+                Cuando activemos los planes Standard y Pro, quienes se registren durante la Beta conservarán sus perfiles y datos. <strong className="text-on-surface">Nunca se borrará nada.</strong>
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Preguntas frecuentes
-            </h2>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="bg-card border-white/10 p-6">
-              <h3 className="text-white font-semibold mb-3">
-                ¿Puedo cambiar de plan en cualquier momento?
-              </h3>
-              <p className="text-muted-foreground">
-                Sí, puedes cambiar de plan cuando quieras desde tu panel de
-                control. Los cambios se aplicarán en el siguiente ciclo de
-                facturación.
-              </p>
-            </Card>
-
-            <Card className="bg-card border-white/10 p-6">
-              <h3 className="text-white font-semibold mb-3">
-                ¿Qué pasa si cancelo mi suscripción?
-              </h3>
-              <p className="text-muted-foreground">
-                Tu perfil pasará automáticamente al plan gratuito (Beta) y
-                seguirá visible en el directorio con las funcionalidades de ese
-                plan.
-              </p>
-            </Card>
-
-            <Card className="bg-card border-white/10 p-6">
-              <h3 className="text-white font-semibold mb-3">
-                ¿TUESDI cobra comisiones por contactos?
-              </h3>
-              <p className="text-muted-foreground">
-                No. TUESDI no cobra comisiones, no intermediamos y no gestionamos
-                pagos entre usuarios. Nuestra monetización viene exclusivamente de
-                las suscripciones.
-              </p>
-            </Card>
-          </div>
+      {/* Why join now */}
+      <section className="max-w-6xl mx-auto px-margin pb-xl">
+        <h2 className="font-headline-lg text-headline-lg text-on-surface text-center mb-xl">¿Por qué unirte ahora?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+          {[
+            {
+              icon: "rocket_launch",
+              title: "Ventaja de primer adoptante",
+              body: "Los primeros artistas en TUESDI tendrán mejor posicionamiento natural cuando el directorio crezca.",
+            },
+            {
+              icon: "visibility",
+              title: "Visibilidad inmediata",
+              body: "Tu perfil es público desde el momento que lo publicas. Promotores, salas y organizadores ya pueden encontrarte.",
+            },
+            {
+              icon: "forum",
+              title: "Influyes en el producto",
+              body: "Tu experiencia durante la Beta define las funcionalidades que activaremos primero. Tienes voz directa.",
+            },
+          ].map((item) => (
+            <div key={item.title} className="glass-card rounded-xl p-lg text-center">
+              <div className="w-16 h-16 mx-auto mb-md rounded-2xl bg-primary/10 flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary text-[32px]">{item.icon}</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">{item.title}</h3>
+              <p className="font-body-md text-body-md text-on-surface-variant">{item.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 border-t border-white/10">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-6">
-            ¿Listo para empezar?
-          </h2>
-          <p className="text-muted-foreground mb-8">
-            Crea tu perfil gratis y comienza a ganar visibilidad hoy mismo.
+      {/* CTA */}
+      <section className="relative py-xl overflow-hidden">
+        <div className="absolute inset-0 spotlight opacity-20 pointer-events-none"></div>
+        <div className="relative z-10 max-w-2xl mx-auto px-margin text-center">
+          <h2 className="font-headline-xl text-headline-xl text-on-surface mb-md">Tu escenario te espera</h2>
+          <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg">
+            Crea tu perfil ahora. Gratis. Sin compromisos.
           </p>
-          <Button
-            size="lg"
-            className="bg-primary text-white hover:bg-primary/90 h-14 px-10 text-lg font-semibold"
-            onClick={() => setLocation("/registro")}
+          <button
+            className="bg-primary text-on-primary font-headline-md text-headline-md px-xl py-sm rounded-xl bloom-primary hover:scale-105 transition-transform"
+            onClick={() => setLocation("/acceso")}
           >
-            Crear perfil gratis
-          </Button>
+            Unirme a la Beta
+          </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
-              </div>
-              <span className="text-white font-semibold">TUESDI</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <a
-                href="/aviso-legal"
-                className="hover:text-primary transition-colors"
-              >
-                Aviso Legal
-              </a>
-              <a
-                href="/politica-privacidad"
-                className="hover:text-primary transition-colors"
-              >
-                Privacidad
-              </a>
-              <a
-                href="/terminos-servicio"
-                className="hover:text-primary transition-colors"
-              >
-                Términos
-              </a>
-            </div>
+      <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
+        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50">TUESDI</div>
+          <div className="flex gap-md flex-wrap justify-center">
+            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([l, p]) => (
+              <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>
+            ))}
           </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} TUESDI — Tu Escenario Digital.
-          </div>
+          <p className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</p>
         </div>
       </footer>
     </div>
