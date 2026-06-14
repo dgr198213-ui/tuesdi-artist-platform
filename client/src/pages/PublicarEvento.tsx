@@ -133,7 +133,7 @@ export default function PublicarEvento() {
       {/* Nav */}
       <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
         <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</button>
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</button>
           <div className="hidden md:flex gap-md">
             <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
             <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" onClick={() => setLocation("/eventos")}>Eventos</button>
@@ -331,7 +331,7 @@ export default function PublicarEvento() {
       {/* Footer */}
       <footer className="w-full py-xl bg-surface-dim border-t border-white/5 mt-xl">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</div>
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</div>
           <div className="flex gap-md">
             {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"]].map(([label, path]) => (
               <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>

@@ -151,7 +151,7 @@ export default function Acceso() {
       {/* Footer */}
       <footer className="w-full py-xl relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-30 select-none"><img src="/isotipo-nuevo.jpg" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</div>
+          <div className="font-headline-md text-headline-md text-on-surface opacity-30 select-none"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</div>
           <div className="flex gap-lg items-center">
             <button
               className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-colors"
