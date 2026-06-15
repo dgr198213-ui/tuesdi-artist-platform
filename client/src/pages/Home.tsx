@@ -37,21 +37,21 @@ const MOCK_ARTISTS: FeaturedArtist[] = [
     artist_name: "Elena Rivers",
     category: "Singer / Songwriter",
     bio: "Vocalista Jazz & Soul con más de 10 años de experiencia en salas nacionales.",
-    profile_image: "/gallery/dj-publico-verde.jpg",       // cantante con micro
+    profile_image: "/gallery/cantante-jazz-elena.jpg",
   },
   {
     slug: "echo-pulse",
     artist_name: "Echo Pulse",
     category: "DJ / Producer",
     bio: "Especialista en Techno Melódico y House Progresivo. Residente en SoundSystem.",
-    profile_image: "/gallery/guitarrista-humo-escenario.jpg", // DJ de espaldas con público
+    profile_image: "/gallery/guitarrista-humo-escenario.jpg",
   },
   {
     slug: "lunar-riot",
     artist_name: "Lunar Riot",
     category: "Rock Band",
     bio: "Cuarteto de Rock Alternativo. Potencia y melodía en cada directo.",
-    profile_image: "/gallery/cantante-guitarra-escenario.jpg", // guitarrista en escenario
+    profile_image: "/gallery/cantante-guitarra-escenario.jpg",
   },
 ];
 
@@ -136,16 +136,15 @@ export default function Home() {
       <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
         <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
           <button
-            className="flex items-center gap-xs"
+            className="flex items-center gap-2 shrink-0"
             onClick={() => setLocation("/")}
           >
             <img
               src="/isotipo-nuevo.png"
               alt="TUESDI"
-              className="h-8 w-8 object-contain"
-              style={{ filter: "drop-shadow(0 0 0 #000) brightness(1.05)" }}
+              className="h-9 w-9 object-contain rounded-lg shrink-0"
             />
-            <span className="font-headline-md text-headline-md font-bold text-primary">TUESDI</span>
+            <span className="font-headline-md text-headline-md font-bold text-primary hidden sm:inline">TUESDI</span>
           </button>
           <div className="hidden md:flex items-center gap-md">
             <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">
