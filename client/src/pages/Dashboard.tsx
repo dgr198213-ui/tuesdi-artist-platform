@@ -53,6 +53,20 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
+      // Detectar primer acceso: si el usuario fue creado hace menos de 2 minutos
+      // es un registro nuevo → disparar email de bienvenida (fire-and-forget)
+      const createdAt = new Date(session.user.created_at);
+      const now = new Date();
+      const isNewUser = (now.getTime() - createdAt.getTime()) < 2 * 60 * 1000;
+      if (isNewUser) {
+        supabase.functions.invoke("send-welcome-email", {
+          body: {
+            email: session.user.email,
+            artist_name: null,
+          },
+        }).catch(() => { /* fire-and-forget, no bloquea UX */ });
+      }
+
       const { data: artistData } = await supabase
         .from("artists")
         .select("id, artist_name, subscription_plan, profile_image")

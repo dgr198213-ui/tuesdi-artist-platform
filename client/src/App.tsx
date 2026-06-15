@@ -13,6 +13,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import Escaparate from "./pages/Escaparate";
 import Acceso from "./pages/Acceso";
 import EnlaceEnviado from "./pages/EnlaceEnviado";
 import Dashboard from "./pages/Dashboard";
@@ -67,6 +68,7 @@ function Router() {
     <Switch>
       {/* Páginas Públicas */}
       <Route path={"/"} component={Home} />
+      <Route path={"/escaparate"} component={Escaparate} />
       <Route path={"/artistas"} component={ExplorarArtistas} />
       <Route path={"/artista/:slug"} component={ArtistaProfile} />
       <Route path={"/eventos"} component={Eventos} />
