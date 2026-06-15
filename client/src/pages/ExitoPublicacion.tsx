@@ -58,7 +58,7 @@ export default function ExitoPublicacion() {
 
       {/* Header */}
       <header className="relative z-10 w-full px-margin py-base flex justify-center md:justify-start">
-        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</button>
+        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
       </header>
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
@@ -152,7 +152,7 @@ export default function ExitoPublicacion() {
       {/* Footer */}
       <footer className="relative z-10 w-full py-xl border-t border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</span>
+          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
           <nav className="flex gap-md">
             {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"]].map(([l, p]) => (
               <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>

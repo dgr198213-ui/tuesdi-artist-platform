@@ -17,7 +17,7 @@ export default function Precios() {
       {/* Nav */}
       <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
         <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</button>
+          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
           <div className="hidden md:flex gap-md items-center">
             <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
             <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/eventos")}>Eventos</button>
@@ -36,9 +36,9 @@ export default function Precios() {
       <section className="relative pt-[140px] pb-xl px-margin text-center overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/8 blur-[120px] rounded-full pointer-events-none"></div>
         <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-xs px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
-            <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
-            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">🚀 Beta Abierta Activa</span>
+          <div className="inline-flex items-center gap-sm px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
+            <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
+            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">Beta Abierta Activa</span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-md">
             Empieza gratis.<br />
@@ -246,7 +246,7 @@ export default function Precios() {
       {/* Footer */}
       <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</div>
+          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
           <div className="flex gap-md flex-wrap justify-center">
             {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([l, p]) => (
               <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>

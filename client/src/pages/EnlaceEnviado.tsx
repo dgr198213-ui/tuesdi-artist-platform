@@ -79,7 +79,7 @@ export default function EnlaceEnviado() {
       {/* Footer */}
       <footer className="relative z-10 w-full py-xl border-t border-white/5 mt-auto">
         <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</span>
+          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
           <nav className="flex gap-md">
             <button
               className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"

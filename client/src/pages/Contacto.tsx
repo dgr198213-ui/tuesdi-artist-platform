@@ -286,7 +286,7 @@ export default function Contacto() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">T</span>
               </div>
-              <span className="text-white font-semibold"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1 rounded-lg" />TUESDI</span>
+              <span className="text-white font-semibold"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <a href="/aviso-legal" className="hover:text-primary transition-colors">

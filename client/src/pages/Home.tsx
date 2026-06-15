@@ -210,22 +210,28 @@ export default function Home() {
           <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full"></div>
           <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full"></div>
           <div className="max-w-4xl text-center z-10">
-            <div className="inline-flex items-center gap-xs px-sm py-1 rounded-full border border-white/10 bg-white/5 mb-md">
-              <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">
-                En Vivo: Beta Abierta
+            <div className="inline-flex items-center gap-sm px-sm py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-md">
+              <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
+              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">
+                En vivo: Beta Abierta
               </span>
             </div>
-            <h1 className="font-headline-xl text-[40px] md:text-headline-xl text-on-surface mb-md leading-[1.15]">
-              Tu Escenario Digital.<br />
-              <span className="text-primary italic">Visibilidad profesional</span><br className="hidden md:block" /> sin intermediarios.
+            <h1 className="font-headline-xl text-[40px] md:text-headline-xl text-on-surface mb-md leading-tight">
+              Tu Escenario Digital.
+              <br />
+              <span className="text-primary italic">Visibilidad profesional</span>{' '}
+              sin intermediarios.
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-xs max-w-2xl mx-auto">
               Muestra tu trabajo. Protege tu privacidad. Recibe oportunidades.
             </p>
-            <p className="font-label-sm text-label-sm text-on-surface-variant/60 mb-lg max-w-xl mx-auto uppercase tracking-wide">
-              Sin comisiones &nbsp;·&nbsp; Sin exponer tus datos &nbsp;·&nbsp; Sin algoritmos
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0 font-label-sm text-label-sm text-on-surface-variant/60 mb-lg max-w-xl mx-auto">
+              <span>Sin comisiones</span>
+              <span className="text-on-surface-variant/30 select-none">·</span>
+              <span>Sin exponer tus datos</span>
+              <span className="text-on-surface-variant/30 select-none">·</span>
+              <span>Sin algoritmos</span>
+            </div>
             <div className="flex flex-col md:flex-row gap-md justify-center">
               <button
                 className="bg-primary text-on-primary font-headline-md text-headline-md px-lg py-sm rounded-lg bloom-primary hover:scale-105 transition-transform duration-300"
@@ -378,9 +384,9 @@ export default function Home() {
         {/* Pricing Section */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="text-center mb-xl">
-            <div className="inline-flex items-center gap-xs px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
-              <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
-              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">🚀 Beta Abierta Activa</span>
+            <div className="inline-flex items-center gap-sm px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
+              <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
+              <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">Beta Abierta Activa</span>
             </div>
             <h2 className="font-headline-lg text-headline-lg text-on-surface">Empieza Gratis. Sin Límites.</h2>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-sm">

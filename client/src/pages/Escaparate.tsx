@@ -87,7 +87,7 @@ export default function Escaparate() {
       {/* Nav mínima */}
       <nav className="relative z-10 flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
         <button className="flex items-center gap-2" onClick={() => setLocation("/")}>
-          <img src="/isotipo-nuevo.png" alt="TUESDI" className="h-9 w-9 object-contain rounded-lg" />
+          <img src="/isotipo-nuevo.png" alt="TUESDI" className="h-9 w-9 object-contain" />
           <span className="font-headline-md text-headline-md font-bold text-primary hidden sm:inline">TUESDI</span>
         </button>
         <button
@@ -100,9 +100,9 @@ export default function Escaparate() {
 
       {/* HERO */}
       <section className="relative z-10 max-w-4xl mx-auto px-margin pt-xl pb-xl text-center">
-        <div className="inline-flex items-center gap-xs px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-lg">
-          <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
-          <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Beta Abierta · Acceso Gratuito</span>
+        <div className="inline-flex items-center gap-sm px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-lg">
+          <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
+          <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">Beta Abierta · Acceso Gratuito</span>
         </div>
 
         <h1 className="font-headline-xl text-[36px] md:text-[56px] text-on-surface leading-[1.1] tracking-tight mb-lg">
