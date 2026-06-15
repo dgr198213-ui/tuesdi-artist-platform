@@ -86,11 +86,14 @@ tuesdi-artist-platform/
 ├── supabase/
 │   ├── functions/
 │   │   ├── create-magic-link/        # Genera y envía Magic Link HMAC-SHA256 via Resend
-│   │   └── confirm-event/            # Valida token y publica el evento (status → approved)
+│   │   ├── confirm-event/            # Valida token y aprueba el evento (status → approved)
+│   │   └── send-welcome-email/       # Email de bienvenida via Resend
 │   └── migrations/
-│       ├── 001_inicial_tuesdi.sql    # Esquema principal v3.0
-│       └── 002_editor_perfil.sql     # cover_image + bucket artist-media
-├── supabase_setup_completo.sql       # Script consolidado de alineación de esquema
+│       ├── 001_inicial_tuesdi.sql    # Esquema principal v3.0.1
+│       ├── 002_editor_perfil.sql     # Bucket artist-media + políticas storage
+│       └── 20260524112351.sql        # Roles, profiles, handle_new_user
+├── supabase_setup_completo.sql       # Script de alineación de esquema (BDs existentes)
+├── tuesdi_fix_completo.sql           # Script de corrección completa (idempotente)
 └── vercel.json                       # SPA rewrite rule
 ```
 

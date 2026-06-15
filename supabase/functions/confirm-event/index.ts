@@ -107,9 +107,13 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Publicar el evento ---
+    // CORRECCIÓN v3.0.1: status debe ser "approved" (el CHECK constraint
+    // solo permite 'pending', 'approved', 'rejected', 'expired').
+    // Antes usaba "published" que causaba error de constraint.
+    // También se elimina updated_at porque la tabla events no tiene esa columna.
     const { data: eventData, error: eventError } = await supabase
       .from("events")
-      .update({ status: "published", updated_at: new Date().toISOString() })
+      .update({ status: "approved" })
       .eq("id", eventId)
       .select()
       .single();
