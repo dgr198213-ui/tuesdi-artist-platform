@@ -1,4 +1,4 @@
-# TUESDI — Tu Escenario Digital
+# TUESDI — Tu Escenario Digital.
 
 **Tu escaparate digital para artistas.**  
 Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales.
