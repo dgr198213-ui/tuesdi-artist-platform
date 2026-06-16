@@ -14,6 +14,14 @@
 -- ============================================================
 
 -- ============================================================
+-- 0. ELIMINAR vista dependiente de artists ANTES de ALTER TABLE
+-- PostgreSQL no puede alterar una tabla que tiene vistas
+-- dependientes con estructura de columnas diferente.
+-- La vista se recrea al final del script.
+-- ============================================================
+DROP VIEW IF EXISTS public.artists_with_metrics;
+
+-- ============================================================
 -- 1. TABLA: artists
 -- ============================================================
 -- Columnas que faltaban en versiones pre-v3.0.1:
@@ -360,9 +368,10 @@ $$ LANGUAGE plpgsql;
 
 -- ============================================================
 -- 13. Vista artists_with_metrics (recrear)
+-- Se eliminó al inicio del script para permitir ALTER TABLE.
 -- ============================================================
 
-CREATE OR REPLACE VIEW public.artists_with_metrics
+CREATE VIEW public.artists_with_metrics
 WITH (security_invoker = true)
 AS
 SELECT
