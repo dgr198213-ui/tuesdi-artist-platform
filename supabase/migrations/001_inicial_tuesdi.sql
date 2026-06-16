@@ -157,10 +157,17 @@ CREATE TABLE IF NOT EXISTS public.events (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Añadir columnas si la tabla ya existía sin ellas
+-- Añadir columnas si la tabla ya existía sin ellas (pre-v3.0.1)
 ALTER TABLE public.events ADD COLUMN IF NOT EXISTS price TEXT;
 ALTER TABLE public.events ADD COLUMN IF NOT EXISTS artist_id UUID REFERENCES public.artists(id);
 ALTER TABLE public.events ADD COLUMN IF NOT EXISTS attendees INTEGER DEFAULT 0;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+
+-- Respaldo para columnas de artists que faltaban en versiones pre-v3.0.1
+ALTER TABLE public.artists ADD COLUMN IF NOT EXISTS tiktok TEXT;
+ALTER TABLE public.artists ADD COLUMN IF NOT EXISTS cover_image TEXT;
+ALTER TABLE public.artists ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.artists ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 CREATE INDEX IF NOT EXISTS idx_events_status ON public.events(status);
 CREATE INDEX IF NOT EXISTS idx_events_event_date ON public.events(event_date);
