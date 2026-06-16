@@ -30,6 +30,40 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // --- Validar que el evento existe y está en estado pending ---
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const { data: eventData, error: eventCheckError } = await supabase
+      .from("events")
+      .select("id, status, organizer_email")
+      .eq("id", eventId)
+      .single();
+
+    if (eventCheckError || !eventData) {
+      return new Response(
+        JSON.stringify({ error: "Evento no encontrado" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (eventData.status !== "pending") {
+      return new Response(
+        JSON.stringify({ error: "Este evento ya fue procesado" }),
+        { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verificar que el email solicitante coincide con el del evento
+    if (eventData.organizer_email && eventData.organizer_email !== email) {
+      return new Response(
+        JSON.stringify({ error: "El email no coincide con el organizador del evento" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // --- Generar token seguro ---
     const secret = Deno.env.get("MAGIC_LINK_SECRET");
     if (!secret) throw new Error("MAGIC_LINK_SECRET no configurado");
@@ -55,11 +89,6 @@ Deno.serve(async (req: Request) => {
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // 30 min
 
     // --- Guardar en Supabase con service role (bypass RLS) ---
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
     const { error: insertError } = await supabase
       .from("magic_links")
       .insert({

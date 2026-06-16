@@ -51,6 +51,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Validar que el timestamp del token no es más antiguo que 35 minutos
+    // (el token expira en 30 min, damos 5 min de margen por relojes desincronizados)
+    const tokenAge = Date.now() - parseInt(timestamp, 10);
+    if (tokenAge > 35 * 60 * 1000) {
+      return new Response(
+        JSON.stringify({ error: "El enlace ha caducado." }),
+        { status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // --- Verificar firma HMAC ---
     const secret = Deno.env.get("MAGIC_LINK_SECRET");
     if (!secret) throw new Error("MAGIC_LINK_SECRET no configurado");
@@ -64,7 +74,10 @@ Deno.serve(async (req: Request) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    if (expectedSignature !== signature) {
+    // Comparación constante en tiempo para evitar timing attacks
+    const sigBuf = new TextEncoder().encode(signature);
+    const expectedBuf = new TextEncoder().encode(expectedSignature);
+    if (sigBuf.length !== expectedBuf.length || !crypto.subtle.timingSafeEqual(sigBuf, expectedBuf)) {
       return new Response(
         JSON.stringify({ error: "Token inválido o manipulado" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }

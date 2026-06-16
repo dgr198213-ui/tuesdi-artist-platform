@@ -26,12 +26,17 @@ Deno.serve(async (req: Request) => {
   try {
     const { email, artist_name } = await req.json();
 
-    if (!email) {
-      return new Response(JSON.stringify({ error: "email requerido" }), {
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return new Response(JSON.stringify({ error: "email valido requerido" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Sanitizar artist_name para prevenir XSS en la plantilla HTML
+    const safeName = artist_name
+      ? String(artist_name).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").slice(0, 100)
+      : null;
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const SITE_URL = Deno.env.get("SITE_URL") || "https://tuesdi-artist-platform.vercel.app";
@@ -40,7 +45,7 @@ Deno.serve(async (req: Request) => {
       throw new Error("RESEND_API_KEY no configurado");
     }
 
-    const greeting = artist_name ? `Hola, ${artist_name}.` : "Hola, artista.";
+    const greeting = safeName ? `Hola, ${safeName}.` : "Hola, artista.";
 
     const html = `<!DOCTYPE html>
 <html lang="es">
