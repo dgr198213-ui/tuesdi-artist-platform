@@ -7,6 +7,8 @@
  * (HMAC-SHA256) y publica el evento (status → approved).
  */
 
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
@@ -55,9 +57,7 @@ export default function ConfirmarEvento() {
         <div className="absolute inset-0 spotlight opacity-30"></div>
       </div>
 
-      <header className="relative z-10 w-full px-margin py-base flex justify-center">
-        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-      </header>
+      <PageNav />
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
         <div className="w-full max-w-md text-center space-y-xl">
@@ -157,12 +157,7 @@ export default function ConfirmarEvento() {
         </div>
       </main>
 
-      <footer className="relative z-10 w-full py-xl border-t border-white/5">
-        <div className="flex justify-center items-center gap-md px-margin">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
-          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</span>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

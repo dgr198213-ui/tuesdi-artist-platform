@@ -8,6 +8,9 @@
  * - Usa esquema v3.0: slug, artist_name, category, city, starting_price, profile_image
  */
 
+import { useAuth } from "@/hooks/useAuth";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -30,7 +33,7 @@ interface Artist {
 
 export default function ExplorarArtistas() {
   const [, setLocation] = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -102,19 +105,7 @@ export default function ExplorarArtistas() {
   return (
     <div className="bg-background text-on-surface min-h-screen selection:bg-primary selection:text-on-primary">
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-        <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-          <div className="hidden md:flex gap-md items-center">
-            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">Artistas</button>
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/eventos")}>Eventos</button>
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/planes")}>Planes</button>
-          </div>
-          <button className="bg-primary-container text-on-primary-container px-md py-xs rounded-full font-label-sm text-label-sm hover:opacity-80 transition-all active:scale-95" onClick={() => setLocation(isAuthenticated ? "/dashboard" : "/acceso")}>
-            {isAuthenticated ? "Mi Panel" : "Acceso"}
-          </button>
-        </div>
-      </nav>
+      <PageNav active="artistas" />
 
       {/* Hero filtros */}
       <section className="pt-[120px] pb-xl px-margin max-w-7xl mx-auto">
@@ -283,17 +274,7 @@ export default function ExplorarArtistas() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-surface-dim w-full py-xl border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
-          <div className="flex flex-wrap justify-center gap-md">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([label, path]) => (
-              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
-            ))}
-          </div>
-          <p className="font-label-sm text-label-sm text-on-surface-variant opacity-70">© {new Date().getFullYear()} TUESDI. All rights reserved.</p>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

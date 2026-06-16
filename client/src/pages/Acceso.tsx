@@ -12,6 +12,8 @@
  *   con sesión activa
  */
 
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -57,14 +59,7 @@ export default function Acceso() {
   return (
     <div className="text-on-surface antialiased flex flex-col min-h-screen bg-background">
       {/* Header minimal (pantalla transaccional, sin nav completa) */}
-      <header className="fixed top-0 w-full z-50 py-base px-margin flex justify-center items-center h-20 bg-transparent">
-        <button
-          className="font-headline-md text-headline-md font-bold text-secondary tracking-tighter"
-          onClick={() => setLocation("/")}
-        >
-          TUESDI
-        </button>
-      </header>
+      <PageNav />
 
       {/* Decoración de fondo */}
       <div className="fixed top-1/4 -left-32 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
@@ -149,34 +144,7 @@ export default function Acceso() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-xl relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-30 select-none"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
-          <div className="flex gap-lg items-center">
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-colors"
-              onClick={() => setLocation("/terminos-servicio")}
-            >
-              Términos
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-colors"
-              onClick={() => setLocation("/politica-privacidad")}
-            >
-              Privacidad
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-colors"
-              onClick={() => setLocation("/contacto")}
-            >
-              Soporte
-            </button>
-          </div>
-          <div className="font-label-sm text-label-sm text-on-surface-variant/30">
-            © {new Date().getFullYear()} TUESDI. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

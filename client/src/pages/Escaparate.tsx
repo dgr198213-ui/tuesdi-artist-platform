@@ -6,6 +6,8 @@
  * Eje: soberanía profesional, sin intermediarios, sin comisiones.
  */
 
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -85,18 +87,7 @@ export default function Escaparate() {
       </div>
 
       {/* Nav mínima */}
-      <nav className="relative z-10 flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-        <button className="flex items-center gap-2" onClick={() => setLocation("/")}>
-          <img src="/isotipo-nuevo.png" alt="TUESDI" className="h-9 w-9 object-contain" />
-          <span className="font-headline-md text-headline-md font-bold text-primary hidden sm:inline">TUESDI</span>
-        </button>
-        <button
-          className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-          onClick={() => setLocation("/acceso")}
-        >
-          Ya tengo cuenta →
-        </button>
-      </nav>
+      <PageNav />
 
       {/* HERO */}
       <section className="relative z-10 max-w-4xl mx-auto px-margin pt-xl pb-xl text-center">
@@ -256,17 +247,7 @@ export default function Escaparate() {
       )}
 
       {/* Footer minimal */}
-      <footer className="relative z-10 py-xl border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-40">TUESDI</span>
-          <div className="flex gap-md flex-wrap justify-center">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"]].map(([l, p]) => (
-              <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>
-            ))}
-          </div>
-          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-40">© {new Date().getFullYear()} TUESDI</span>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

@@ -8,6 +8,8 @@
  */
 
 import { useLocation } from "wouter";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 
 export default function Precios() {
   const [, setLocation] = useLocation();
@@ -15,22 +17,7 @@ export default function Precios() {
   return (
     <div className="min-h-screen bg-background text-on-surface">
       {/* Nav */}
-      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-          <div className="hidden md:flex gap-md items-center">
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/eventos")}>Eventos</button>
-            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">Planes</button>
-          </div>
-          <button
-            className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:opacity-90"
-            onClick={() => setLocation("/acceso")}
-          >
-            Acceso
-          </button>
-        </nav>
-      </header>
+      <PageNav active="planes" />
 
       {/* Hero */}
       <section className="relative pt-[140px] pb-xl px-margin text-center overflow-hidden">
@@ -244,17 +231,7 @@ export default function Precios() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
-          <div className="flex gap-md flex-wrap justify-center">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([l, p]) => (
-              <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>
-            ))}
-          </div>
-          <p className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</p>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

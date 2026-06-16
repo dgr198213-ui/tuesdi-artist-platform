@@ -7,6 +7,8 @@
  * hasta que el organizador haga clic en el Magic Link que recibió por email.
  */
 
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useLocation, useSearch } from "wouter";
@@ -57,9 +59,7 @@ export default function ExitoPublicacion() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 w-full px-margin py-base flex justify-center md:justify-start">
-        <button className="font-headline-md text-headline-md font-bold text-primary tracking-tighter" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-      </header>
+      <PageNav />
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
         <div className="w-full max-w-xl text-center space-y-xl">
@@ -150,17 +150,7 @@ export default function ExitoPublicacion() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full py-xl border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
-          <nav className="flex gap-md">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"]].map(([l, p]) => (
-              <button key={p} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(p)}>{l}</button>
-            ))}
-          </nav>
-          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">© {new Date().getFullYear()} TUESDI. All rights reserved.</span>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

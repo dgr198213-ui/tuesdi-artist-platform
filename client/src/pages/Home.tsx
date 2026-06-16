@@ -11,6 +11,9 @@
  * - CTA final
  */
 
+import { useAuth } from "@/hooks/useAuth";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
@@ -64,7 +67,7 @@ const MOCK_EVENTS: UpcomingEvent[] = [
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [artists, setArtists] = useState<FeaturedArtist[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
 
@@ -133,67 +136,7 @@ export default function Home() {
   return (
     <div className="bg-background text-on-surface min-h-screen selection:bg-primary selection:text-on-primary">
       {/* TopNavBar */}
-      <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-        <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button
-            className="flex items-center gap-2 shrink-0"
-            onClick={() => setLocation("/")}
-          >
-            <img
-              src="/isotipo-nuevo.png"
-              alt="TUESDI"
-              className="h-9 w-9 object-contain rounded-lg shrink-0"
-            />
-            <span className="font-headline-md text-headline-md font-bold text-primary hidden sm:inline">TUESDI</span>
-          </button>
-          <div className="hidden md:flex items-center gap-md">
-            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">
-              Inicio
-            </button>
-            <button
-              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/artistas")}
-            >
-              Artistas
-            </button>
-            <button
-              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/eventos")}
-            >
-              Eventos
-            </button>
-            <button
-              className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/planes")}
-            >
-              Planes
-            </button>
-          </div>
-          <div className="flex items-center gap-sm">
-            {isAuthenticated ? (
-              <button
-                className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all duration-300"
-                onClick={() => setLocation("/dashboard")}
-              >
-                Mi Panel
-              </button>
-            ) : (
-              <button
-                className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all duration-300"
-                onClick={() => setLocation("/login")}
-              >
-                Acceso
-              </button>
-            )}
-            <button
-              className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary scale-95 duration-200 ease-in-out hover:scale-100"
-              onClick={goToProfile}
-            >
-              Crear Perfil
-            </button>
-          </div>
-        </div>
-      </nav>
+      <PageNav active="home" />
 
       <main className="overflow-x-hidden">
         {/* Hero Section */}
@@ -492,42 +435,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-surface-dim w-full py-xl border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="flex flex-col items-center md:items-start">
-            <span className="font-headline-md text-headline-md text-on-surface opacity-50 mb-sm">TUESDI</span>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">
-              © {new Date().getFullYear()} TUESDI — Tu Escenario Digital. Todos los derechos reservados.
-            </p>
-          </div>
-          <div className="flex gap-md flex-wrap justify-center">
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/politica-privacidad")}
-            >
-              Privacidad
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/terminos-servicio")}
-            >
-              Términos
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/contacto")}
-            >
-              Contacto
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/politica-cookies")}
-            >
-              Cookies
-            </button>
-          </div>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

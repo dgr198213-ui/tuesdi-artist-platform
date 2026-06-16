@@ -296,10 +296,8 @@
     padding-right: 1rem;
   }
 
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
+  /* .flex override removed — was breaking all Tailwind flex containers.
+     Use explicit .min-h-0 or .min-w-0 utilities where needed. */
 
   @media (min-width: 640px) {
     .container {

@@ -4,6 +4,9 @@
  * Diseño: Stitch "Digital Stage" (directorio_de_eventos_tuesdi_1 + _2)
  */
 
+import { useAuth } from "@/hooks/useAuth";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -35,7 +38,7 @@ function formatDate(dateStr: string) {
 
 export default function Eventos() {
   const [, setLocation] = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -99,24 +102,7 @@ export default function Eventos() {
   return (
     <div className="bg-background text-on-surface min-h-screen selection:bg-primary/30">
       {/* Nav */}
-      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-          <div className="hidden md:flex items-center gap-lg">
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
-            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1">Eventos</button>
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/planes")}>Planes</button>
-          </div>
-          <div className="flex items-center gap-md">
-            <button
-              className="font-body-md text-body-md text-primary hover:opacity-80 transition-all active:scale-95 px-md py-xs rounded-lg neon-border"
-              onClick={() => setLocation(isAuthenticated ? "/dashboard" : "/acceso")}
-            >
-              {isAuthenticated ? "Mi Panel" : "Acceso"}
-            </button>
-          </div>
-        </nav>
-      </header>
+      <PageNav active="eventos" />
 
       <main className="pt-xl min-h-screen">
         {/* Hero */}
@@ -290,17 +276,7 @@ export default function Eventos() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-xl bg-surface-dim border-t border-white/5">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
-          <div className="flex gap-md">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"], ["Contacto", "/contacto"], ["Cookies", "/politica-cookies"]].map(([label, path]) => (
-              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
-            ))}
-          </div>
-          <div className="font-label-sm text-label-sm text-on-surface opacity-40">© {new Date().getFullYear()} TUESDI. All rights reserved.</div>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

@@ -21,14 +21,7 @@ export default function EnlaceEnviado() {
       </div>
 
       {/* Header minimal */}
-      <header className="relative z-10 w-full px-margin py-base flex justify-center md:justify-start">
-        <button
-          className="font-headline-md text-headline-md font-bold text-primary tracking-tighter"
-          onClick={() => setLocation("/")}
-        >
-          TUESDI
-        </button>
-      </header>
+      <PageNav />
 
       {/* Main Content */}
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin">
@@ -77,34 +70,7 @@ export default function EnlaceEnviado() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full py-xl border-t border-white/5 mt-auto">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
-          <nav className="flex gap-md">
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/politica-privacidad")}
-            >
-              Privacidad
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/terminos-servicio")}
-            >
-              Términos
-            </button>
-            <button
-              className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors"
-              onClick={() => setLocation("/contacto")}
-            >
-              Contacto
-            </button>
-          </nav>
-          <span className="font-label-sm text-label-sm text-on-surface-variant opacity-60">
-            © {new Date().getFullYear()} TUESDI. All rights reserved.
-          </span>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

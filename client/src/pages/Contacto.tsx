@@ -7,6 +7,8 @@
 
 import { useState } from "react";
 import { useLocation } from "wouter";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,70 +57,7 @@ export default function Contacto() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-white/10 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => setLocation("/")}
-          >
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">T</span>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight">
-                TUESDI
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                Tu Escenario Digital
-              </span>
-            </div>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="/artistas"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Artistas
-            </a>
-            <a
-              href="/eventos"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Eventos
-            </a>
-            <a
-              href="/planes"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Planes
-            </a>
-            <a
-              href="/quienes-somos"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Quiénes Somos
-            </a>
-          </nav>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/login")}
-            >
-              Acceso
-            </Button>
-            <Button
-              size="sm"
-              className="bg-primary text-white hover:bg-primary/90"
-              onClick={() => setLocation("/registro")}
-            >
-              Registro
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PageNav />
 
       {/* Hero Section */}
       <section className="py-24 md:py-32 relative overflow-hidden">
@@ -279,32 +218,7 @@ export default function Contacto() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">T</span>
-              </div>
-              <span className="text-white font-semibold"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <a href="/aviso-legal" className="hover:text-primary transition-colors">
-                Aviso Legal
-              </a>
-              <a href="/politica-privacidad" className="hover:text-primary transition-colors">
-                Privacidad
-              </a>
-              <a href="/terminos-servicio" className="hover:text-primary transition-colors">
-                Términos
-              </a>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-white/10 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} TUESDI — Tu Escenario Digital.
-          </div>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }

@@ -7,6 +7,8 @@
  *        invoke create-magic-link → redirige a /exito-publicacion?id=xxx
  */
 
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
@@ -131,16 +133,7 @@ export default function PublicarEvento() {
   return (
     <div className="bg-background text-on-surface min-h-screen">
       {/* Nav */}
-      <header className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
-        <nav className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
-          <button className="font-headline-md text-headline-md font-bold text-primary" onClick={() => setLocation("/")}><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</button>
-          <div className="hidden md:flex gap-md">
-            <button className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation("/artistas")}>Artistas</button>
-            <button className="font-body-md text-body-md text-primary font-bold border-b-2 border-primary pb-1" onClick={() => setLocation("/eventos")}>Eventos</button>
-          </div>
-          <button className="font-body-md text-body-md text-primary hover:opacity-80 px-md py-xs rounded-lg neon-border" onClick={() => setLocation("/acceso")}>Acceso</button>
-        </nav>
-      </header>
+      <PageNav active="eventos" />
 
       {/* Ambient */}
       <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
@@ -329,17 +322,7 @@ export default function PublicarEvento() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-xl bg-surface-dim border-t border-white/5 mt-xl">
-        <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
-          <div className="font-headline-md text-headline-md text-on-surface opacity-50"><img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain inline-block mr-1" />TUESDI</div>
-          <div className="flex gap-md">
-            {[["Privacidad", "/politica-privacidad"], ["Términos", "/terminos-servicio"]].map(([label, path]) => (
-              <button key={path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(path)}>{label}</button>
-            ))}
-          </div>
-          <div className="font-label-sm text-label-sm text-on-surface opacity-40">© {new Date().getFullYear()} TUESDI. All rights reserved.</div>
-        </div>
-      </footer>
+      <PageFooter />
     </div>
   );
 }
