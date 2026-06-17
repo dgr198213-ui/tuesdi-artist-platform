@@ -1,6 +1,6 @@
 // supabase/functions/confirm-event/index.ts
 // Valida el Magic Link (HMAC-SHA256) generado por create-magic-link,
-// marca el evento como "published" y el enlace como usado.
+// marca el evento como "approved" y el enlace como usado.
 //
 // Variables de entorno requeridas (Supabase Dashboard -> Edge Functions -> Secrets):
 //   MAGIC_LINK_SECRET   — el MISMO secreto usado en create-magic-link
@@ -13,12 +13,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/** Lee una variable de entorno requerida o lanza error descriptivo. */
+function getRequiredEnv(key: string): string {
+  const value = Deno.env.get(key);
+  if (!value) throw new Error(`Variable de entorno requerida: ${key} no está configurada.`);
+  return value;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // Validar todas las env vars al inicio, antes de cualquier operación
+    const supabaseUrl = getRequiredEnv("SUPABASE_URL");
+    const supabaseServiceKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+    const magicLinkSecret = getRequiredEnv("MAGIC_LINK_SECRET");
+
     const { token } = await req.json();
 
     if (!token || typeof token !== "string" || !token.includes(".")) {
@@ -62,12 +74,9 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Verificar firma HMAC ---
-    const secret = Deno.env.get("MAGIC_LINK_SECRET");
-    if (!secret) throw new Error("MAGIC_LINK_SECRET no configurado");
-
     const encoder = new TextEncoder();
     const cryptoKey = await crypto.subtle.importKey(
-      "raw", encoder.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+      "raw", encoder.encode(magicLinkSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
     );
     const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(payload));
     const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
@@ -84,10 +93,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // --- Buscar el magic link ---
     const { data: linkData, error: linkError } = await supabase
@@ -122,8 +128,6 @@ Deno.serve(async (req: Request) => {
     // --- Publicar el evento ---
     // CORRECCIÓN v3.0.1: status debe ser "approved" (el CHECK constraint
     // solo permite 'pending', 'approved', 'rejected', 'expired').
-    // Antes usaba "published" que causaba error de constraint.
-    // También se elimina updated_at porque la tabla events no tiene esa columna.
     const { data: eventData, error: eventError } = await supabase
       .from("events")
       .update({ status: "approved" })

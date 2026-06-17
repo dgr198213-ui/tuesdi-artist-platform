@@ -18,12 +18,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/** Lee una variable de entorno requerida o lanza error descriptivo. */
+function getRequiredEnv(key: string): string {
+  const value = Deno.env.get(key);
+  if (!value) throw new Error(`Variable de entorno requerida: ${key} no está configurada.`);
+  return value;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
+    // Validar env vars al inicio
+    const RESEND_API_KEY = getRequiredEnv("RESEND_API_KEY");
+    const SITE_URL = Deno.env.get("SITE_URL") || "https://tuesdi-artist-platform.vercel.app";
+
     const { email, artist_name } = await req.json();
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
@@ -37,13 +48,6 @@ Deno.serve(async (req: Request) => {
     const safeName = artist_name
       ? String(artist_name).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").slice(0, 100)
       : null;
-
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const SITE_URL = Deno.env.get("SITE_URL") || "https://tuesdi-artist-platform.vercel.app";
-
-    if (!RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY no configurado");
-    }
 
     const greeting = safeName ? `Hola, ${safeName}.` : "Hola, artista.";
 

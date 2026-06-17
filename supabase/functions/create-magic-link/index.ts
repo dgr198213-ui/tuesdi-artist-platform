@@ -14,6 +14,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/** Lee una variable de entorno requerida o lanza error descriptivo. */
+function getRequiredEnv(key: string): string {
+  const value = Deno.env.get(key);
+  if (!value) throw new Error(`Variable de entorno requerida: ${key} no está configurada.`);
+  return value;
+}
+
 Deno.serve(async (req: Request) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
@@ -21,6 +28,15 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // Validar todas las env vars al inicio, antes de cualquier operación
+    const supabaseUrl = getRequiredEnv("SUPABASE_URL");
+    const supabaseServiceKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
+    const magicLinkSecret = getRequiredEnv("MAGIC_LINK_SECRET");
+    const siteUrl = Deno.env.get("SITE_URL") ?? "https://tuesdi-artist-platform.vercel.app";
+    const resendKey = Deno.env.get("RESEND_API_KEY");
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     const { eventId, email, promoterName } = await req.json();
 
     if (!eventId || !email) {
@@ -31,11 +47,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Validar que el evento existe y está en estado pending ---
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-
     const { data: eventData, error: eventCheckError } = await supabase
       .from("events")
       .select("id, status, organizer_email")
@@ -65,15 +76,12 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Generar token seguro ---
-    const secret = Deno.env.get("MAGIC_LINK_SECRET");
-    if (!secret) throw new Error("MAGIC_LINK_SECRET no configurado");
-
     const timestamp = Date.now().toString();
     const payload = `${eventId}:${email}:${timestamp}`;
 
     // HMAC-SHA256 usando Web Crypto API (disponible en Deno)
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(secret);
+    const keyData = encoder.encode(magicLinkSecret);
     const cryptoKey = await crypto.subtle.importKey(
       "raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
     );
@@ -102,11 +110,9 @@ Deno.serve(async (req: Request) => {
     if (insertError) throw insertError;
 
     // --- Construir el enlace de confirmación ---
-    const siteUrl = Deno.env.get("SITE_URL") ?? "https://tuesdi-artist-platform.vercel.app";
     const confirmUrl = `${siteUrl}/confirmar-evento/${token}`;
 
     // --- Enviar email con Resend ---
-    const resendKey = Deno.env.get("RESEND_API_KEY");
     if (resendKey) {
       await fetch("https://api.resend.com/emails", {
         method: "POST",

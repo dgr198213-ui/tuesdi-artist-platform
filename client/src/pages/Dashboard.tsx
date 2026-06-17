@@ -39,6 +39,62 @@ interface MediaItem {
   thumbnail: string | null;
 }
 
+/** Devuelve los límites de media por plan. Función pura, fácil de testear. */
+function getPlanLimits(plan: string | null | undefined) {
+  const photoLimit = plan === "pro" ? 3 : plan === "standard" ? 3 : 1;
+  const videoLimit = plan === "pro" ? 3 : plan === "standard" ? 1 : 0;
+  return { photoLimit, videoLimit };
+}
+
+/** Barra de uso de media (fotos/vídeos) según el plan. */
+function MediaUsage({ media, plan }: { media: MediaItem[]; plan: string | null | undefined }) {
+  const { photoLimit, videoLimit } = getPlanLimits(plan);
+  const photos = media.filter((m) => m.type === "photo");
+  const videos = media.filter((m) => m.type === "video");
+
+  return (
+    <>
+      <div>
+        <div className="flex justify-between font-label-sm text-label-sm mb-xs">
+          <span className="text-outline">Fotos</span>
+          <span className="font-bold">{photos.length} / {photoLimit}</span>
+        </div>
+        <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+          <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min((photos.length / photoLimit) * 100, 100)}%` }}></div>
+        </div>
+      </div>
+      {videoLimit > 0 && (
+        <div>
+          <div className="flex justify-between font-label-sm text-label-sm mb-xs">
+            <span className="text-outline">Vídeos</span>
+            <span className="font-bold">{videos.length} / {videoLimit}</span>
+          </div>
+          <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
+            <div className="h-full bg-primary transition-all" style={{ width: `${Math.min((videos.length / videoLimit) * 100, 100)}%` }}></div>
+          </div>
+        </div>
+      )}
+      {media.length > 0 ? (
+        <div className="pt-md grid grid-cols-2 gap-sm">
+          {media.slice(0, 4).map((item) => (
+            <div key={item.id} className="aspect-video relative rounded-lg overflow-hidden group">
+              <img className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.thumbnail || item.url} alt="" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="material-symbols-outlined text-white">{item.type === "video" ? "play_circle" : "visibility"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="pt-md text-center text-on-surface-variant">
+          <span className="material-symbols-outlined text-[32px] block mb-xs">photo_library</span>
+          <p className="font-label-sm text-label-sm">Sin archivos todavía</p>
+        </div>
+      )}
+    </>
+  );
+}
+
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [artist, setArtist] = useState<ArtistData | null>(null);
@@ -149,10 +205,10 @@ export default function Dashboard() {
   const planLabel = artist?.subscription_plan === "pro" ? "TUESDI Pro" : artist?.subscription_plan === "standard" ? "TUESDI Standard" : "TUESDI Beta";
 
   const metricCards = [
-    { icon: "visibility", label: "Profile Views", value: metrics?.profile_views ?? 0, trend: "+12%", up: true },
-    { icon: "search_check", label: "Search Appearances", value: metrics?.search_impressions ?? 0, trend: "+5.2%", up: true },
-    { icon: "ads_click", label: "Contact Clicks", value: metrics?.contact_clicks ?? 0, trend: "-2.1%", up: false },
-    { icon: "group_add", label: "New Contacts", value: metrics?.contacts_received ?? newCount, trend: "+22%", up: true },
+    { icon: "visibility", label: "Profile Views", value: metrics?.profile_views ?? 0 },
+    { icon: "search_check", label: "Search Appearances", value: metrics?.search_impressions ?? 0 },
+    { icon: "ads_click", label: "Contact Clicks", value: metrics?.contact_clicks ?? 0 },
+    { icon: "group_add", label: "New Contacts", value: metrics?.contacts_received ?? newCount },
   ];
 
   return (
@@ -184,10 +240,11 @@ export default function Dashboard() {
           <div key={m.label} className="glass-card rounded-xl p-md flex flex-col justify-between h-40">
             <div className="flex justify-between">
               <span className="material-symbols-outlined text-outline">{m.icon}</span>
-              <span className={`${m.up ? "text-secondary" : "text-error"} font-label-sm text-label-sm font-bold flex items-center gap-xs`}>
-                {m.trend}
-                <span className="material-symbols-outlined text-[14px]">{m.up ? "trending_up" : "trending_down"}</span>
-              </span>
+              {metrics && (
+                <span className="text-outline-variant font-label-sm text-label-sm flex items-center gap-xs">
+                  —
+                </span>
+              )}
             </div>
             <div>
               <h4 className="text-outline font-label-sm text-label-sm uppercase mb-xs">{m.label}</h4>
@@ -272,53 +329,7 @@ export default function Dashboard() {
             </span>
           </div>
           <div className="space-y-md flex-1">
-            {(() => {
-              const photos = media.filter((m) => m.type === "photo");
-              const videos = media.filter((m) => m.type === "video");
-              const photoLimit = artist?.subscription_plan === "pro" ? 3 : artist?.subscription_plan === "standard" ? 3 : 1;
-              const videoLimit = artist?.subscription_plan === "pro" ? 3 : artist?.subscription_plan === "standard" ? 1 : 0;
-              return (
-                <>
-                  <div>
-                    <div className="flex justify-between font-label-sm text-label-sm mb-xs">
-                      <span className="text-outline">Fotos</span>
-                      <span className="font-bold">{photos.length} / {photoLimit}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
-                      <div className="h-full bg-secondary transition-all" style={{ width: `${Math.min((photos.length / photoLimit) * 100, 100)}%` }}></div>
-                    </div>
-                  </div>
-                  {videoLimit > 0 && (
-                    <div>
-                      <div className="flex justify-between font-label-sm text-label-sm mb-xs">
-                        <span className="text-outline">Vídeos</span>
-                        <span className="font-bold">{videos.length} / {videoLimit}</span>
-                      </div>
-                      <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
-                        <div className="h-full bg-primary transition-all" style={{ width: `${Math.min((videos.length / videoLimit) * 100, 100)}%` }}></div>
-                      </div>
-                    </div>
-                  )}
-                  {media.length > 0 ? (
-                    <div className="pt-md grid grid-cols-2 gap-sm">
-                      {media.slice(0, 4).map((item) => (
-                        <div key={item.id} className="aspect-video relative rounded-lg overflow-hidden group">
-                          <img className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.thumbnail || item.url} alt="" />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="material-symbols-outlined text-white">{item.type === "video" ? "play_circle" : "visibility"}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="pt-md text-center text-on-surface-variant">
-                      <span className="material-symbols-outlined text-[32px] block mb-xs">photo_library</span>
-                      <p className="font-label-sm text-label-sm">Sin archivos todavía</p>
-                    </div>
-                  )}
-                </>
-              );
-            })()}
+            <MediaUsage media={media} plan={artist?.subscription_plan} />
           </div>
           <button
             className="mt-lg w-full py-sm border border-outline-variant hover:bg-surface-variant transition-colors rounded-lg flex items-center justify-center gap-sm font-bold"
