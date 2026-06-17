@@ -7,6 +7,8 @@
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { PLAN_LIMITS } from "@/lib/constants";
 
 interface MediaItem {
   id: string;
@@ -15,16 +17,6 @@ interface MediaItem {
   thumbnail: string | null;
   position: number;
 }
-
-interface ArtistPlan {
-  subscription_plan: string | null;
-}
-
-const PLAN_LIMITS: Record<string, { photos: number; videos: number }> = {
-  pro: { photos: 3, videos: 3 },
-  standard: { photos: 3, videos: 1 },
-  beta: { photos: 1, videos: 0 },
-};
 
 export default function GestionMedia() {
   const [artistId, setArtistId] = useState<string | null>(null);
@@ -35,6 +27,7 @@ export default function GestionMedia() {
   const [userId, setUserId] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
   const [showAddVideo, setShowAddVideo] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -74,7 +67,7 @@ export default function GestionMedia() {
     if (!files.length || !userId || !artistId) return;
 
     const available = limits.photos - photos.length;
-    if (available <= 0) { alert(`Tu plan ${plan} solo permite ${limits.photos} foto(s).`); return; }
+    if (available <= 0) { toast.error(`Tu plan ${plan} solo permite ${limits.photos} foto(s).`); return; }
     const toUpload = files.slice(0, available);
 
     setUploading(true);
@@ -98,7 +91,7 @@ export default function GestionMedia() {
 
   const handleAddVideo = async () => {
     if (!videoUrl || !artistId) return;
-    if (videos.length >= limits.videos) { alert(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`); return; }
+    if (videos.length >= limits.videos) { toast.error(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`); return; }
 
     const { data: newItem } = await supabase.from("media").insert([{
       artist_id: artistId,
@@ -116,7 +109,6 @@ export default function GestionMedia() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("¿Eliminar este archivo?")) return;
     await supabase.from("media").delete().eq("id", id);
     setMedia((prev) => prev.filter((m) => m.id !== id));
   };
@@ -204,7 +196,7 @@ export default function GestionMedia() {
           {media.map((item) => (
             <div key={item.id} className="relative aspect-square group rounded-xl overflow-hidden glass-card">
               {item.type === "photo" ? (
-                <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={item.url} alt="" />
+                <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={item.url} alt="" />
               ) : (
                 <div className="w-full h-full bg-surface-container flex flex-col items-center justify-center gap-sm">
                   <span className="material-symbols-outlined text-primary text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_circle</span>
@@ -219,7 +211,7 @@ export default function GestionMedia() {
                 )}
                 <button
                   className="w-10 h-10 bg-error/80 rounded-full flex items-center justify-center hover:bg-error transition-colors"
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => setDeleteTarget(item.id)}
                 >
                   <span className="material-symbols-outlined text-white text-[18px]">delete</span>
                 </button>
@@ -263,6 +255,20 @@ export default function GestionMedia() {
             <p className="font-body-md text-body-md text-on-surface-variant mb-md">
               Con el plan <strong className="text-on-surface">Standard</strong> (6€/mes) puedes tener hasta 3 fotos + 1 vídeo. Con el plan <strong className="text-on-surface">Pro</strong> (9,99€/mes), 3 fotos + 3 vídeos.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-md">
+          <div className="glass-card rounded-2xl p-lg w-full max-w-sm relative">
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">Eliminar archivo</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-lg">¿Estás seguro? Esta acción no se puede deshacer.</p>
+            <div className="flex gap-sm justify-end">
+              <button className="px-md py-sm rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-variant transition-colors" onClick={() => setDeleteTarget(null)}>Cancelar</button>
+              <button className="px-md py-sm rounded-lg bg-error text-white font-bold hover:opacity-90 transition-colors" onClick={() => { handleDelete(deleteTarget); setDeleteTarget(null); }}>Eliminar</button>
+            </div>
           </div>
         </div>
       )}

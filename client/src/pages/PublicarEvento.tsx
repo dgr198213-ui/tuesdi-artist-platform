@@ -12,8 +12,7 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-
-const CATEGORIES = ["Música", "Arte", "Teatro", "Danza", "Magia", "Humor", "Performance", "Otro"];
+import { EVENT_CATEGORIES, DEFAULT_COUNTRY } from "@/lib/constants";
 
 interface EventForm {
   title: string;
@@ -30,9 +29,9 @@ interface EventForm {
 const EMPTY: EventForm = {
   title: "",
   description: "",
-  category: CATEGORIES[0],
+  category: EVENT_CATEGORIES[0],
   city: "",
-  country: "España",
+  country: DEFAULT_COUNTRY,
   event_date: "",
   event_time: "",
   organizer_name: "",
@@ -100,7 +99,7 @@ export default function PublicarEvento() {
         description: form.description.trim() || null,
         category: form.category,
         city: form.city.trim(),
-        country: form.country.trim() || "España",
+        country: form.country.trim() || DEFAULT_COUNTRY,
         event_date: form.event_date,
         event_time: form.event_time || null,
         image_url,
@@ -203,7 +202,7 @@ export default function PublicarEvento() {
                     onChange={(e) => update("category", e.target.value)}
                     required
                   >
-                    {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                    {EVENT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                   <span className="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
                 </div>

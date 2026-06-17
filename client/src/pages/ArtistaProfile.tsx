@@ -250,7 +250,7 @@ export default function ArtistaProfile() {
                 <div className={`grid gap-md ${photos.length >= 3 ? "grid-cols-1 md:grid-cols-3 md:h-[600px]" : "grid-cols-1 md:grid-cols-2"}`}>
                   {photos.slice(0, 3).map((item, idx) => (
                     <div key={item.id} className={`relative group overflow-hidden rounded-xl ${idx === 0 && photos.length >= 3 ? "md:col-span-2 aspect-video md:aspect-auto" : "aspect-square md:aspect-auto"}`}>
-                      <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={item.url} alt={artist.artist_name} />
+                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={item.url} alt={artist.artist_name} />
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
                     </div>
                   ))}
@@ -266,7 +266,7 @@ export default function ArtistaProfile() {
                         </div>
                       </div>
                       {item.thumbnail ? (
-                        <img className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} />
+                        <img loading="lazy" className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} />
                       ) : (
                         <div className="w-full h-full bg-surface-container"></div>
                       )}
@@ -292,7 +292,7 @@ export default function ArtistaProfile() {
                 <div key={r.slug} className="glass-card rounded-xl overflow-hidden group hover:border-primary transition-colors cursor-pointer" onClick={() => setLocation(`/artista/${r.slug}`)}>
                   <div className="aspect-square overflow-hidden bg-surface-container">
                     {r.profile_image ? (
-                      <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={r.profile_image} alt={r.artist_name} />
+                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={r.profile_image} alt={r.artist_name} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                         <span className="material-symbols-outlined text-[48px]">person</span>

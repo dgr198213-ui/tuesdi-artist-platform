@@ -14,9 +14,10 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
+import { ARTIST_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
 
-const CATEGORIES = ["Todas", "Cantante", "Músico", "DJ", "Banda", "Mago", "Humorista", "Actor", "Bailarín", "Performer"];
-const CITIES = ["Todas", "Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Zaragoza", "Málaga"];
+const CATEGORIES = [FILTER_ALL, ...ARTIST_CATEGORIES];
+const CITIES = [...FILTER_CITIES];
 const PAGE_SIZE = 12;
 
 interface Artist {
@@ -210,7 +211,7 @@ export default function ExplorarArtistas() {
                 <div key={artist.id} className="glass-card rounded-xl overflow-hidden group flex flex-col h-full cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
                   <div className="relative h-64 overflow-hidden bg-surface-container">
                     {artist.profile_image ? (
-                      <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={artist.profile_image} alt={artist.artist_name} />
+                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={artist.profile_image} alt={artist.artist_name} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                         <span className="material-symbols-outlined text-[64px]">person</span>

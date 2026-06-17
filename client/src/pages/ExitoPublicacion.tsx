@@ -11,6 +11,7 @@ import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useSearch } from "wouter";
 
 interface Event {
@@ -42,7 +43,7 @@ export default function ExitoPublicacion() {
         await navigator.share({ title: "TUESDI — Tu Escenario Digital", url: window.location.origin });
       } else {
         await navigator.clipboard.writeText(window.location.origin);
-        alert("Enlace copiado al portapapeles");
+        toast.success("Enlace copiado al portapapeles");
       }
     } catch { /* cancelled */ }
   };

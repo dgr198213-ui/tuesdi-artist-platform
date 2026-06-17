@@ -6,38 +6,82 @@
  * y recibir solicitudes de contacto de forma privada y segura.
  */
 
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Escaparate from "./pages/Escaparate";
-import Acceso from "./pages/Acceso";
-import EnlaceEnviado from "./pages/EnlaceEnviado";
-import Dashboard from "./pages/Dashboard";
-import EditorPerfil from "./pages/EditorPerfil";
-import BandejaContactos from "./pages/BandejaContactos";
-import GestionMedia from "./pages/GestionMedia";
-import Analitica from "./pages/Analitica";
-import ExplorarArtistas from "./pages/ExplorarArtistas";
-import Eventos from "./pages/Eventos";
-import EventoDetalle from "./pages/EventoDetalle";
-import ArtistaProfile from "./pages/ArtistaProfile";
-import PublicarEvento from "./pages/PublicarEvento";
-import ConfirmarEvento from "./pages/ConfirmarEvento";
-import Precios from "./pages/Precios";
-import ExitoPublicacion from "./pages/ExitoPublicacion";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Páginas Legales
-import TerminosServicio from "./pages/TerminosServicio";
-import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
-import AvisoLegal from "./pages/AvisoLegal";
-import PoliticaCookies from "./pages/PoliticaCookies";
-import QuienesSomos from "./pages/QuienesSomos";
-import Contacto from "./pages/Contacto";
+// ---------------------------------------------------------------------------
+// Lazy-loaded page components — public routes
+// ---------------------------------------------------------------------------
+const Home = lazy(() => import("./pages/Home"));
+const Escaparate = lazy(() => import("./pages/Escaparate"));
+const Acceso = lazy(() => import("./pages/Acceso"));
+const EnlaceEnviado = lazy(() => import("./pages/EnlaceEnviado"));
+const ExplorarArtistas = lazy(() => import("./pages/ExplorarArtistas"));
+const ArtistaProfile = lazy(() => import("./pages/ArtistaProfile"));
+const Eventos = lazy(() => import("./pages/Eventos"));
+const EventoDetalle = lazy(() => import("./pages/EventoDetalle"));
+const PublicarEvento = lazy(() => import("./pages/PublicarEvento"));
+const ConfirmarEvento = lazy(() => import("./pages/ConfirmarEvento"));
+const ExitoPublicacion = lazy(() => import("./pages/ExitoPublicacion"));
+const Precios = lazy(() => import("./pages/Precios"));
+
+// ---------------------------------------------------------------------------
+// Lazy-loaded page components — protected routes
+// The HOC is applied inside the `.then()` so ProtectedRoute receives a plain
+// React.ComponentType rather than a LazyExoticComponent (avoids TS errors).
+// ---------------------------------------------------------------------------
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").then((m) => ({
+    default: ProtectedRoute(m.default),
+  })),
+);
+const EditorPerfil = lazy(() =>
+  import("./pages/EditorPerfil").then((m) => ({
+    default: ProtectedRoute(m.default),
+  })),
+);
+const BandejaContactos = lazy(() =>
+  import("./pages/BandejaContactos").then((m) => ({
+    default: ProtectedRoute(m.default),
+  })),
+);
+const GestionMedia = lazy(() =>
+  import("./pages/GestionMedia").then((m) => ({
+    default: ProtectedRoute(m.default),
+  })),
+);
+const Analitica = lazy(() =>
+  import("./pages/Analitica").then((m) => ({
+    default: ProtectedRoute(m.default),
+  })),
+);
+
+// ---------------------------------------------------------------------------
+// Lazy-loaded page components — legal / info pages
+// ---------------------------------------------------------------------------
+const TerminosServicio = lazy(() => import("./pages/TerminosServicio"));
+const PoliticaPrivacidad = lazy(() => import("./pages/PoliticaPrivacidad"));
+const AvisoLegal = lazy(() => import("./pages/AvisoLegal"));
+const PoliticaCookies = lazy(() => import("./pages/PoliticaCookies"));
+const QuienesSomos = lazy(() => import("./pages/QuienesSomos"));
+const Contacto = lazy(() => import("./pages/Contacto"));
+
+// ---------------------------------------------------------------------------
+// Suspense fallback
+// ---------------------------------------------------------------------------
+function RouteLoading() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+    </div>
+  );
+}
 
 function Router() {
   /**
@@ -65,45 +109,47 @@ function Router() {
    * - /dashboard/suscripcion : Gestión de suscripción
    */
   return (
-    <Switch>
-      {/* Páginas Públicas */}
-      <Route path={"/"} component={Home} />
-      <Route path={"/escaparate"} component={Escaparate} />
-      <Route path={"/artistas"} component={ExplorarArtistas} />
-      <Route path={"/artista/:slug"} component={ArtistaProfile} />
-      <Route path={"/eventos"} component={Eventos} />
-      <Route path={"/eventos/:id"} component={EventoDetalle} />
-      <Route path={"/planes"} component={Precios} />
-      <Route path={"/quienes-somos"} component={QuienesSomos} />
-      <Route path={"/contacto"} component={Contacto} />
-      <Route path={"/aviso-legal"} component={AvisoLegal} />
-      <Route path={"/politica-privacidad"} component={PoliticaPrivacidad} />
-      <Route path={"/politica-cookies"} component={PoliticaCookies} />
-      <Route path={"/terminos-servicio"} component={TerminosServicio} />
+    <Suspense fallback={<RouteLoading />}>
+      <Switch>
+        {/* Páginas Públicas */}
+        <Route path="/" component={Home} />
+        <Route path="/escaparate" component={Escaparate} />
+        <Route path="/artistas" component={ExplorarArtistas} />
+        <Route path="/artista/:slug" component={ArtistaProfile} />
+        <Route path="/eventos" component={Eventos} />
+        <Route path="/eventos/:id" component={EventoDetalle} />
+        <Route path="/planes" component={Precios} />
+        <Route path="/quienes-somos" component={QuienesSomos} />
+        <Route path="/contacto" component={Contacto} />
+        <Route path="/aviso-legal" component={AvisoLegal} />
+        <Route path="/politica-privacidad" component={PoliticaPrivacidad} />
+        <Route path="/politica-cookies" component={PoliticaCookies} />
+        <Route path="/terminos-servicio" component={TerminosServicio} />
 
-      {/* Autenticación */}
-      <Route path={"/acceso"} component={Acceso} />
-      <Route path={"/enlace-enviado"} component={EnlaceEnviado} />
-      {/* Alias para enlaces antiguos: login/registro -> Acceso (Magic Link) */}
-      <Route path={"/login"} component={Acceso} />
-      <Route path={"/registro"} component={Acceso} />
+        {/* Autenticación */}
+        <Route path="/acceso" component={Acceso} />
+        <Route path="/enlace-enviado" component={EnlaceEnviado} />
+        {/* Alias para enlaces antiguos: login/registro -> Acceso (Magic Link) */}
+        <Route path="/login" component={Acceso} />
+        <Route path="/registro" component={Acceso} />
 
-      {/* Publicación de Eventos (Magic Link) */}
-      <Route path={"/publicar-evento"} component={PublicarEvento} />
-      <Route path={"/confirmar-evento/:token"} component={ConfirmarEvento} />
-      <Route path={"/exito-publicacion"} component={ExitoPublicacion} />
+        {/* Publicación de Eventos (Magic Link) */}
+        <Route path="/publicar-evento" component={PublicarEvento} />
+        <Route path="/confirmar-evento/:token" component={ConfirmarEvento} />
+        <Route path="/exito-publicacion" component={ExitoPublicacion} />
 
-      {/* Dashboard Privado */}
-      <Route path={"/dashboard"} component={ProtectedRoute(Dashboard)} />
-      <Route path={"/dashboard/perfil"} component={ProtectedRoute(EditorPerfil)} />
-      <Route path={"/dashboard/contactos"} component={ProtectedRoute(BandejaContactos)} />
-      <Route path={"/dashboard/media"} component={ProtectedRoute(GestionMedia)} />
-      <Route path={"/dashboard/analitica"} component={ProtectedRoute(Analitica)} />
+        {/* Dashboard Privado */}
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard/perfil" component={EditorPerfil} />
+        <Route path="/dashboard/contactos" component={BandejaContactos} />
+        <Route path="/dashboard/media" component={GestionMedia} />
+        <Route path="/dashboard/analitica" component={Analitica} />
 
-      {/* 404 */}
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+        {/* 404 */}
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

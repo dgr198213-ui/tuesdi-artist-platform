@@ -8,6 +8,7 @@ import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { useRoute, useLocation } from "wouter";
 
 interface Event {
@@ -65,7 +66,7 @@ export default function EventoDetalle() {
     const url = window.location.href;
     try {
       if (navigator.share) await navigator.share({ title: event?.title, url });
-      else { await navigator.clipboard.writeText(url); alert("Enlace copiado al portapapeles"); }
+      else { await navigator.clipboard.writeText(url); toast.success("Enlace copiado al portapapeles"); }
     } catch { /* user cancelled */ }
   };
 

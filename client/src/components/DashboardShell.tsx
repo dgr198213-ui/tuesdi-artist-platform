@@ -127,7 +127,7 @@ export default function DashboardShell({ active, title, children }: DashboardShe
         <div className="flex items-center gap-md">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/30 bg-surface-container flex items-center justify-center">
             {avatarUrl ? (
-              <img alt="Avatar" className="w-full h-full object-cover" src={avatarUrl} />
+              <img loading="lazy" alt="Avatar" className="w-full h-full object-cover" src={avatarUrl} />
             ) : (
               <span className="material-symbols-outlined text-on-surface-variant">person</span>
             )}

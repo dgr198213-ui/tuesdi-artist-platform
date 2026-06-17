@@ -10,9 +10,10 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
+import { EVENT_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
 
-const CATEGORIES = ["Todas", "Música", "Arte", "Teatro", "Danza", "Magia", "Humor", "Performance", "Otro"];
-const CITIES = ["Todas", "Madrid", "Barcelona", "Valencia", "Sevilla", "Bilbao", "Zaragoza", "Málaga"];
+const CATEGORIES = [FILTER_ALL, ...EVENT_CATEGORIES];
+const CITIES = [...FILTER_CITIES];
 const PAGE_SIZE = 12;
 
 interface Event {
@@ -218,7 +219,7 @@ export default function Eventos() {
                     >
                       <div className="relative h-48 overflow-hidden bg-surface-container">
                         {event.image_url ? (
-                          <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={event.image_url} alt={event.title} />
+                          <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={event.image_url} alt={event.title} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center spotlight">
                             <span className="material-symbols-outlined text-[48px] text-primary/30">event</span>

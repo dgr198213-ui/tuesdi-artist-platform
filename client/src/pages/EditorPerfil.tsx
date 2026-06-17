@@ -14,21 +14,9 @@
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useLocation } from "wouter";
-
-const CATEGORIES = [
-  "Cantante",
-  "Músico",
-  "DJ",
-  "Banda",
-  "Mago",
-  "Humorista",
-  "Actor",
-  "Bailarín",
-  "Performer",
-];
-
-const BIO_MAX = 2000;
+import { ARTIST_CATEGORIES, BIO_MAX, DEFAULT_COUNTRY, slugify } from "@/lib/constants";
 
 interface ArtistForm {
   artist_name: string;
@@ -47,9 +35,9 @@ interface ArtistForm {
 
 const EMPTY_FORM: ArtistForm = {
   artist_name: "",
-  category: CATEGORIES[0],
+  category: ARTIST_CATEGORIES[0],
   city: "",
-  country: "España",
+  country: DEFAULT_COUNTRY,
   bio: "",
   starting_price: "",
   instagram: "",
@@ -59,19 +47,6 @@ const EMPTY_FORM: ArtistForm = {
   profile_image: "",
   cover_image: "",
 };
-
-function slugify(text: string): string {
-  return (
-    text
-      .toString()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "artista"
-  );
-}
 
 export default function EditorPerfil() {
   const [, setLocation] = useLocation();
@@ -108,9 +83,9 @@ export default function EditorPerfil() {
         setSlug(data.slug);
         setForm({
           artist_name: data.artist_name || "",
-          category: data.category || CATEGORIES[0],
+          category: data.category || ARTIST_CATEGORIES[0],
           city: data.city || "",
-          country: data.country || "España",
+          country: data.country || DEFAULT_COUNTRY,
           bio: data.bio || "",
           starting_price: data.starting_price || "",
           instagram: data.instagram || "",
@@ -146,7 +121,7 @@ export default function EditorPerfil() {
     });
 
     if (error) {
-      alert("No se pudo subir la imagen: " + error.message);
+      toast.error("No se pudo subir la imagen: " + error.message);
       setUploading(false);
       return;
     }
@@ -192,7 +167,7 @@ export default function EditorPerfil() {
       artist_name: form.artist_name.trim(),
       category: form.category,
       city: form.city.trim(),
-      country: form.country.trim() || "España",
+      country: form.country.trim() || DEFAULT_COUNTRY,
       bio: form.bio,
       starting_price: form.starting_price,
       instagram: form.instagram,
@@ -323,7 +298,7 @@ export default function EditorPerfil() {
                   value={form.category}
                   onChange={(e) => updateField("category", e.target.value)}
                 >
-                  {CATEGORIES.map((cat) => (
+                  {ARTIST_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
