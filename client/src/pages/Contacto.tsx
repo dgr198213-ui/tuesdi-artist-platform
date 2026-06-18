@@ -30,12 +30,15 @@ export default function Contacto() {
     website: "",
   });
 
-  // CAMBIO 2: Se ha eliminado la línea "const { toast } = useToast();" porque Sonner no la necesita.
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Detección de bot en el cliente: el campo honeypot debe estar siempre vacío
+    if (formData.website) {
+      // Simulamos éxito para no revelar la detección al bot
+      setFormData({ name: "", email: "", subject: "", message: "", website: "" });
+      return;
+    }
     setIsSubmitting(true);
-
     try {
       const { error } = await supabase.functions.invoke("send-contact-email", {
         body: formData,
