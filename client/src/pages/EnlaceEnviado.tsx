@@ -7,6 +7,8 @@
  */
 
 import { useLocation, useSearch } from "wouter";
+import PageNav from "@/components/PageNav";
+import PageFooter from "@/components/PageFooter";
 
 export default function EnlaceEnviado() {
   const [, setLocation] = useLocation();
@@ -28,44 +30,51 @@ export default function EnlaceEnviado() {
         <div className="w-full max-w-xl text-center space-y-lg">
           {/* Animated Icon */}
           <div className="relative inline-block">
-            <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
-            <div className="relative glass-card w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center border border-white/20 bloom-primary mx-auto overflow-hidden">
-              <span
-                className="material-symbols-outlined text-[64px] md:text-[80px] text-secondary"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                mail
+            <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+              <span className="material-symbols-outlined text-primary text-[48px]">
+                mail_outline
               </span>
             </div>
           </div>
 
-          {/* Texto */}
-          <div className="space-y-md">
-            <h1 className="font-headline-xl text-headline-lg-mobile md:text-headline-xl text-on-surface tracking-tight">
-              ¡Enlace enviado!
+          {/* Heading */}
+          <div>
+            <h1 className="font-headline-xl text-headline-xl text-on-surface mb-md">
+              Enlace enviado
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed">
-              Hemos enviado un enlace de acceso a{" "}
-              {email ? <span className="text-secondary">{email}</span> : "tu bandeja de entrada"}.
-              Revisa tu correo <span className="text-secondary">(y la carpeta de spam si es necesario)</span> para entrar a tu dashboard.
+            <p className="font-body-lg text-body-lg text-on-surface-variant">
+              Hemos enviado un enlace de confirmación a:
+            </p>
+            <p className="font-headline-md text-headline-md text-primary mt-sm">{email}</p>
+          </div>
+
+          {/* Instructions */}
+          <div className="bg-surface-container-lowest rounded-xl p-lg space-y-sm text-left">
+            <p className="font-body-md text-body-md text-on-surface-variant">
+              <strong className="text-on-surface">Próximos pasos:</strong>
+            </p>
+            <ol className="space-y-sm font-body-md text-body-md text-on-surface-variant list-decimal list-inside">
+              <li>Abre tu correo electrónico</li>
+              <li>Busca el email de TUESDI</li>
+              <li>Haz clic en el enlace de confirmación</li>
+              <li>¡Listo! Tu evento será publicado</li>
+            </ol>
+          </div>
+
+          {/* Expiry Note */}
+          <div className="text-center">
+            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
+              ⏱️ El enlace caduca en 30 minutos
             </p>
           </div>
 
-          {/* Acciones */}
-          <div className="flex flex-col items-center gap-md">
-            <button
-              className="neon-border rounded-full px-lg py-sm font-label-sm text-label-sm uppercase tracking-widest text-secondary hover:text-white transition-all"
-              onClick={() => setLocation("/acceso")}
-            >
-              Volver a intentar
-            </button>
-            <div className="pt-md">
-              <p className="font-label-sm text-label-sm text-primary opacity-80 flex items-center gap-base">
-                <span className="material-symbols-outlined text-[16px] animate-pulse">radio_button_checked</span>
-                TU ESCENARIO TE ESPERA.
-              </p>
-            </div>
-          </div>
+          {/* CTA */}
+          <button
+            onClick={() => setLocation("/")}
+            className="w-full py-md rounded-xl bg-primary text-on-primary font-headline-md text-headline-md hover:opacity-90 transition-all"
+          >
+            Volver al inicio
+          </button>
         </div>
       </main>
 

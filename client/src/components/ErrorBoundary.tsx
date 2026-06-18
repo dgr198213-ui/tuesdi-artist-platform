@@ -4,6 +4,7 @@ import { Component, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  fallback?: (error: Error, retry: () => void) => ReactNode;
 }
 
 interface State {
@@ -21,35 +22,66 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
+  }
+
+  retry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback(this.state.error!, this.retry);
+      }
+
       return (
         <div className="flex items-center justify-center min-h-screen p-8 bg-background">
-          <div className="flex flex-col items-center w-full max-w-2xl p-8">
-            <AlertTriangle
-              size={48}
-              className="text-destructive mb-6 flex-shrink-0"
-            />
-
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
-
-            <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
-              <pre className="text-sm text-muted-foreground whitespace-break-spaces">
-                {this.state.error?.stack}
-              </pre>
+          <div className="flex flex-col items-center w-full max-w-2xl p-8 glass-card rounded-2xl">
+            <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mb-6">
+              <AlertTriangle size={32} className="text-error" />
             </div>
 
-            <button
-              onClick={() => window.location.reload()}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg",
-                "bg-primary text-primary-foreground",
-                "hover:opacity-90 cursor-pointer"
-              )}
-            >
-              <RotateCcw size={16} />
-              Reload Page
-            </button>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-sm text-center">Algo salió mal</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant mb-lg text-center">
+              {this.state.error?.message || "Se ha producido un error inesperado"}
+            </p>
+
+            <div className="flex gap-sm justify-center w-full mb-lg">
+              <button
+                onClick={this.retry}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg",
+                  "bg-primary text-primary-foreground font-bold",
+                  "hover:opacity-90 transition-opacity"
+                )}
+              >
+                <RotateCcw size={16} />
+                Reintentar
+              </button>
+              <button
+                onClick={() => (window.location.href = "/")}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-lg",
+                  "border border-outline-variant text-on-surface-variant font-bold",
+                  "hover:bg-surface-variant transition-colors"
+                )}
+              >
+                Ir al Inicio
+              </button>
+            </div>
+
+            {process.env.NODE_ENV === "development" && (
+              <details className="w-full text-left">
+                <summary className="cursor-pointer text-on-surface-variant text-sm font-bold hover:text-on-surface">
+                  Detalles del Error (dev)
+                </summary>
+                <pre className="mt-sm p-sm bg-surface-container rounded text-[10px] overflow-auto max-h-40 text-error whitespace-pre-wrap break-words">
+                  {this.state.error?.stack}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
       );

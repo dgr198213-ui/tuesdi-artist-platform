@@ -175,7 +175,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast as sonnerToast } from "sonner";
-import { AIChatBox, type Message } from "@/components/AIChatBox";
+// import { AIChatBox, type Message } from "@/components/AIChatBox"; // TODO: Implementar componente AIChatBox
+
+interface Message {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
 
 export default function ComponentsShowcase() {
   const { theme, toggleTheme } = useTheme();
@@ -1410,7 +1415,7 @@ export default function ComponentsShowcase() {
                       This is a demo with simulated responses. In a real app, you'd connect it to a tRPC mutation.
                     </p>
                   </div>
-                  <AIChatBox
+                  {/* <AIChatBox
                     messages={chatMessages}
                     onSendMessage={handleChatSend}
                     isLoading={isChatLoading}
@@ -1423,7 +1428,8 @@ export default function ComponentsShowcase() {
                       "How to use tRPC?",
                       "Best practices for web development",
                     ]}
-                  />
+                  /> */}
+                  <p className="text-sm text-muted-foreground">Componente AIChatBox pendiente de implementación</p>
                 </div>
               </CardContent>
             </Card>

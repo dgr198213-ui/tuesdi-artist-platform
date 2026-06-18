@@ -1,0 +1,335 @@
+/**
+ * TUESDI v3.0 — Animaciones y Transiciones
+ * Definiciones de animaciones reutilizables para toda la aplicación
+ */
+
+/* ============================================================
+   FADE ANIMATIONS
+   ============================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease-in-out forwards;
+}
+
+.animate-fade-out {
+  animation: fadeOut 300ms ease-in-out forwards;
+}
+
+/* ============================================================
+   SLIDE ANIMATIONS
+   ============================================================ */
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-top {
+  animation: slideInFromTop 300ms ease-out forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 300ms ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 300ms ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInFromRight 300ms ease-out forwards;
+}
+
+/* ============================================================
+   SCALE ANIMATIONS
+   ============================================================ */
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 300ms ease-out forwards;
+}
+
+.animate-scale-out {
+  animation: scaleOut 300ms ease-out forwards;
+}
+
+/* ============================================================
+   PULSE & SHIMMER
+   ============================================================ */
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-container) 0%,
+    var(--color-surface-container-highest) 50%,
+    var(--color-surface-container) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================================
+   BOUNCE & WIGGLE
+   ============================================================ */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.5rem);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-1deg);
+  }
+  75% {
+    transform: rotate(1deg);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 500ms ease-in-out;
+}
+
+/* ============================================================
+   SPIN
+   ============================================================ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================
+   RESPETO POR PREFERENCIAS DE USUARIO
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   TRANSICIONES GLOBALES
+   ============================================================ */
+
+/* Transición suave para cambios de color */
+.transition-colors {
+  transition: color 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+
+/* Transición suave para cambios de opacidad */
+.transition-opacity {
+  transition: opacity 200ms ease;
+}
+
+/* Transición suave para cambios de transformación */
+.transition-transform {
+  transition: transform 200ms ease;
+}
+
+/* Transición suave para todos los cambios */
+.transition-all {
+  transition: all 200ms ease;
+}
+
+/* ============================================================
+   EFECTOS ESPECIALES
+   ============================================================ */
+
+/* Efecto de brillo (bloom) */
+.bloom-primary {
+  box-shadow: 0 0 20px rgba(0, 129, 255, 0.3);
+}
+
+.bloom-secondary {
+  box-shadow: 0 0 20px rgba(255, 0, 128, 0.3);
+}
+
+.bloom-success {
+  box-shadow: 0 0 20px rgba(0, 200, 100, 0.3);
+}
+
+.bloom-error {
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+/* Efecto de pulso en vivo */
+.pulse-live {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Efecto de carga */
+.loading-bar {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 129, 255, 0.3),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================================
+   TRANSICIONES DE PÁGINA
+   ============================================================ */
+
+.page-enter {
+  animation: fadeIn 300ms ease-out forwards;
+}
+
+.page-exit {
+  animation: fadeOut 300ms ease-out forwards;
+}
+
+/* ============================================================
+   NOTAS DE RENDIMIENTO
+   ============================================================ */
+
+/*
+OPTIMIZACIONES APLICADAS:
+
+1. WILL-CHANGE: Indica al navegador qué propiedades cambiarán
+   - Usar solo cuando sea necesario (causa overhead)
+   - Remover cuando no se use
+
+2. TRANSFORM & OPACITY: Propiedades que no causan reflow
+   - Usar en lugar de top/left/width/height
+   - Mejor rendimiento en animaciones
+
+3. GPU ACCELERATION: Usar transform3d para activar GPU
+   - transform: translate3d(0, 0, 0)
+   - Más rápido pero usa más memoria
+
+4. PREFERS-REDUCED-MOTION: Respetar preferencias del usuario
+   - Algunos usuarios tienen sensibilidad a animaciones
+   - Desactivar automáticamente si está habilitado
+
+5. DURACIÓN: Mantener animaciones cortas (200-300ms)
+   - Más rápido se siente más responsivo
+   - Evitar animaciones que duren más de 1s
+*/
