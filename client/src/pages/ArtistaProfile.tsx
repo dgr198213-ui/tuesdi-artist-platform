@@ -15,6 +15,7 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
+import { toast } from "sonner";
 
 interface Artist {
   id: string;
@@ -62,7 +63,6 @@ export default function ArtistaProfile() {
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "" });
   const [sending, setSending] = useState(false);
-  const [sendMsg, setSendMsg] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -76,30 +76,19 @@ export default function ArtistaProfile() {
     setNotFound(false);
 
     const load = async () => {
-      const { data: artistData, error } = await supabase
-        .from("artists")
-        .select("*")
-        .eq("slug", params.slug)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("get-public-profile", {
+        body: { slug: params.slug },
+      });
 
-      if (error || !artistData) { setNotFound(true); setLoading(false); return; }
-      setArtist(artistData as Artist);
+      if (error || !data?.artist) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
 
-      const { data: mediaData } = await supabase
-        .from("media")
-        .select("id, type, url, thumbnail, position")
-        .eq("artist_id", artistData.id)
-        .order("position", { ascending: true });
-      setMedia((mediaData || []) as MediaItem[]);
-
-      const { data: relatedData } = await supabase
-        .from("artists")
-        .select("slug, artist_name, category, profile_image")
-        .eq("category", artistData.category)
-        .neq("id", artistData.id)
-        .limit(4);
-      setRelated((relatedData || []) as RelatedArtist[]);
-
+      setArtist(data.artist as Artist);
+      setMedia((data.media || []) as MediaItem[]);
+      setRelated((data.related || []) as RelatedArtist[]);
       setLoading(false);
     };
 
@@ -109,11 +98,10 @@ export default function ArtistaProfile() {
   const handleSendContact = async () => {
     if (!artist) return;
     if (!contactForm.name || !contactForm.email || !contactForm.subject || !contactForm.message) {
-      setSendMsg("Completa nombre, email, asunto y mensaje.");
+      toast.error("Completa nombre, email, asunto y mensaje.");
       return;
     }
     setSending(true);
-    setSendMsg("");
     const message = contactForm.date
       ? `Fecha estimada: ${contactForm.date}\n\n${contactForm.message}`
       : contactForm.message;
@@ -128,11 +116,11 @@ export default function ArtistaProfile() {
     }]);
     setSending(false);
     if (error) {
-      setSendMsg("No se pudo enviar la propuesta. Inténtalo de nuevo.");
+      toast.error("No se pudo enviar la propuesta. Inténtalo de nuevo.");
     } else {
-      setSendMsg("Propuesta enviada. El artista la verá en su panel privado.");
+      toast.success("Propuesta enviada. El artista la verá en su panel privado.");
       setContactForm({ name: "", email: "", subject: "", date: "", message: "" });
-      setTimeout(() => { setContactOpen(false); setSendMsg(""); }, 2000);
+      setTimeout(() => { setContactOpen(false); }, 2000);
     }
   };
 
@@ -317,7 +305,7 @@ export default function ArtistaProfile() {
       {contactOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/80 backdrop-blur-sm">
           <div className="glass-card w-full max-w-lg rounded-2xl p-lg relative">
-            <button className="absolute top-base right-base text-on-surface-variant hover:text-white" onClick={() => { setContactOpen(false); setSendMsg(""); }}>
+            <button className="absolute top-base right-base text-on-surface-variant hover:text-white" onClick={() => setContactOpen(false)}>
               <span className="material-symbols-outlined">close</span>
             </button>
             <h2 className="font-headline-md text-headline-md text-white mb-sm">Contactar con {artist.artist_name}</h2>
@@ -347,7 +335,6 @@ export default function ArtistaProfile() {
                 <label className="block font-label-sm text-label-sm text-primary uppercase mb-2">Mensaje</label>
                 <textarea className="w-full bg-surface-container border border-outline-variant rounded-lg p-sm text-white focus:border-primary outline-none transition-all" rows={4} placeholder="Cuéntanos más sobre el tipo de evento y lo que buscas..." value={contactForm.message} onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })} />
               </div>
-              {sendMsg && <p className="font-label-sm text-label-sm text-secondary">{sendMsg}</p>}
               <button className="w-full bg-primary text-on-primary py-sm rounded-lg font-body-lg font-bold hover:opacity-90 transition-opacity disabled:opacity-60" onClick={handleSendContact} disabled={sending}>
                 {sending ? "Enviando..." : "Enviar Propuesta"}
               </button>

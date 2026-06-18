@@ -13,42 +13,38 @@ import { supabase } from "@/lib/supabase";
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { EVENT_CATEGORIES, DEFAULT_COUNTRY } from "@/lib/constants";
-
-interface EventForm {
-  title: string;
-  description: string;
-  category: string;
-  city: string;
-  country: string;
-  event_date: string;
-  event_time: string;
-  organizer_name: string;
-  organizer_email: string;
-}
-
-const EMPTY: EventForm = {
-  title: "",
-  description: "",
-  category: EVENT_CATEGORIES[0],
-  city: "",
-  country: DEFAULT_COUNTRY,
-  event_date: "",
-  event_time: "",
-  organizer_name: "",
-  organizer_email: "",
-};
+import { useForm, type Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { eventFormSchema, type EventForm } from "@/lib/schemas/eventForm";
+import { toast } from "sonner";
 
 export default function PublicarEvento() {
   const [, setLocation] = useLocation();
-  const [form, setForm] = useState<EventForm>(EMPTY);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const update = (field: keyof EventForm, value: string) =>
-    setForm((f) => ({ ...f, [field]: value }));
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<EventForm>({
+    // Zod 4 .default() makes input type include `undefined`; cast to match output type
+    resolver: zodResolver(eventFormSchema) as unknown as Resolver<EventForm>,
+    defaultValues: {
+      title: "",
+      description: "",
+      category: EVENT_CATEGORIES[0],
+      city: "",
+      country: DEFAULT_COUNTRY,
+      event_date: "",
+      event_time: "",
+      organizer_name: "",
+      organizer_email: "",
+    },
+  });
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,22 +53,10 @@ export default function PublicarEvento() {
     setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!form.title || !form.category || !form.city || !form.event_date || !form.organizer_email) {
-      setError("Completa todos los campos obligatorios: título, categoría, ciudad, fecha y email.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.organizer_email)) {
-      setError("El email del organizador no tiene un formato válido.");
-      return;
-    }
-
+  const onSubmit = async () => {
     setSubmitting(true);
+
+    const form = getValues();
 
     let image_url: string | null = null;
 
@@ -112,7 +96,7 @@ export default function PublicarEvento() {
       .single();
 
     if (insertError || !eventData) {
-      setError("No se pudo crear el evento: " + (insertError?.message || "error desconocido"));
+      toast.error("No se pudo crear el evento: " + (insertError?.message || "error desconocido"));
       setSubmitting(false);
       return;
     }
@@ -151,7 +135,7 @@ export default function PublicarEvento() {
           </p>
         </header>
 
-        <form className="space-y-md" onSubmit={handleSubmit}>
+        <form className="space-y-md" onSubmit={rhfHandleSubmit(onSubmit)}>
           {/* Cover Upload */}
           <div
             className="glass-card rounded-xl p-base md:p-md text-center group cursor-pointer relative overflow-hidden transition-all duration-500 hover:border-secondary/50 min-h-[220px] flex flex-col items-center justify-center border-dashed border-2 border-white/20"
@@ -185,10 +169,9 @@ export default function PublicarEvento() {
                 className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-white/20"
                 placeholder="Ej: Neón Ritual Night"
                 type="text"
-                value={form.title}
-                onChange={(e) => update("title", e.target.value)}
-                required
+                {...register("title")}
               />
+              {errors.title && <p className="text-red-400 text-xs ml-1">{errors.title.message}</p>}
             </div>
 
             {/* Category + City */}
@@ -198,14 +181,13 @@ export default function PublicarEvento() {
                 <div className="relative">
                   <select
                     className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none appearance-none"
-                    value={form.category}
-                    onChange={(e) => update("category", e.target.value)}
-                    required
+                    {...register("category")}
                   >
                     {EVENT_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                   <span className="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
                 </div>
+                {errors.category && <p className="text-red-400 text-xs ml-1">{errors.category.message}</p>}
               </div>
               <div className="space-y-xs">
                 <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Ciudad *</label>
@@ -213,10 +195,9 @@ export default function PublicarEvento() {
                   className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20"
                   placeholder="Ej: Madrid, Barcelona..."
                   type="text"
-                  value={form.city}
-                  onChange={(e) => update("city", e.target.value)}
-                  required
+                  {...register("city")}
                 />
+                {errors.city && <p className="text-red-400 text-xs ml-1">{errors.city.message}</p>}
               </div>
             </div>
 
@@ -227,20 +208,19 @@ export default function PublicarEvento() {
                 <input
                   className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all [color-scheme:dark]"
                   type="date"
-                  value={form.event_date}
-                  onChange={(e) => update("event_date", e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  required
+                  {...register("event_date")}
                 />
+                {errors.event_date && <p className="text-red-400 text-xs ml-1">{errors.event_date.message}</p>}
               </div>
               <div className="space-y-xs">
                 <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Hora (opcional)</label>
                 <input
                   className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all [color-scheme:dark]"
                   type="time"
-                  value={form.event_time}
-                  onChange={(e) => update("event_time", e.target.value)}
+                  {...register("event_time")}
                 />
+                {errors.event_time && <p className="text-red-400 text-xs ml-1">{errors.event_time.message}</p>}
               </div>
             </div>
 
@@ -250,9 +230,9 @@ export default function PublicarEvento() {
               <textarea
                 className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20 min-h-[100px] resize-none"
                 placeholder="Describe el evento, artistas, ambiente esperado..."
-                value={form.description}
-                onChange={(e) => update("description", e.target.value)}
+                {...register("description")}
               />
+              {errors.description && <p className="text-red-400 text-xs ml-1">{errors.description.message}</p>}
             </div>
           </div>
 
@@ -269,9 +249,9 @@ export default function PublicarEvento() {
                   className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20"
                   placeholder="Ej: Sala MuBe Madrid"
                   type="text"
-                  value={form.organizer_name}
-                  onChange={(e) => update("organizer_name", e.target.value)}
+                  {...register("organizer_name")}
                 />
+                {errors.organizer_name && <p className="text-red-400 text-xs ml-1">{errors.organizer_name.message}</p>}
               </div>
               <div className="space-y-xs">
                 <label className="font-label-sm text-label-sm text-secondary uppercase tracking-widest ml-1">Email del Organizador *</label>
@@ -279,10 +259,9 @@ export default function PublicarEvento() {
                   className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-secondary outline-none transition-all placeholder:text-white/20"
                   placeholder="tu@email.com"
                   type="email"
-                  value={form.organizer_email}
-                  onChange={(e) => update("organizer_email", e.target.value)}
-                  required
+                  {...register("organizer_email")}
                 />
+                {errors.organizer_email && <p className="text-red-400 text-xs ml-1">{errors.organizer_email.message}</p>}
               </div>
             </div>
           </div>
@@ -299,12 +278,6 @@ export default function PublicarEvento() {
               </div>
             </div>
           </div>
-
-          {error && (
-            <div className="glass-card rounded-xl p-md border-l-4 border-error">
-              <p className="font-body-md text-body-md text-error">{error}</p>
-            </div>
-          )}
 
           <button
             className="w-full bg-primary text-on-primary py-md rounded-xl font-headline-md text-headline-md bloom-primary hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-sm"

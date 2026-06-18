@@ -17,36 +17,9 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import { ARTIST_CATEGORIES, BIO_MAX, DEFAULT_COUNTRY, slugify } from "@/lib/constants";
-
-interface ArtistForm {
-  artist_name: string;
-  category: string;
-  city: string;
-  country: string;
-  bio: string;
-  starting_price: string;
-  instagram: string;
-  youtube: string;
-  spotify: string;
-  website: string;
-  profile_image: string;
-  cover_image: string;
-}
-
-const EMPTY_FORM: ArtistForm = {
-  artist_name: "",
-  category: ARTIST_CATEGORIES[0],
-  city: "",
-  country: DEFAULT_COUNTRY,
-  bio: "",
-  starting_price: "",
-  instagram: "",
-  youtube: "",
-  spotify: "",
-  website: "",
-  profile_image: "",
-  cover_image: "",
-};
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { artistProfileSchema, type ArtistProfileForm } from "@/lib/schemas/artistProfile";
 
 export default function EditorPerfil() {
   const [, setLocation] = useLocation();
@@ -55,10 +28,41 @@ export default function EditorPerfil() {
   const [slug, setSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  const [form, setForm] = useState<ArtistForm>(EMPTY_FORM);
+
+  const {
+    register,
+    setValue,
+    getValues,
+    watch,
+    reset,
+    trigger,
+    formState: { errors },
+  } = useForm<ArtistProfileForm>({
+    // zodResolver input type has optional fields from schema .default()/.optional(),
+    // but our form type (z.infer = output) requires them — cast to bridge the gap
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(artistProfileSchema) as any,
+    defaultValues: {
+      artist_name: "",
+      category: ARTIST_CATEGORIES[0],
+      city: "",
+      country: DEFAULT_COUNTRY,
+      bio: "",
+      starting_price: "",
+      instagram: "",
+      youtube: "",
+      spotify: "",
+      website: "",
+      profile_image: "",
+      cover_image: "",
+    },
+  });
+
+  const watchedBio = watch("bio");
+  const watchedProfileImage = watch("profile_image");
+  const watchedCoverImage = watch("cover_image");
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -81,7 +85,7 @@ export default function EditorPerfil() {
       if (data) {
         setArtistId(data.id);
         setSlug(data.slug);
-        setForm({
+        reset({
           artist_name: data.artist_name || "",
           category: data.category || ARTIST_CATEGORIES[0],
           city: data.city || "",
@@ -101,11 +105,7 @@ export default function EditorPerfil() {
     };
 
     load();
-  }, []);
-
-  const updateField = (field: keyof ArtistForm, value: string) => {
-    setForm((f) => ({ ...f, [field]: value }));
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageUpload = async (file: File, type: "avatar" | "cover") => {
     if (!userId) return;
@@ -127,24 +127,26 @@ export default function EditorPerfil() {
     }
 
     const { data } = supabase.storage.from("artist-media").getPublicUrl(path);
-    updateField(type === "avatar" ? "profile_image" : "cover_image", data.publicUrl);
+    setValue(type === "avatar" ? "profile_image" : "cover_image", data.publicUrl, { shouldValidate: true });
     setUploading(false);
   };
 
   const handleSave = async () => {
     if (!userId) return;
 
-    if (!form.artist_name.trim() || !form.category || !form.city.trim()) {
-      setSaveMsg("Completa Nombre Artístico, Categoría y Ciudad antes de guardar.");
+    const isValid = await trigger();
+    if (!isValid) {
+      toast.error("Revisa los campos marcados en rojo antes de guardar.");
       return;
     }
 
     setSaving(true);
-    setSaveMsg("");
+
+    const values = getValues();
 
     let finalSlug = slug;
     if (!finalSlug) {
-      const base = slugify(form.artist_name);
+      const base = slugify(values.artist_name);
       finalSlug = base;
       let n = 2;
       // Garantiza un slug único
@@ -164,18 +166,18 @@ export default function EditorPerfil() {
     const payload = {
       user_id: userId,
       slug: finalSlug,
-      artist_name: form.artist_name.trim(),
-      category: form.category,
-      city: form.city.trim(),
-      country: form.country.trim() || DEFAULT_COUNTRY,
-      bio: form.bio,
-      starting_price: form.starting_price,
-      instagram: form.instagram,
-      youtube: form.youtube,
-      spotify: form.spotify,
-      website: form.website,
-      profile_image: form.profile_image,
-      cover_image: form.cover_image,
+      artist_name: values.artist_name.trim(),
+      category: values.category,
+      city: values.city.trim(),
+      country: values.country.trim() || DEFAULT_COUNTRY,
+      bio: values.bio,
+      starting_price: values.starting_price,
+      instagram: values.instagram,
+      youtube: values.youtube,
+      spotify: values.spotify,
+      website: values.website,
+      profile_image: values.profile_image,
+      cover_image: values.cover_image,
       updated_at: new Date().toISOString(),
     };
 
@@ -197,11 +199,10 @@ export default function EditorPerfil() {
     setSaving(false);
 
     if (error) {
-      setSaveMsg("Error al guardar: " + error.message);
+      toast.error("Error al guardar: " + error.message);
     } else {
       setSlug(finalSlug);
-      setSaveMsg("¡Cambios guardados!");
-      setTimeout(() => setSaveMsg(""), 4000);
+      toast.success("¡Cambios guardados!");
     }
   };
 
@@ -224,9 +225,6 @@ export default function EditorPerfil() {
           </p>
         </div>
         <div className="flex gap-md items-center">
-          {saveMsg && (
-            <span className="font-label-sm text-label-sm text-secondary-container">{saveMsg}</span>
-          )}
           <button
             className="neon-border text-secondary-container px-md py-sm rounded-lg font-bold hover:bg-secondary-container/10 transition-colors flex items-center gap-xs disabled:opacity-40"
             disabled={!slug}
@@ -255,8 +253,8 @@ export default function EditorPerfil() {
             <div className="flex flex-col items-center mb-md">
               <div className="relative group">
                 <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-surface-variant group-hover:border-primary transition-colors bg-surface-container flex items-center justify-center">
-                  {form.profile_image ? (
-                    <img alt="Foto de perfil" className="w-full h-full object-cover" src={form.profile_image} />
+                  {watchedProfileImage ? (
+                    <img alt="Foto de perfil" className="w-full h-full object-cover" src={watchedProfileImage} />
                   ) : (
                     <span className="material-symbols-outlined text-on-surface-variant text-[48px]">person</span>
                   )}
@@ -286,22 +284,26 @@ export default function EditorPerfil() {
                 <input
                   className="w-full bg-black border border-surface-variant focus:border-secondary-container focus:ring-1 focus:ring-secondary-container rounded-lg p-sm text-on-surface transition-all"
                   type="text"
-                  value={form.artist_name}
-                  onChange={(e) => updateField("artist_name", e.target.value)}
                   placeholder="Ej: Neon Dreamer"
+                  {...register("artist_name")}
                 />
+                {errors.artist_name && (
+                  <p className="text-red-400 text-xs mt-1">{errors.artist_name.message}</p>
+                )}
               </div>
               <div>
                 <label className="font-label-sm text-on-surface-variant block mb-base">Categoría</label>
                 <select
                   className="w-full bg-black border border-surface-variant focus:border-secondary-container focus:ring-1 focus:ring-secondary-container rounded-lg p-sm text-on-surface transition-all"
-                  value={form.category}
-                  onChange={(e) => updateField("category", e.target.value)}
+                  {...register("category")}
                 >
                   {ARTIST_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
+                {errors.category && (
+                  <p className="text-red-400 text-xs mt-1">{errors.category.message}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-base">
                 <div>
@@ -310,9 +312,11 @@ export default function EditorPerfil() {
                     className="w-full bg-black border border-surface-variant focus:border-secondary-container focus:ring-1 focus:ring-secondary-container rounded-lg p-sm text-on-surface"
                     placeholder="Ej: Madrid"
                     type="text"
-                    value={form.city}
-                    onChange={(e) => updateField("city", e.target.value)}
+                    {...register("city")}
                   />
+                  {errors.city && (
+                    <p className="text-red-400 text-xs mt-1">{errors.city.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="font-label-sm text-on-surface-variant block mb-base">País</label>
@@ -320,8 +324,7 @@ export default function EditorPerfil() {
                     className="w-full bg-black border border-surface-variant focus:border-secondary-container focus:ring-1 focus:ring-secondary-container rounded-lg p-sm text-on-surface"
                     placeholder="Ej: España"
                     type="text"
-                    value={form.country}
-                    onChange={(e) => updateField("country", e.target.value)}
+                    {...register("country")}
                   />
                 </div>
               </div>
@@ -340,10 +343,12 @@ export default function EditorPerfil() {
                   className="bg-transparent border-none focus:ring-0 text-sm flex-grow text-on-surface"
                   placeholder="Instagram URL"
                   type="text"
-                  value={form.instagram}
-                  onChange={(e) => updateField("instagram", e.target.value)}
+                  {...register("instagram")}
                 />
               </div>
+              {errors.instagram && (
+                <p className="text-red-400 text-xs -mt-sm">{errors.instagram.message}</p>
+              )}
               <div className="flex items-center gap-sm bg-black/40 border border-surface-variant rounded-lg p-xs pr-sm">
                 <div className="w-10 h-10 flex items-center justify-center text-on-surface-variant">
                   <span className="material-symbols-outlined">play_circle</span>
@@ -352,10 +357,12 @@ export default function EditorPerfil() {
                   className="bg-transparent border-none focus:ring-0 text-sm flex-grow text-on-surface"
                   placeholder="YouTube URL"
                   type="text"
-                  value={form.youtube}
-                  onChange={(e) => updateField("youtube", e.target.value)}
+                  {...register("youtube")}
                 />
               </div>
+              {errors.youtube && (
+                <p className="text-red-400 text-xs -mt-sm">{errors.youtube.message}</p>
+              )}
               <div className="flex items-center gap-sm bg-black/40 border border-surface-variant rounded-lg p-xs pr-sm">
                 <div className="w-10 h-10 flex items-center justify-center text-on-surface-variant">
                   <span className="material-symbols-outlined">music_note</span>
@@ -364,10 +371,12 @@ export default function EditorPerfil() {
                   className="bg-transparent border-none focus:ring-0 text-sm flex-grow text-on-surface"
                   placeholder="Spotify Profile"
                   type="text"
-                  value={form.spotify}
-                  onChange={(e) => updateField("spotify", e.target.value)}
+                  {...register("spotify")}
                 />
               </div>
+              {errors.spotify && (
+                <p className="text-red-400 text-xs -mt-sm">{errors.spotify.message}</p>
+              )}
               <div className="flex items-center gap-sm bg-black/40 border border-surface-variant rounded-lg p-xs pr-sm">
                 <div className="w-10 h-10 flex items-center justify-center text-on-surface-variant">
                   <span className="material-symbols-outlined">language</span>
@@ -376,10 +385,12 @@ export default function EditorPerfil() {
                   className="bg-transparent border-none focus:ring-0 text-sm flex-grow text-on-surface"
                   placeholder="Sitio Web Personal"
                   type="text"
-                  value={form.website}
-                  onChange={(e) => updateField("website", e.target.value)}
+                  {...register("website")}
                 />
               </div>
+              {errors.website && (
+                <p className="text-red-400 text-xs -mt-sm">{errors.website.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -390,19 +401,21 @@ export default function EditorPerfil() {
           <div className="glass-card rounded-xl p-md flex flex-col flex-grow">
             <div className="flex justify-between items-center mb-md">
               <h3 className="font-headline-md text-headline-md text-primary">Biografía &amp; Trayectoria</h3>
-              <span className={`font-label-sm ${form.bio.length > 1800 ? "text-error" : "text-outline"}`}>
-                {form.bio.length} / {BIO_MAX}
+              <span className={`font-label-sm ${watchedBio.length > 1800 ? "text-error" : "text-outline"}`}>
+                {watchedBio.length} / {BIO_MAX}
               </span>
             </div>
             <div className="flex-grow flex flex-col bg-black border border-surface-variant rounded-lg overflow-hidden focus-within:border-secondary-container transition-all">
               <textarea
                 className="w-full h-[320px] bg-transparent border-none focus:ring-0 p-md text-body-md resize-none leading-relaxed"
                 placeholder="Escribe aquí tu trayectoria profesional, logros y lo que hace única tu propuesta artística..."
-                value={form.bio}
                 maxLength={BIO_MAX}
-                onChange={(e) => updateField("bio", e.target.value)}
+                {...register("bio")}
               />
             </div>
+            {errors.bio && (
+              <p className="text-red-400 text-xs mt-1">{errors.bio.message}</p>
+            )}
           </div>
 
           {/* Caché */}
@@ -417,8 +430,7 @@ export default function EditorPerfil() {
                     className="w-full bg-black border border-surface-variant focus:border-secondary-container focus:ring-1 focus:ring-secondary-container rounded-lg p-sm pl-8 text-on-surface text-lg font-bold"
                     placeholder="Ej: 300 - 500"
                     type="text"
-                    value={form.starting_price}
-                    onChange={(e) => updateField("starting_price", e.target.value)}
+                    {...register("starting_price")}
                   />
                 </div>
               </div>
@@ -440,11 +452,11 @@ export default function EditorPerfil() {
           {/* Portada */}
           <div className="relative h-48 rounded-xl overflow-hidden group bg-surface-container">
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10"></div>
-            {form.cover_image ? (
+            {watchedCoverImage ? (
               <img
                 alt="Portada del perfil"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                src={form.cover_image}
+                src={watchedCoverImage}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-on-surface-variant">

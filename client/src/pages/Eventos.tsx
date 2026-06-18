@@ -56,24 +56,20 @@ export default function Eventos() {
 
   const fetchEvents = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);
-    const today = new Date().toISOString().split("T")[0];
 
-    let query = supabase
-      .from("events")
-      .select("id, title, description, category, city, country, event_date, event_time, image_url, organizer_name, status")
-      .eq("status", "approved")
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
-      .range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
+    const { data, error } = await supabase.functions.invoke("get-events", {
+      body: {
+        search: search || undefined,
+        category: category !== "Todas" ? category : undefined,
+        city: city !== "Todas" ? city : undefined,
+        page: currentPage,
+        pageSize: PAGE_SIZE,
+      },
+    });
 
-    if (search) query = query.ilike("title", `%${search}%`);
-    if (category !== "Todas") query = query.eq("category", category);
-    if (city !== "Todas") query = query.ilike("city", `%${city}%`);
-
-    const { data, error } = await query;
-    if (!error && data) {
-      setEvents(reset ? data : (prev) => [...prev, ...data]);
-      setHasMore(data.length === PAGE_SIZE);
+    if (!error && data?.events) {
+      setEvents(reset ? data.events : (prev) => [...prev, ...data.events]);
+      setHasMore(data.hasMore);
     }
     setIsLoading(false);
   }, [search, category, city]);
