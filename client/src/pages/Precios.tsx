@@ -5,11 +5,29 @@
  * Estrategia de lanzamiento Beta Abierta:
  * - Beta: activo, gratuito, con todo incluido durante el periodo de validación
  * - Standard / Pro: "Próximamente" — sin precio activo ni botón de pago
+ *
+ * Límites de media (fotos/vídeos) definidos en constants.ts → PLAN_LIMITS
  */
 
 import { useLocation } from "wouter";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
+import { PLAN_LIMITS } from "@/lib/constants";
+
+const CHECK = (
+  <span
+    className="material-symbols-outlined text-primary text-[20px] shrink-0"
+    style={{ fontVariationSettings: "'FILL' 1" }}
+  >
+    check_circle
+  </span>
+);
+
+const DOT = (
+  <span className="material-symbols-outlined text-outline text-[20px] shrink-0">
+    radio_button_unchecked
+  </span>
+);
 
 export default function Precios() {
   const [, setLocation] = useLocation();
@@ -25,14 +43,18 @@ export default function Precios() {
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-sm px-md py-xs rounded-full border border-secondary/30 bg-secondary/10 mb-md">
             <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
-            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">Beta Abierta Activa</span>
+            <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">
+              Beta Abierta Activa
+            </span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mb-md">
-            Empieza gratis.<br />
+            Empieza gratis.
+            <br />
             <span className="text-primary">Sin límites ahora.</span>
           </h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
-            Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita. Sin tarjeta. Sin fecha de caducidad.
+            Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita. Sin
+            tarjeta. Sin fecha de caducidad.
           </p>
         </div>
       </section>
@@ -40,10 +62,8 @@ export default function Precios() {
       {/* Plans Grid */}
       <section className="max-w-6xl mx-auto px-margin pb-xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-md items-start">
-
-          {/* BETA — ACTIVO */}
+          {/* ── BETA — ACTIVO ── */}
           <div className="relative glass-card rounded-2xl overflow-hidden border-primary/40 shadow-[0_0_40px_rgba(0,129,255,0.2)] md:scale-105 md:-translate-y-2 z-10">
-            {/* Badge */}
             <div className="bg-primary text-on-primary text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest flex items-center justify-center gap-xs">
               <span className="w-2 h-2 rounded-full bg-on-primary pulse-live"></span>
               Disponible Ahora
@@ -51,26 +71,42 @@ export default function Precios() {
             <div className="p-lg">
               <div className="mb-lg">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Beta</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">Todo lo que necesitas para empezar.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Todo lo que necesitas para empezar.
+                </p>
               </div>
               <div className="mb-lg">
                 <span className="text-[56px] font-bold text-on-surface leading-none">0€</span>
                 <span className="text-on-surface-variant font-body-md"> /mes</span>
-                <p className="font-label-sm text-label-sm text-secondary mt-xs uppercase tracking-widest">Gratis durante la Beta</p>
+                <p className="font-label-sm text-label-sm text-secondary mt-xs uppercase tracking-widest">
+                  Gratis durante la Beta
+                </p>
+              </div>
+
+              {/* Limits summary */}
+              <div className="flex gap-sm mb-lg">
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-primary">{PLAN_LIMITS.beta.photos}</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Fotos</p>
+                </div>
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-on-surface-variant">—</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Vídeos</p>
+                </div>
               </div>
 
               <ul className="space-y-sm mb-xl">
                 {[
                   "Perfil artístico público completo",
-                  "Galería multimedia (fotos + vídeos)",
+                  "Galería con 1 foto",
                   "Formulario de contacto privado",
-                  "Dashboard con analíticas",
-                  "Publicación de eventos gratuita",
-                  "Visibilidad en el directorio",
+                  "Publicación de eventos",
+                  "Métricas básicas en el dashboard",
+                  "Posicionamiento estándar en el directorio",
                   "Sin comisiones ni intermediarios",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md">
-                    <span className="material-symbols-outlined text-primary text-[20px] shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    {CHECK}
                     {feat}
                   </li>
                 ))}
@@ -88,7 +124,7 @@ export default function Precios() {
             </div>
           </div>
 
-          {/* STANDARD — PRÓXIMAMENTE */}
+          {/* ── STANDARD — PRÓXIMAMENTE ── */}
           <div className="glass-card rounded-2xl overflow-hidden opacity-60">
             <div className="bg-surface-container-high text-on-surface-variant text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest">
               Próximamente
@@ -96,23 +132,42 @@ export default function Precios() {
             <div className="p-lg">
               <div className="mb-lg">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Standard</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">Para artistas que quieren destacar.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Para artistas que quieren destacar.
+                </p>
               </div>
               <div className="mb-lg">
                 <span className="text-[56px] font-bold text-on-surface/30 leading-none">6€</span>
                 <span className="text-on-surface-variant/50 font-body-md"> /mes</span>
               </div>
 
+              {/* Limits summary */}
+              <div className="flex gap-sm mb-lg">
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-on-surface-variant/50">
+                    {PLAN_LIMITS.standard.photos}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Fotos</p>
+                </div>
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-on-surface-variant/50">
+                    {PLAN_LIMITS.standard.videos}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeos</p>
+                </div>
+              </div>
+
               <ul className="space-y-sm mb-xl">
                 {[
                   "Todo lo del plan Beta",
-                  "Mejor posicionamiento en búsquedas",
-                  "Analíticas avanzadas e historial",
-                  "Difusión mensual en canales TUESDI",
+                  "Galería ampliada: 3 fotos + 1 vídeo",
+                  "Métricas ampliadas en el dashboard",
+                  "Posicionamiento mejorado en búsquedas",
                   "Distintivo Standard en el perfil",
+                  "Publicación de eventos",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
-                    <span className="material-symbols-outlined text-outline text-[20px] shrink-0">radio_button_unchecked</span>
+                    {DOT}
                     {feat}
                   </li>
                 ))}
@@ -124,7 +179,7 @@ export default function Precios() {
             </div>
           </div>
 
-          {/* PRO — PRÓXIMAMENTE */}
+          {/* ── PRO — PRÓXIMAMENTE ── */}
           <div className="glass-card rounded-2xl overflow-hidden opacity-60">
             <div className="bg-surface-container-high text-on-surface-variant text-center py-sm font-label-sm text-label-sm font-bold uppercase tracking-widest">
               Próximamente
@@ -132,24 +187,42 @@ export default function Precios() {
             <div className="p-lg">
               <div className="mb-lg">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Pro</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">Máxima visibilidad y promoción activa.</p>
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Máxima visibilidad y promoción activa.
+                </p>
               </div>
               <div className="mb-lg">
                 <span className="text-[56px] font-bold text-on-surface/30 leading-none">9,99€</span>
                 <span className="text-on-surface-variant/50 font-body-md"> /mes</span>
               </div>
 
+              {/* Limits summary */}
+              <div className="flex gap-sm mb-lg">
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-on-surface-variant/50">
+                    {PLAN_LIMITS.pro.photos}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Fotos</p>
+                </div>
+                <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
+                  <p className="font-headline-md text-headline-md text-on-surface-variant/50">
+                    {PLAN_LIMITS.pro.videos}
+                  </p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeos</p>
+                </div>
+              </div>
+
               <ul className="space-y-sm mb-xl">
                 {[
                   "Todo lo del plan Standard",
-                  "Prioridad en directorios y búsquedas",
+                  "Galería completa: 3 fotos + 3 vídeos",
+                  "Métricas avanzadas con tendencias",
+                  "Posicionamiento prioritario en el directorio",
                   "Distintivo Pro verificado",
-                  "4 difusiones mensuales en redes TUESDI",
-                  "Analítica avanzada con tendencias",
-                  "Promoción destacada en campañas especiales",
+                  "Publicación de eventos",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
-                    <span className="material-symbols-outlined text-outline text-[20px] shrink-0">radio_button_unchecked</span>
+                    {DOT}
                     {feat}
                   </li>
                 ))}
@@ -163,18 +236,42 @@ export default function Precios() {
         </div>
       </section>
 
-      {/* Beta explanation */}
-      <section className="max-w-4xl mx-auto px-margin pb-xl">
+      {/* Stripe notice */}
+      <section className="max-w-4xl mx-auto px-margin pb-lg">
         <div className="glass-card rounded-2xl p-lg md:p-xl border-l-4 border-secondary/50">
           <div className="flex items-start gap-md">
-            <span className="material-symbols-outlined text-secondary text-[36px] shrink-0">info</span>
+            <span className="material-symbols-outlined text-secondary text-[36px] shrink-0">credit_card</span>
             <div>
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">¿Por qué la Beta es gratuita?</h3>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">
+                Gestión de suscripciones vía Stripe
+              </h3>
               <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                TUESDI está en su fase de validación. Antes de activar los planes de pago, queremos demostrar que la plataforma genera valor real: perfiles activos, contactos generados, eventos publicados. Durante este periodo, todos los artistas tienen acceso completo sin coste.
+                Los pagos de los planes Standard y Pro se gestionarán de forma segura a través de{" "}
+                <strong className="text-on-surface">Stripe</strong>. La integración se activará cuando los planes
+                de pago estén disponibles. Durante la Beta, todo es gratuito.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Beta explanation */}
+      <section className="max-w-4xl mx-auto px-margin pb-xl">
+        <div className="glass-card rounded-2xl p-lg md:p-xl border-l-4 border-primary/30">
+          <div className="flex items-start gap-md">
+            <span className="material-symbols-outlined text-primary text-[36px] shrink-0">info</span>
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">
+                ¿Por qué la Beta es gratuita?
+              </h3>
+              <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                TUESDI está en su fase de validación. Antes de activar los planes de pago, queremos demostrar que
+                la plataforma genera valor real: perfiles activos, contactos generados, eventos publicados. Durante
+                este periodo, todos los artistas tienen acceso completo sin coste.
               </p>
               <p className="font-body-md text-body-md text-on-surface-variant leading-relaxed mt-sm">
-                Cuando activemos los planes Standard y Pro, quienes se registren durante la Beta conservarán sus perfiles y datos. <strong className="text-on-surface">Nunca se borrará nada.</strong>
+                Cuando activemos los planes Standard y Pro, quienes se registren durante la Beta conservarán sus
+                perfiles y datos. <strong className="text-on-surface">Nunca se borrará nada.</strong>
               </p>
             </div>
           </div>
@@ -183,7 +280,9 @@ export default function Precios() {
 
       {/* Why join now */}
       <section className="max-w-6xl mx-auto px-margin pb-xl">
-        <h2 className="font-headline-lg text-headline-lg text-on-surface text-center mb-xl">¿Por qué unirte ahora?</h2>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface text-center mb-xl">
+          ¿Por qué unirte ahora?
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
           {[
             {
