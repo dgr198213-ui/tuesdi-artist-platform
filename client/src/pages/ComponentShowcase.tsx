@@ -1,3 +1,7 @@
+/**
+ * @internal Dev-only component — NOT routed in production.
+ * Access via ?showcase=true query param or import directly during development.
+ */
 import {
   Accordion,
   AccordionContent,

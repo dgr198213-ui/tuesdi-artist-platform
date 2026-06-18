@@ -14,8 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner"; // <-- CAMBIO 1: Importación directa desde la librería original
+import { toast } from "sonner";
 import { Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function Contacto() {
   const [, setLocation] = useLocation();
@@ -34,20 +35,19 @@ export default function Contacto() {
     setIsSubmitting(true);
 
     try {
-      // Simulación de envío - En producción conectar con Edge Function de Resend
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Sonner funciona llamando a toast() directamente
-      toast("Mensaje enviado", {
-        description: "Gracias por contactarnos. Te responderemos lo antes posible.",
+      const { error } = await supabase.functions.invoke("send-contact-email", {
+        body: formData,
       });
 
+      if (error) throw error;
+
+      toast.success("Mensaje enviado", {
+        description: "Gracias por contactarnos. Te responderemos lo antes posible.",
+      });
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch {
-      toast("Error", {
+      toast.error("Error al enviar", {
         description: "No hemos podido enviar tu mensaje. Inténtalo de nuevo.",
-        // En Sonner, en lugar de variant: "destructive", se suele usar un estilo visual o simplemente un toast normal. 
-        // Si tienes configurado el estilo destructivo en tu Toaster global, lo cogerá.
       });
     } finally {
       setIsSubmitting(false);
