@@ -4,7 +4,6 @@
  * Diseño: Stitch "Digital Stage" (directorio_de_eventos_tuesdi_1 + _2)
  */
 
-import { useAuth } from "@/hooks/useAuth";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
@@ -39,7 +38,6 @@ function formatDate(dateStr: string) {
 
 export default function Eventos() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -49,10 +47,6 @@ export default function Eventos() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
   const [city, setCity] = useState("Todas");
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthenticated(!!session));
-  }, []);
 
   const fetchEvents = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);

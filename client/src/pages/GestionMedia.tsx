@@ -66,9 +66,26 @@ export default function GestionMedia() {
     const files = Array.from(e.target.files || []);
     if (!files.length || !userId || !artistId) return;
 
+    // Validar tipo y tamaño de cada archivo
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+    const validFiles = files.filter((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(`${file.name}: formato no permitido (solo JPG, PNG, WebP)`);
+        return false;
+      }
+      if (file.size > MAX_SIZE) {
+        toast.error(`${file.name}: excede los 5 MB`);
+        return false;
+      }
+      return true;
+    });
+
+    if (!validFiles.length) { e.target.value = ""; return; }
+
     const available = limits.photos - photos.length;
     if (available <= 0) { toast.error(`Tu plan ${plan} solo permite ${limits.photos} foto(s).`); return; }
-    const toUpload = files.slice(0, available);
+    const toUpload = validFiles.slice(0, available);
 
     setUploading(true);
     for (const file of toUpload) {
@@ -123,7 +140,7 @@ export default function GestionMedia() {
           <p className="font-body-md text-body-md text-on-surface-variant mt-xs">Gestiona tus fotos y vídeos del perfil público.</p>
         </div>
         <div className="flex gap-sm">
-          <input ref={photoInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
+          <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handlePhotoUpload} />
           <button
             className="neon-border text-secondary px-md py-sm rounded-lg font-bold hover:bg-secondary/10 transition-all flex items-center gap-xs disabled:opacity-50"
             onClick={() => photoInputRef.current?.click()}

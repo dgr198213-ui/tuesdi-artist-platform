@@ -16,7 +16,7 @@ import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface FeaturedArtist {
   slug: string;
@@ -71,53 +71,34 @@ export default function Home() {
   const [artists, setArtists] = useState<FeaturedArtist[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
+  const loadFeatured = useCallback(async () => {
+    const { data: artistsData } = await supabase
+      .from("artists")
+      .select("slug, artist_name, category, bio, profile_image")
+      .order("created_at", { ascending: false })
+      .limit(3);
 
-    checkAuth();
+    if (artistsData && artistsData.length > 0) {
+      setArtists(artistsData as FeaturedArtist[]);
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setIsAuthenticated(!!session);
-      }
-    );
+    const today = new Date().toISOString().split("T")[0];
+    const { data: eventsData } = await supabase
+      .from("events")
+      .select("id, title, city, event_date, category")
+      .eq("status", "approved")
+      .gte("event_date", today)
+      .order("event_date", { ascending: true })
+      .limit(4);
 
-    return () => {
-      subscription?.unsubscribe();
-    };
+    if (eventsData && eventsData.length > 0) {
+      setEvents(eventsData as UpcomingEvent[]);
+    }
   }, []);
 
   useEffect(() => {
-    const loadFeatured = async () => {
-      const { data: artistsData } = await supabase
-        .from("artists")
-        .select("slug, artist_name, category, bio, profile_image")
-        .order("created_at", { ascending: false })
-        .limit(3);
-
-      if (artistsData && artistsData.length > 0) {
-        setArtists(artistsData as FeaturedArtist[]);
-      }
-
-      const today = new Date().toISOString().split("T")[0];
-      const { data: eventsData } = await supabase
-        .from("events")
-        .select("id, title, city, event_date, category")
-        .eq("status", "approved")
-        .gte("event_date", today)
-        .order("event_date", { ascending: true })
-        .limit(4);
-
-      if (eventsData && eventsData.length > 0) {
-        setEvents(eventsData as UpcomingEvent[]);
-      }
-    };
-
     loadFeatured();
-  }, []);
+  }, [loadFeatured]);
 
   const displayArtists = artists.length > 0 ? artists : MOCK_ARTISTS;
   const displayEvents = events.length > 0 ? events : MOCK_EVENTS;

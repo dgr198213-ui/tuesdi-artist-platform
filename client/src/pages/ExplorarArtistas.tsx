@@ -8,7 +8,6 @@
  * - Usa esquema v3.0: slug, artist_name, category, city, starting_price, profile_image
  */
 
-import { useAuth } from "@/hooks/useAuth";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
@@ -34,7 +33,6 @@ interface Artist {
 
 export default function ExplorarArtistas() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -45,10 +43,6 @@ export default function ExplorarArtistas() {
   const [category, setCategory] = useState("Todas");
   const [city, setCity] = useState("Todas");
   const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setIsAuthenticated(!!session));
-  }, []);
 
   const fetchArtists = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);

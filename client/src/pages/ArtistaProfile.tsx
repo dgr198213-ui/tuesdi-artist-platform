@@ -9,7 +9,6 @@
  * - Formulario de contacto -> inserta en `contact_requests`
  */
 
-import { useAuth } from "@/hooks/useAuth";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
@@ -53,7 +52,6 @@ interface RelatedArtist {
 export default function ArtistaProfile() {
   const [, params] = useRoute("/artista/:slug");
   const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [related, setRelated] = useState<RelatedArtist[]>([]);
@@ -63,12 +61,6 @@ export default function ArtistaProfile() {
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "" });
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-    });
-  }, []);
 
   useEffect(() => {
     if (!params?.slug) return;

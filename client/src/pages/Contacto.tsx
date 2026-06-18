@@ -26,6 +26,8 @@ export default function Contacto() {
     email: "",
     subject: "",
     message: "",
+    // Honeypot: campo oculto para detectar bots. Nunca visible para humanos.
+    website: "",
   });
 
   // CAMBIO 2: Se ha eliminado la línea "const { toast } = useToast();" porque Sonner no la necesita.
@@ -44,7 +46,7 @@ export default function Contacto() {
       toast.success("Mensaje enviado", {
         description: "Gracias por contactarnos. Te responderemos lo antes posible.",
       });
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      setFormData({ name: "", email: "", subject: "", message: "", website: "" });
     } catch {
       toast.error("Error al enviar", {
         description: "No hemos podido enviar tu mensaje. Inténtalo de nuevo.",
@@ -193,6 +195,22 @@ export default function Contacto() {
                       required
                       rows={6}
                       className="bg-background border-white/10 text-white resize-none"
+                    />
+                  </div>
+
+                  {/* Honeypot anti-spam: invisible para humanos, los bots lo rellenan */}
+                  <div className="absolute left-[-9999px]" aria-hidden="true" tabIndex={-1}>
+                    <label htmlFor="website">No rellenar este campo</label>
+                    <input
+                      id="website"
+                      name="website"
+                      type="text"
+                      value={formData.website}
+                      onChange={(e) =>
+                        setFormData({ ...formData, website: e.target.value })
+                      }
+                      tabIndex={-1}
+                      autoComplete="off"
                     />
                   </div>
 

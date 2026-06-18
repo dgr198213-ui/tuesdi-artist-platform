@@ -49,6 +49,27 @@ export default function PublicarEvento() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validar tipo MIME permitido
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Formato no permitido", {
+        description: "Solo se aceptan JPG, PNG y WebP.",
+      });
+      e.target.value = "";
+      return;
+    }
+
+    // Validar tamaño máximo (5 MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast.error("Imagen demasiado grande", {
+        description: "El tamaño máximo es 5 MB.",
+      });
+      e.target.value = "";
+      return;
+    }
+
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
   };
@@ -101,14 +122,17 @@ export default function PublicarEvento() {
       return;
     }
 
-    try {
-      await supabase.functions.invoke("create-magic-link", {
+    const { data: mlData, error: mlError } = await supabase.functions.invoke("create-magic-link", {
         body: { eventId: eventData.id, email: form.organizer_email },
       });
-    } catch {
-      // Si el envío del email falla, el evento está creado; el usuario puede
-      // contactar soporte. No bloqueamos la UX.
-    }
+
+      if (mlError) {
+        // El evento ya está creado. El magic link falló — lo registramos pero no bloqueamos.
+        console.warn("Magic Link no se pudo generar:", mlError.message);
+      } else if (mlData?.success === false) {
+        // La Edge Function devolvió { success: false } (ej: Resend no configurado)
+        console.warn("Magic Link generado sin envío de email.");
+      }
 
     setLocation(`/exito-publicacion?id=${eventData.id}`);
   };
@@ -152,10 +176,10 @@ export default function PublicarEvento() {
                 <p className="font-headline-md text-headline-md text-on-surface">
                   {imagePreview ? "Cambiar imagen de portada" : "Añadir imagen de portada"}
                 </p>
-                <p className="text-on-surface-variant font-label-sm text-label-sm">Formato sugerido: 16:9. Máximo 10MB.</p>
+                <p className="text-on-surface-variant font-label-sm text-label-sm">Formato sugerido: 16:9. Máximo 5 MB (JPG, PNG, WebP).</p>
               </div>
             </div>
-            <input ref={fileInputRef} className="absolute inset-0 opacity-0 cursor-pointer" type="file" accept="image/*" onChange={handleImageChange} />
+            <input ref={fileInputRef} className="absolute inset-0 opacity-0 cursor-pointer" type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} />
           </div>
 
           {/* Form Fields */}
