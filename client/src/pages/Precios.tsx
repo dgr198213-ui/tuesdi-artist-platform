@@ -86,12 +86,12 @@ export default function Precios() {
               {/* Limits summary */}
               <div className="flex gap-sm mb-lg">
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
-                  <p className="font-headline-md text-headline-md text-primary">{PLAN_LIMITS.beta.photos}</p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">Fotos</p>
+                  <p className="font-headline-md text-headline-md text-primary">Hasta 1</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Foto de portafolio</p>
                 </div>
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
                   <p className="font-headline-md text-headline-md text-on-surface-variant">—</p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant">Vídeos</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant">Sin vídeo</p>
                 </div>
               </div>
 
@@ -145,15 +145,15 @@ export default function Precios() {
               <div className="flex gap-sm mb-lg">
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
                   <p className="font-headline-md text-headline-md text-on-surface-variant/50">
-                    {PLAN_LIMITS.standard.photos}
+                    Hasta 3
                   </p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant/50">Fotos</p>
                 </div>
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
                   <p className="font-headline-md text-headline-md text-on-surface-variant/50">
-                    {PLAN_LIMITS.standard.videos}
+                    1
                   </p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeos</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeo integrado</p>
                 </div>
               </div>
 
@@ -200,15 +200,15 @@ export default function Precios() {
               <div className="flex gap-sm mb-lg">
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
                   <p className="font-headline-md text-headline-md text-on-surface-variant/50">
-                    {PLAN_LIMITS.pro.photos}
+                    Hasta 3
                   </p>
                   <p className="font-label-sm text-label-sm text-on-surface-variant/50">Fotos</p>
                 </div>
                 <div className="flex-1 bg-surface-container-lowest rounded-lg p-sm text-center">
                   <p className="font-headline-md text-headline-md text-on-surface-variant/50">
-                    {PLAN_LIMITS.pro.videos}
+                    3
                   </p>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeos</p>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant/50">Vídeos integrados</p>
                 </div>
               </div>
 
