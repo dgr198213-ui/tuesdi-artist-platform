@@ -42,15 +42,28 @@ export default function PageNav({ active = null }: PageNavProps) {
         </div>
         <div className="flex items-center gap-sm">
           {isAuthenticated ? (
-            <button className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all" onClick={() => setLocation("/dashboard")}>Mi Panel</button>
+            <button 
+              className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:scale-105 transition-transform" 
+              onClick={() => setLocation("/dashboard")}
+            >
+              Mi Panel
+            </button>
           ) : (
-            <button className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all" onClick={() => setLocation("/acceso")}>Acceso</button>
+            <>
+              <button 
+                className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all" 
+                onClick={() => setLocation("/acceso")}
+              >
+                Acceso
+              </button>
+              <button
+                className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:scale-105 transition-transform"
+                onClick={() => setLocation("/acceso")}
+              >
+                Crear Perfil
+              </button>
+            </>
           )}
-          <button
-            className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:scale-100 scale-95 transition-transform duration-200"
-            onClick={() => setLocation(isAuthenticated ? "/dashboard" : "/acceso")}>
-            Crear Perfil
-          </button>
         </div>
       </div>
     </nav>

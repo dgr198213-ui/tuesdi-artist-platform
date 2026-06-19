@@ -32,12 +32,12 @@ Deno.serve(async (req: Request) => {
     const supabaseUrl = getRequiredEnv("SUPABASE_URL");
     const supabaseServiceKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
     const magicLinkSecret = getRequiredEnv("MAGIC_LINK_SECRET");
-    const siteUrl = Deno.env.get("SITE_URL") ?? "https://tuesdi-artist-platform.vercel.app";
+    const siteUrl = clientSiteUrl ?? Deno.env.get("SITE_URL") ?? "https://tuesdi-artist-platform.vercel.app";
     const resendKey = Deno.env.get("RESEND_API_KEY");
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { eventId, email, promoterName } = await req.json();
+    const { eventId, email, promoterName, siteUrl: clientSiteUrl } = await req.json();
 
     if (!eventId || !email) {
       return new Response(

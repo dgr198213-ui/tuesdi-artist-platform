@@ -123,7 +123,11 @@ export default function PublicarEvento() {
     }
 
     const { data: mlData, error: mlError } = await supabase.functions.invoke("create-magic-link", {
-        body: { eventId: eventData.id, email: form.organizer_email },
+        body: { 
+          eventId: eventData.id, 
+          email: form.organizer_email,
+          siteUrl: window.location.origin 
+        },
       });
 
       if (mlError) {
@@ -184,7 +188,13 @@ export default function PublicarEvento() {
 
           {/* Form Fields */}
           <div className="glass-card rounded-xl p-md space-y-md">
-            <h3 className="font-headline-md text-headline-md text-primary">Información del Evento</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-headline-md text-headline-md text-primary">Información del Evento</h3>
+              <div className="flex items-center gap-1 text-on-surface-variant/60 bg-white/5 px-2 py-1 rounded text-[10px] uppercase tracking-tighter">
+                <span className="material-symbols-outlined text-[12px]">lock</span>
+                No editable tras publicar
+              </div>
+            </div>
 
             {/* Title */}
             <div className="space-y-xs">

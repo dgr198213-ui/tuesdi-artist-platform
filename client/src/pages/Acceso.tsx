@@ -17,10 +17,18 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Acceso() {
   const [, setLocation] = useLocation();
+  const { isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState("");
+
+  // Redirigir automáticamente si ya está autenticado
+  if (!isLoading && isAuthenticated) {
+    setLocation("/dashboard");
+    return null;
+  }
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -31,10 +39,7 @@ export default function Acceso() {
     setStatus("sending");
     setErrorMsg("");
 
-    const redirectTo =
-      window.location.hostname === "localhost"
-        ? `${window.location.origin}/dashboard`
-        : "https://tuesdi-artist-platform.vercel.app/dashboard";
+    const redirectTo = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email,

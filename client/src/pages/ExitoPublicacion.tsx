@@ -144,9 +144,14 @@ export default function ExitoPublicacion() {
             </span>
           </div>
 
-          <p className="font-label-sm text-label-sm text-on-surface-variant/40">
-            💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.
-          </p>
+          <div className="space-y-sm">
+            <p className="font-label-sm text-label-sm text-on-surface-variant/40">
+              💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.
+            </p>
+            <p className="font-label-sm text-label-sm text-on-surface-variant/40 max-w-xs mx-auto">
+              Nota: Como promotor anónimo, el evento no es editable tras su publicación. Si hay algún error grave, contacta con <a href="mailto:hola@tuesdi.com" className="text-secondary hover:underline">hola@tuesdi.com</a>
+            </p>
+          </div>
         </div>
       </main>
 
