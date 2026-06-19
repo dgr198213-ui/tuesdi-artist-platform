@@ -40,6 +40,7 @@ export default function Eventos() {
   const [, setLocation] = useLocation();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
 
@@ -50,6 +51,7 @@ export default function Eventos() {
 
   const fetchEvents = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);
+    setHasError(false);
 
     const { data, error } = await supabase.functions.invoke("get-events", {
       body: {
@@ -61,7 +63,10 @@ export default function Eventos() {
       },
     });
 
-    if (!error && data?.events) {
+    if (error || !data?.events) {
+      console.error("[Eventos] Error cargando eventos:", error);
+      setHasError(true);
+    } else {
       setEvents(reset ? data.events : (prev) => [...prev, ...data.events]);
       setHasMore(data.hasMore);
     }
@@ -168,7 +173,19 @@ export default function Eventos() {
 
         {/* Grid */}
         <section className="max-w-7xl mx-auto px-margin pb-xl">
-          {isLoading && events.length === 0 ? (
+          {hasError ? (
+            <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
+              <span className="material-symbols-outlined text-[64px] mb-md block text-error">error_outline</span>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">No se pudieron cargar los eventos</h3>
+              <p className="font-body-md text-body-md mb-lg">Hubo un problema al conectar con el servidor. Inténtalo de nuevo.</p>
+              <button
+                className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary"
+                onClick={() => fetchEvents(0, true)}
+              >
+                Reintentar
+              </button>
+            </div>
+          ) : isLoading && events.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">

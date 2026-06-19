@@ -1,14 +1,20 @@
 -- ============================================================
--- Migración: 20260524112351_editor_perfil.sql
--- Sincronización con estado remoto de Supabase.
--- Esta migración estaba registrada en supabase_migrations.schema_migrations
--- pero faltaba el archivo SQL en el repositorio.
+-- Migración: 20260619000001_user_roles_profiles.sql
+-- Roles, profiles, enums y trigger handle_new_user.
 --
--- Contenido: roles, profiles, enums, trigger handle_new_user.
+-- HISTORIAL:
+--   Originalmente creada como 20260524112351_editor_perfil.sql para
+--   sincronizar con el estado remoto de Supabase. Renombrada el
+--   2026-06-19 (v3.0.5) porque el timestamp 20260524112351 colisionaba
+--   con una migración anterior ya registrada en schema_migrations,
+--   causando el mismo error de versión duplicada que se corrigió en
+--   la fase anterior.
+--
+-- Contenido: enums app_role / artist_category / artist_plan,
+--   tablas user_roles y profiles, trigger handle_new_user.
 -- NOTA: Las tablas principales de TUESDI v3.0 (artists, events, etc.)
--- están en 001_inicial_tuesdi.sql. Esta migración corresponde a un
--- esquema alternativo generado automáticamente por Supabase que coexiste
--- en la BD pero no es el utilizado por el frontend actual.
+--   están en 001_inicial_tuesdi.sql. Esta migración corresponde al
+--   esquema de roles/profiles que coexiste en la BD.
 --
 -- v3.0.1 — 2026-06-16: Corrección crítica
 --   + handle_new_user ahora también crea entrada en tabla artists.

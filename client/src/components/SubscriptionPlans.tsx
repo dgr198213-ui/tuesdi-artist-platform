@@ -1,6 +1,13 @@
 /**
  * SubscriptionPlans — Componente para mostrar planes con integración Stripe
  * Reemplaza la lógica estática de Precios.tsx con funcionalidad de pago real
+ *
+ * @backlog (2026-06-19) — COMPONENTE NO ACTIVO
+ * Este componente NO está enrutado ni importado en ninguna página.
+ * Depende de la Edge Function `create-checkout-session` y del secret
+ * `STRIPE_SECRET_KEY`, que todavía no están configurados en producción.
+ * La página /planes usa Precios.tsx con planes estáticos.
+ * Activar cuando se habilite la monetización real con Stripe.
  */
 
 import { useState } from "react";

@@ -35,6 +35,7 @@ export default function ExplorarArtistas() {
   const [, setLocation] = useLocation();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
 
@@ -46,6 +47,7 @@ export default function ExplorarArtistas() {
 
   const fetchArtists = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);
+    setHasError(false);
     let query = supabase
       .from("artists")
       .select("id, slug, artist_name, category, city, starting_price, profile_image, verified, subscription_plan")
@@ -58,7 +60,10 @@ export default function ExplorarArtistas() {
     if (city !== "Todas") query = query.ilike("city", `%${city}%`);
 
     const { data, error } = await query;
-    if (!error && data) {
+    if (error || !data) {
+      console.error("[ExplorarArtistas] Error cargando artistas:", error);
+      setHasError(true);
+    } else {
       setArtists(reset ? data : (prev) => [...prev, ...data]);
       setHasMore(data.length === PAGE_SIZE);
     }
@@ -179,7 +184,19 @@ export default function ExplorarArtistas() {
 
       {/* Grid */}
       <section className="max-w-7xl mx-auto px-margin mb-xl">
-        {isLoading && artists.length === 0 ? (
+        {hasError ? (
+          <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
+            <span className="material-symbols-outlined text-[64px] mb-md block text-error">error_outline</span>
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">No se pudo cargar el directorio</h3>
+            <p className="font-body-md text-body-md mb-lg">Hubo un problema al conectar con el servidor. Inténtalo de nuevo.</p>
+            <button
+              className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary"
+              onClick={() => fetchArtists(0, true)}
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : isLoading && artists.length === 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="glass-card rounded-xl overflow-hidden animate-pulse">
