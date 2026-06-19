@@ -6,11 +6,18 @@
 import { useLocation } from "wouter";
 
 const LINKS = [
+  { label: "Publicar Evento", path: "/publicar-evento" },
+  { label: "Artistas",        path: "/artistas" },
+  { label: "Eventos",         path: "/eventos" },
+  { label: "Planes",          path: "/planes" },
+  { label: "Quiénes Somos",   path: "/quienes-somos" },
+  { label: "Contacto",        path: "/contacto" },
+];
+
+const LEGAL_LINKS = [
   { label: "Privacidad",    path: "/politica-privacidad" },
   { label: "Términos",      path: "/terminos-servicio" },
-  { label: "Contacto",      path: "/contacto" },
   { label: "Cookies",       path: "/politica-cookies" },
-  { label: "Quiénes Somos", path: "/quienes-somos" },
 ];
 
 export default function PageFooter() {
@@ -24,12 +31,21 @@ export default function PageFooter() {
             © {new Date().getFullYear()} TUESDI — Tu Escenario Digital. Todos los derechos reservados.
           </p>
         </div>
-        <div className="flex gap-md flex-wrap justify-center">
-          {LINKS.map((l) => (
-            <button key={l.path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(l.path)}>
-              {l.label}
-            </button>
-          ))}
+        <div className="flex flex-col items-center md:items-end gap-md">
+          <div className="flex gap-md flex-wrap justify-center">
+            {LINKS.map((l) => (
+              <button key={l.path} className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" onClick={() => setLocation(l.path)}>
+                {l.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-sm flex-wrap justify-center opacity-40">
+            {LEGAL_LINKS.map((l) => (
+              <button key={l.path} className="text-[10px] uppercase tracking-widest text-on-surface-variant hover:text-white transition-colors" onClick={() => setLocation(l.path)}>
+                {l.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
