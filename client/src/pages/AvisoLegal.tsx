@@ -29,7 +29,7 @@ export default function AvisoLegal() {
             <div className="space-y-2 text-muted-foreground leading-relaxed">
               <p><strong className="text-foreground">Denominación Social:</strong> TUESDI</p>
               <p><strong className="text-foreground">Domicilio:</strong> España</p>
-              <p><strong className="text-foreground">Email de contacto:</strong> info@tuesdi.com</p>
+              <p><strong className="text-foreground">Email de contacto:</strong> hola@tuesdi.com</p>
               <p><strong className="text-foreground">Teléfono:</strong> Disponible en la página de contacto</p>
             </div>
           </section>
@@ -102,7 +102,7 @@ export default function AvisoLegal() {
           <section>
             <h2 className="text-2xl font-bold mb-4">8. Contacto</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Para consultas sobre este Aviso Legal, contacta con: <strong className="text-foreground">legal@tuesdi.com</strong>
+              Para consultas sobre este Aviso Legal, contacta con: <strong className="text-foreground">hola@tuesdi.com</strong>
             </p>
           </section>
         </div>

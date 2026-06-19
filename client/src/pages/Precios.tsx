@@ -97,13 +97,10 @@ export default function Precios() {
 
               <ul className="space-y-sm mb-xl">
                 {[
-                  "Perfil artístico público completo",
-                  "Galería con 1 foto",
-                  "Formulario de contacto privado",
-                  "Publicación de eventos",
-                  "Métricas básicas en el dashboard",
-                  "Posicionamiento estándar en el directorio",
-                  "Sin comisiones ni intermediarios",
+                  "Perfil completo.",
+                  "Galería multimedia.",
+                  "Contacto privado.",
+                  "Dashboard + analíticas.",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md">
                     {CHECK}
@@ -159,12 +156,9 @@ export default function Precios() {
 
               <ul className="space-y-sm mb-xl">
                 {[
-                  "Todo lo del plan Beta",
-                  "Galería ampliada: 3 fotos + 1 vídeo",
-                  "Métricas ampliadas en el dashboard",
-                  "Posicionamiento mejorado en búsquedas",
-                  "Distintivo Standard en el perfil",
-                  "Publicación de eventos",
+                  "Mejor posicionamiento.",
+                  "Analíticas avanzadas.",
+                  "Difusión en canales TUESDI.",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
                     {DOT}
@@ -214,12 +208,10 @@ export default function Precios() {
 
               <ul className="space-y-sm mb-xl">
                 {[
-                  "Todo lo del plan Standard",
-                  "Galería completa: 3 fotos + 3 vídeos",
-                  "Métricas avanzadas con tendencias",
-                  "Posicionamiento prioritario en el directorio",
-                  "Distintivo Pro verificado",
-                  "Publicación de eventos",
+                  "Prioridad en directorios.",
+                  "Distintivo Pro verificado.",
+                  "4 difusiones/mes en redes TUESDI.",
+                  "Campañas especiales.",
                 ].map((feat) => (
                   <li key={feat} className="flex items-center gap-sm font-body-md text-body-md text-on-surface-variant/70">
                     {DOT}

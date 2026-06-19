@@ -95,7 +95,7 @@ export default function Contacto() {
                   <div>
                     <h3 className="text-white font-semibold mb-1">Email</h3>
                     <p className="text-muted-foreground text-sm">
-                      hola@tuesdi.es
+                      hola@tuesdi.com
                     </p>
                   </div>
                 </div>
