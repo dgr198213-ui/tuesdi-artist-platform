@@ -3,12 +3,6 @@
  * Página Principal (Home)
  *
  * Diseño: Stitch "Digital Stage" (home_planes_refinados_tuesdi)
- * - Hero con título y subtítulo oficiales
- * - Artistas destacados (datos reales con fallback a contenido de ejemplo)
- * - Cómo funciona
- * - Próximos eventos (datos reales con fallback a contenido de ejemplo)
- * - Planes (Beta / Standard / Pro)
- * - CTA final
  */
 
 import { useAuth } from "@/hooks/useAuth";
@@ -103,7 +97,6 @@ export default function Home() {
 
   const displayArtists = artists.length > 0 ? artists : MOCK_ARTISTS;
   const displayEvents = events.length > 0 ? events : MOCK_EVENTS;
-  const usingMockEvents = events.length === 0;
 
   const formatEventDate = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
@@ -113,17 +106,13 @@ export default function Home() {
       .replace(".", "");
   };
 
-  const goToProfile = () => setLocation(isAuthenticated ? "/dashboard" : "/registro");
-
   return (
     <div className="bg-background text-on-surface min-h-screen selection:bg-primary selection:text-on-primary">
-      {/* TopNavBar */}
       <PageNav active="home" />
 
       <main className="overflow-x-hidden">
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-xl px-margin overflow-hidden">
-          {/* Real background photo */}
           <div className="absolute inset-0 z-0">
             <img
               src="/gallery/concierto-confeti-luces.jpg"
@@ -132,8 +121,6 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30"></div>
           </div>
-          <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-primary/10 blur-[120px] rounded-full"></div>
-          <div className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-secondary/10 blur-[120px] rounded-full"></div>
           <div className="max-w-4xl text-center z-10">
             <div className="inline-flex items-center gap-sm px-sm py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-md">
               <span className="w-2 h-2 rounded-full bg-secondary pulse-live shrink-0"></span>
@@ -165,12 +152,9 @@ export default function Home() {
               Sin tarjetas de crédito · Registro en 1 minuto vía Magic Link
             </p>
           </div>
-          <div className="absolute bottom-base left-1/2 -translate-x-1/2 animate-bounce opacity-50">
-            <span className="material-symbols-outlined text-on-surface-variant">keyboard_double_arrow_down</span>
-          </div>
         </section>
 
-        {/* Caminos de Entrada Section */}
+        {/* Caminos de Entrada */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
             <div className="glass-card p-xl rounded-2xl border-l-4 border-l-primary hover:bg-primary/5 transition-colors group cursor-pointer" onClick={() => setLocation("/acceso")}>
@@ -200,7 +184,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* TUESDI por dentro Section */}
+        {/* Product Showcase */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="text-center mb-xl">
             <h2 className="font-headline-lg text-headline-lg text-on-surface">TUESDI por dentro</h2>
@@ -211,147 +195,54 @@ export default function Home() {
           <ProductShowcase />
         </section>
 
-        {/* Featured Artists Section */}
+        {/* Featured Artists */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-lg gap-md">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-on-surface">Artistas destacados</h2>
               <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                Descubre perfiles profesionales con portfolio verificado, categoría y contacto privado directo. Muestra tu talento en un escaparate limpio e inspirado en escenarios en vivo.
+                Descubre perfiles profesionales con portfolio verificado, categoría y contacto privado directo.
               </p>
             </div>
-            <button
-              className="font-label-sm text-label-sm text-primary flex items-center gap-xs hover:gap-sm transition-all whitespace-nowrap"
-              onClick={() => setLocation("/artistas")}
-            >
+            <button className="font-label-sm text-label-sm text-primary flex items-center gap-xs" onClick={() => setLocation("/artistas")}>
               Ver todos <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
             {displayArtists.map((artist) => (
-              <div
-                key={artist.slug}
-                className="glass-card group rounded-xl overflow-hidden cursor-pointer"
-                onClick={() => setLocation(`/artista/${artist.slug}`)}
-              >
+              <div key={artist.slug} className="glass-card group rounded-xl overflow-hidden cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
                 <div className="aspect-[4/5] relative overflow-hidden">
                   {artist.profile_image ? (
-                    <img
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100"
-                      src={artist.profile_image}
-                      alt={artist.artist_name}
-                    />
+                    <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={artist.profile_image} alt={artist.artist_name} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-surface-container text-on-surface-variant">
                       <span className="material-symbols-outlined text-[64px]">person</span>
                     </div>
                   )}
-                  {artist.category && (
-                    <div className="absolute top-sm left-sm bg-black/50 backdrop-blur-md px-sm py-xs rounded-full">
-                      <span className="font-label-sm text-label-sm text-secondary">{artist.category}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="p-md">
                   <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">{artist.artist_name}</h3>
-                  <p className="font-body-md text-body-md text-on-surface-variant mb-md line-clamp-2">
-                    {artist.bio || "Artista en TUESDI"}
-                  </p>
-                  <button className="w-full py-xs border border-white/10 rounded-lg font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all">
-                    Ver Portafolio
-                  </button>
+                  <p className="font-body-md text-body-md text-on-surface-variant mb-md line-clamp-2">{artist.bio || "Artista en TUESDI"}</p>
+                  <button className="w-full py-xs border border-white/10 rounded-lg font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all">Ver Portafolio</button>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section className="py-2xl bg-surface-container-low">
-          <div className="max-w-7xl mx-auto px-margin">
-            <div className="text-center mb-xl">
-              <h2 className="font-headline-lg text-headline-lg text-on-surface">Cómo funciona</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Flujos ágiles diseñados para el sector cultural
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
-              {/* Artistas */}
-              <div className="space-y-lg">
-                <div className="flex items-center gap-sm mb-md">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary">palette</span>
-                  </div>
-                  <h3 className="font-headline-md text-headline-md text-white">Para Artistas</h3>
-                </div>
-                <div className="space-y-md border-l border-white/10 pl-md">
-                  {[
-                    { t: "Crea tu perfil", d: "Regístrate vía Magic Link y construye tu portafolio en minutos." },
-                    { t: "Sube tu material", d: "Añade fotos y vídeos para mostrar tu talento al mundo." },
-                    { t: "Recibe propuestas", d: "Gestiona contactos directos en tu bandeja privada sin intermediarios." }
-                  ].map((step, i) => (
-                    <div key={i} className="relative">
-                      <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-surface-container-low"></div>
-                      <h4 className="font-bold text-on-surface text-sm mb-0.5">{step.t}</h4>
-                      <p className="text-on-surface-variant text-sm">{step.d}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Promotores */}
-              <div className="space-y-lg">
-                <div className="flex items-center gap-sm mb-md">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-secondary">event_available</span>
-                  </div>
-                  <h3 className="font-headline-md text-headline-md text-white">Para Promotores</h3>
-                </div>
-                <div className="space-y-md border-l border-white/10 pl-md">
-                  {[
-                    { t: "Publica el evento", d: "Rellena el formulario rápido con los detalles de tu fecha." },
-                    { t: "Verifica tu autoría", d: "Confirma la publicación al instante mediante tu enlace mágico." },
-                    { t: "Gana visibilidad", d: "Tu evento aparece en la agenda pública frente a artistas y público." }
-                  ].map((step, i) => (
-                    <div key={i} className="relative">
-                      <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-secondary border-2 border-surface-container-low"></div>
-                      <h4 className="font-bold text-on-surface text-sm mb-0.5">{step.t}</h4>
-                      <p className="text-on-surface-variant text-sm">{step.d}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Upcoming Events Section */}
+        {/* Upcoming Events */}
         <section className="py-xl px-margin max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-lg gap-md">
-            <div>
-              <h2 className="font-headline-lg text-headline-lg text-on-surface">Próximos eventos culturales</h2>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-                La agenda viva de la plataforma. Fechas reales publicadas de forma transparente. Da visibilidad a tu propuesta en minutos con un flujo simple guiado por token HMAC seguro.
-              </p>
-            </div>
-            <button
-              className="font-label-sm text-label-sm text-primary flex items-center gap-xs hover:gap-sm transition-all whitespace-nowrap"
-              onClick={() => setLocation("/eventos")}
-            >
-              Ver agenda completa <span className="material-symbols-outlined">arrow_forward</span>
+          <div className="flex justify-between items-end mb-lg">
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">Próximos eventos</h2>
+            <button className="font-label-sm text-label-sm text-secondary flex items-center gap-xs" onClick={() => setLocation("/eventos")}>
+              Ver agenda <span className="material-symbols-outlined">arrow_forward</span>
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
             {displayEvents.map((event) => (
-              <div
-                key={event.id}
-                className="glass-card rounded-lg p-md cursor-pointer"
-                onClick={() => !usingMockEvents && setLocation(`/eventos/${event.id}`)}
-              >
+              <div key={event.id} className="glass-card p-md rounded-xl">
                 <div className="flex justify-between items-start mb-sm">
-                  <div className="bg-primary/20 text-primary px-xs py-1 rounded font-label-sm text-label-sm">
-                    {formatEventDate(event.event_date)}
-                  </div>
-                  <span className="material-symbols-outlined text-on-surface-variant">event</span>
+                  <div className="bg-primary/20 text-primary px-xs py-1 rounded font-label-sm text-label-sm">{formatEventDate(event.event_date)}</div>
                 </div>
                 <h4 className="font-headline-md text-headline-md text-on-surface mb-xs">{event.title}</h4>
                 <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
@@ -359,14 +250,6 @@ export default function Home() {
                 </p>
               </div>
             ))}
-          </div>
-          <div className="text-center mt-lg">
-            <button
-              className="font-label-sm text-label-sm text-primary flex items-center gap-xs justify-center mx-auto hover:gap-sm transition-all"
-              onClick={() => setLocation("/eventos")}
-            >
-              Ver todos los eventos <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
           </div>
         </section>
 
@@ -395,21 +278,18 @@ export default function Home() {
                 <span className="text-on-surface-variant">/mes</span>
               </div>
               <ul className="space-y-sm mb-xl flex-grow flex flex-col gap-sm">
-                {["Perfil completo", "Galería multimedia", "Contacto privado", "Dashboard + Analíticas", "Publicación de eventos"].map((f) => (
+                {["Perfil completo", "Galería multimedia", "Contacto privado", "Dashboard + Analíticas"].map((f) => (
                   <li key={f} className="flex items-center gap-xs font-body-md text-body-md">
                     <span className="material-symbols-outlined text-primary text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> {f}
                   </li>
                 ))}
               </ul>
-              <button
-                className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary font-label-sm text-label-sm font-bold hover:opacity-90 transition-all"
-                onClick={() => setLocation("/acceso")}
-              >
+              <button className="w-full py-sm rounded-lg bg-primary text-on-primary bloom-primary font-label-sm text-label-sm font-bold hover:opacity-90 transition-all" onClick={() => setLocation("/acceso")}>
                 Crear Perfil Gratis
               </button>
             </div>
 
-            {/* Standard - Coming Soon */}
+            {/* Standard */}
             <div className="glass-card p-lg rounded-xl flex flex-col h-full opacity-50">
               <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Standard</h3>
               <div className="mb-lg">
@@ -423,12 +303,10 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
-                Próximamente
-              </div>
+              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Próximamente</div>
             </div>
 
-            {/* Pro - Coming Soon */}
+            {/* Pro */}
             <div className="glass-card p-lg rounded-xl flex flex-col h-full opacity-50">
               <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">Pro</h3>
               <div className="mb-lg">
@@ -442,50 +320,29 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">
-                Próximamente
-              </div>
+              <div className="w-full py-sm rounded-lg border border-outline-variant text-center font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Próximamente</div>
             </div>
           </div>
-          <p className="text-center font-label-sm text-label-sm text-on-surface-variant/50 mt-lg">
-            Los datos y perfiles creados durante la Beta se mantienen al activarse los planes de pago.
-          </p>
+          <p className="text-center font-label-sm text-label-sm text-on-surface-variant/50 mt-lg">Los datos y perfiles creados durante la Beta se mantienen al activarse los planes de pago.</p>
         </section>
 
         {/* Final CTA */}
-        <section className="py-2xl relative overflow-hidden">
+        <section className="py-2xl relative overflow-hidden text-center">
           <div className="absolute inset-0 z-0">
-            <img
-              src="/gallery/artista-guitarrista-luces.jpg"
-              alt=""
-              className="w-full h-full object-cover opacity-15"
-            />
+            <img src="/gallery/artista-guitarrista-luces.jpg" alt="" className="w-full h-full object-cover opacity-15" />
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/50"></div>
           </div>
-          <div className="absolute inset-0 spotlight opacity-20"></div>
-          <div className="max-w-4xl mx-auto px-margin text-center z-10 relative">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-md">
-              Haz que tu talento sea imposible de ignorar.
-            </h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant mb-xl">
-              Crea tu cuenta gratis en la Beta abierta de TUESDI hoy mismo y asegura tu espacio antes del lanzamiento de los planes avanzados.
-            </p>
+          <div className="max-w-4xl mx-auto px-margin z-10 relative">
+            <h2 className="font-headline-lg text-headline-lg text-on-surface mb-md">Haz que tu talento sea imposible de ignorar.</h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant mb-xl">Crea tu cuenta gratis en la Beta abierta de TUESDI hoy mismo y asegura tu espacio antes del lanzamiento de los planes avanzados.</p>
             <div className="flex flex-col items-center gap-sm">
-              <button
-                className="bg-primary text-on-primary font-headline-md text-headline-md px-xl py-sm rounded-lg bloom-primary hover:scale-105 transition-transform duration-300"
-                onClick={() => setLocation("/acceso")}
-              >
-                Empezar ahora (Gratis)
-              </button>
-              <p className="font-label-sm text-label-sm text-on-surface-variant/50">
-                Sin tarjetas de crédito · Registro en 1 minuto vía Magic Link
-              </p>
+              <button className="bg-primary text-on-primary font-headline-md text-headline-md px-xl py-sm rounded-lg bloom-primary hover:scale-105 transition-transform duration-300" onClick={() => setLocation("/acceso")}>Empezar ahora (Gratis)</button>
+              <p className="font-label-sm text-label-sm text-on-surface-variant/50">Sin tarjetas de crédito · Registro en 1 minuto vía Magic Link</p>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <PageFooter />
     </div>
   );
