@@ -26,7 +26,7 @@ export default function PageFooter() {
     <footer className="bg-surface-dim w-full py-xl border-t border-white/5">
       <div className="flex flex-col md:flex-row justify-between items-center px-margin gap-md max-w-7xl mx-auto">
         <div className="flex flex-col items-center md:items-start">
-          <span className="font-headline-md text-headline-md text-on-surface opacity-50 mb-sm">TUESDI</span>
+          <img src="/logo-tuesdi-full.png" alt="TUESDI" className="h-10 w-auto object-contain opacity-50 mb-sm grayscale hover:grayscale-0 transition-all" />
           <p className="font-label-sm text-label-sm text-on-surface-variant">
             © {new Date().getFullYear()} TUESDI — Tu Escenario Digital. Todos los derechos reservados.
           </p>

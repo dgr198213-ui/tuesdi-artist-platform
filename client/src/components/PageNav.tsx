@@ -24,8 +24,7 @@ export default function PageNav({ active = null }: PageNavProps) {
     <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
       <div className="flex justify-between items-center px-margin py-base max-w-7xl mx-auto">
         <button className="flex items-center gap-2 shrink-0" onClick={() => setLocation("/")} aria-label="TUESDI inicio">
-          <img src="/isotipo-nuevo.png" alt="TUESDI" className="h-9 w-9 object-contain rounded-lg shrink-0" />
-          <span className="font-headline-md text-headline-md font-bold text-primary hidden sm:inline">TUESDI</span>
+          <img src="/logo-tuesdi-full.png" alt="TUESDI" className="h-10 md:h-12 w-auto object-contain shrink-0" />
         </button>
         <div className="hidden md:flex items-center gap-md">
           {NAV_LINKS.map((link) => (

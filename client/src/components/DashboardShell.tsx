@@ -60,11 +60,10 @@ export default function DashboardShell({ active, title, children }: DashboardShe
       {/* SideNavBar */}
       <nav className="fixed left-0 top-0 h-full w-64 bg-surface-container-low shadow-md flex flex-col py-md px-base z-50">
         <div className="mb-xl px-base">
-          <button onClick={() => setLocation("/")} className="text-left flex items-center gap-xs">
-            <img src="/isotipo-nuevo.png" alt="" className="h-8 w-8 object-contain"  />
-            <h1 className="font-headline-md text-headline-md font-bold text-secondary-container tracking-tight">TUESDI</h1>
+          <button onClick={() => setLocation("/")} className="text-left flex flex-col gap-xs">
+            <img src="/logo-tuesdi-full.png" alt="TUESDI" className="h-10 w-auto object-contain"  />
+            <p className="text-on-surface-variant font-label-sm text-[9px] uppercase tracking-[0.2em] ml-1">Artist Dashboard</p>
           </button>
-          <p className="text-on-surface-variant font-label-sm text-[10px] uppercase tracking-[0.2em]">Artist Dashboard</p>
         </div>
         <div className="flex-grow flex flex-col gap-base">
           {NAV_ITEMS.map((item) => {
