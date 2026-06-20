@@ -16,7 +16,7 @@ import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
-import { ARTIST_CATEGORIES, BIO_MAX, DEFAULT_COUNTRY, slugify } from "@/lib/constants";
+import { ARTIST_CATEGORIES, BIO_MAX, DEFAULT_COUNTRY, slugify, CATEGORY_DB_VALUE } from "@/lib/constants";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { artistProfileSchema, type ArtistProfileForm } from "@/lib/schemas/artistProfile";
@@ -77,27 +77,33 @@ export default function EditorPerfil() {
       setUserId(session.user.id);
 
       const { data } = await supabase
-        .from("artists")
+        .from("profiles")
         .select("*")
-        .eq("user_id", session.user.id)
+        .eq("id", session.user.id)
         .maybeSingle();
 
       if (data) {
         setArtistId(data.id);
         setSlug(data.slug);
+        // category llega como valor de enum (ej. "musica"); buscamos la
+        // etiqueta de UI correspondiente para mostrarla en el <select>
+        const categoryLabel =
+          Object.keys(CATEGORY_DB_VALUE).find(
+            (label) => CATEGORY_DB_VALUE[label] === data.category && ARTIST_CATEGORIES.includes(label as typeof ARTIST_CATEGORIES[number])
+          ) ?? ARTIST_CATEGORIES[0];
         reset({
-          artist_name: data.artist_name || "",
-          category: data.category || ARTIST_CATEGORIES[0],
+          artist_name: data.display_name || "",
+          category: categoryLabel,
           city: data.city || "",
           country: data.country || DEFAULT_COUNTRY,
           bio: data.bio || "",
-          starting_price: data.starting_price || "",
+          starting_price: data.price_note || "",
           instagram: data.instagram || "",
           youtube: data.youtube || "",
           spotify: data.spotify || "",
           website: data.website || "",
-          profile_image: data.profile_image || "",
-          cover_image: data.cover_image || "",
+          profile_image: data.avatar_url || "",
+          cover_image: data.cover_url || "",
         });
       }
 
@@ -153,9 +159,10 @@ export default function EditorPerfil() {
       // eslint-disable-next-line no-constant-condition
       while (true) {
         const { data: existing } = await supabase
-          .from("artists")
+          .from("profiles")
           .select("id")
           .eq("slug", finalSlug)
+          .neq("id", userId)
           .maybeSingle();
         if (!existing) break;
         finalSlug = `${base}-${n}`;
@@ -164,45 +171,36 @@ export default function EditorPerfil() {
     }
 
     const payload = {
-      user_id: userId,
+      id: userId,
       slug: finalSlug,
-      artist_name: values.artist_name.trim(),
-      category: values.category,
+      display_name: values.artist_name.trim(),
+      category: CATEGORY_DB_VALUE[values.category] ?? "arte",
       city: values.city.trim(),
       country: values.country.trim() || DEFAULT_COUNTRY,
       bio: values.bio,
-      starting_price: values.starting_price,
+      price_note: values.starting_price,
       instagram: values.instagram,
       youtube: values.youtube,
       spotify: values.spotify,
       website: values.website,
-      profile_image: values.profile_image,
-      cover_image: values.cover_image,
+      avatar_url: values.profile_image,
+      cover_url: values.cover_image,
+      // El perfil se publica en cuanto el artista guarda con los campos
+      // obligatorios completos (no hay panel de roles ni revisión manual).
+      is_published: true,
       updated_at: new Date().toISOString(),
     };
 
-    let error;
-    if (artistId) {
-      ({ error } = await supabase.from("artists").update(payload).eq("id", artistId));
-    } else {
-      const { data, error: insertError } = await supabase
-        .from("artists")
-        .insert([payload])
-        .select()
-        .single();
-      error = insertError;
-      if (data) {
-        setArtistId(data.id);
-      }
-    }
+    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
 
+    setArtistId(userId);
     setSaving(false);
 
     if (error) {
       toast.error("Error al guardar: " + error.message);
     } else {
       setSlug(finalSlug);
-      toast.success("¡Cambios guardados!");
+      toast.success("¡Cambios guardados y perfil publicado!");
     }
   };
 

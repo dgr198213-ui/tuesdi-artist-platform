@@ -13,7 +13,7 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState, useRef } from "react";
 import { useLocation } from "wouter";
-import { EVENT_CATEGORIES, DEFAULT_COUNTRY } from "@/lib/constants";
+import { EVENT_CATEGORIES, DEFAULT_COUNTRY, CATEGORY_DB_VALUE } from "@/lib/constants";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eventFormSchema, type EventForm } from "@/lib/schemas/eventForm";
@@ -98,7 +98,7 @@ export default function PublicarEvento() {
       body: {
         title: form.title.trim(),
         description: form.description.trim() || null,
-        category: form.category,
+        category: CATEGORY_DB_VALUE[form.category] ?? "arte",
         location: form.location.trim(),
         city: form.city.trim(),
         date: dateTime.toISOString(),

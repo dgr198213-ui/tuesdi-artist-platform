@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
     const { data: artist, error: artistError } = await supabase
       .from("profiles")
       .select(
-        "id, slug, display_name, bio, category, city, price_from, rating, reviews_count, avatar_url, cover_url, plan, is_published"
+        "id, slug, display_name, bio, category, city, country, price_from, price_note, rating, reviews_count, avatar_url, cover_url, plan, is_published, instagram, youtube, spotify, website"
       )
       .eq("slug", slug.trim())
       .eq("is_published", true)
@@ -88,12 +88,12 @@ Deno.serve(async (req: Request) => {
       bio: artist.bio,
       category: artist.category,
       city: artist.city,
-      country: null,
-      starting_price: artist.price_from,
-      website: null,
-      instagram: null,
-      youtube: null,
-      spotify: null,
+      country: artist.country,
+      starting_price: artist.price_note ?? artist.price_from,
+      website: artist.website,
+      instagram: artist.instagram,
+      youtube: artist.youtube,
+      spotify: artist.spotify,
       profile_image: artist.avatar_url,
       cover_image: artist.cover_url,
       verified: false,

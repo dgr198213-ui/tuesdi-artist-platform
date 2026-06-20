@@ -37,6 +37,36 @@ export const EVENT_CATEGORIES = [
   "Otro",
 ] as const;
 
+/**
+ * Mapeo de las etiquetas de categoría mostradas en la UI (español, con
+ * mayúsculas/tildes) a los valores reales del enum `artist_category` en
+ * Postgres (musica, teatro, magia, comedia, danza, dj, circo, arte,
+ * foto_video). Sin este mapeo, cualquier INSERT/UPDATE con la etiqueta
+ * de UI directamente falla con un error de enum inválido.
+ * Usar SIEMPRE antes de enviar `category` a Supabase.
+ */
+export const CATEGORY_DB_VALUE: Record<string, string> = {
+  // ARTIST_CATEGORIES
+  "Cantante": "musica",
+  "Músico": "musica",
+  "DJ": "dj",
+  "Banda": "musica",
+  "Mago": "magia",
+  "Humorista": "comedia",
+  "Actor": "teatro",
+  "Bailarín": "danza",
+  "Performer": "arte",
+  // EVENT_CATEGORIES
+  "Música": "musica",
+  "Arte": "arte",
+  "Teatro": "teatro",
+  "Danza": "danza",
+  "Magia": "magia",
+  "Humor": "comedia",
+  "Performance": "arte",
+  "Otro": "arte",
+};
+
 /** Cities available for filtering (used in ExplorarArtistas, Eventos) */
 export const FILTER_CITIES = [
   "Todas",
