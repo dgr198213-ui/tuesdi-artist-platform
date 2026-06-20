@@ -27,7 +27,7 @@ export default function ConfirmarEvento() {
       if (!params?.token) { setStatus("error"); setErrorMsg("Enlace inválido."); return; }
 
       try {
-        const { data, error } = await supabase.functions.invoke("confirm-event", {
+        const { data, error } = await supabase.functions.invoke("verify-event", {
           body: { token: params.token },
         });
 
@@ -49,7 +49,7 @@ export default function ConfirmarEvento() {
   }, [params?.token]);
 
   const formatDate = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
+    new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" });
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-on-surface overflow-hidden">
@@ -101,7 +101,7 @@ export default function ConfirmarEvento() {
                   <div className="flex flex-wrap gap-md text-on-surface-variant font-label-sm text-label-sm">
                     <div className="flex items-center gap-xs">
                       <span className="material-symbols-outlined text-[14px]">calendar_today</span>
-                      {formatDate(event.event_date)}
+                      {formatDate(event.date)}
                     </div>
                     <div className="flex items-center gap-xs">
                       <span className="material-symbols-outlined text-[14px]">location_on</span>

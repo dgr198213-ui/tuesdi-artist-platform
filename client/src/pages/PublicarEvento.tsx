@@ -3,8 +3,9 @@
  * Publicar Evento (/publicar-evento)
  * Diseño: Stitch "Digital Stage" (publicar_evento_tuesdi)
  *
- * Flujo: Formulario anónimo → INSERT events (status: pending) →
- *        invoke create-magic-link → redirige a /exito-publicacion?id=xxx
+ * Flujo (Opción C — sin cuenta, con validación por email):
+ * Formulario anónimo → invoke submit-event (crea evento is_published:false,
+ * rate limiting + honeypot, envía email) → redirige a /exito-publicacion?id=xxx
  */
 
 import PageNav from "@/components/PageNav";
@@ -37,12 +38,14 @@ export default function PublicarEvento() {
       title: "",
       description: "",
       category: EVENT_CATEGORIES[0],
+      location: "",
       city: "",
       country: DEFAULT_COUNTRY,
       event_date: "",
       event_time: "",
       organizer_name: "",
       organizer_email: "",
+      website: "",
     },
   });
 
@@ -50,22 +53,16 @@ export default function PublicarEvento() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo MIME permitido
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Formato no permitido", {
-        description: "Solo se aceptan JPG, PNG y WebP.",
-      });
+      toast.error("Formato no permitido", { description: "Solo se aceptan JPG, PNG y WebP." });
       e.target.value = "";
       return;
     }
 
-    // Validar tamaño máximo (5 MB)
     const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast.error("Imagen demasiado grande", {
-        description: "El tamaño máximo es 5 MB.",
-      });
+      toast.error("Imagen demasiado grande", { description: "El tamaño máximo es 5 MB." });
       e.target.value = "";
       return;
     }
@@ -94,51 +91,31 @@ export default function PublicarEvento() {
       }
     }
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 30);
+    // Combinar fecha + hora en un timestamp ISO (columna `date` es timestamptz)
+    const dateTime = new Date(`${form.event_date}T${form.event_time || "00:00"}:00`);
 
-    const { data: eventData, error: insertError } = await supabase
-      .from("events")
-      .insert([{
+    const { data, error } = await supabase.functions.invoke("submit-event", {
+      body: {
         title: form.title.trim(),
         description: form.description.trim() || null,
         category: form.category,
+        location: form.location.trim(),
         city: form.city.trim(),
-        country: form.country.trim() || DEFAULT_COUNTRY,
-        event_date: form.event_date,
-        event_time: form.event_time || null,
+        date: dateTime.toISOString(),
         image_url,
         organizer_name: form.organizer_name.trim() || null,
         organizer_email: form.organizer_email.trim(),
-        status: "pending",
-        expires_at: expiresAt.toISOString(),
-      }])
-      .select()
-      .single();
+        website: form.website, // honeypot, debe llegar vacío
+      },
+    });
 
-    if (insertError || !eventData) {
-      toast.error("No se pudo crear el evento: " + (insertError?.message || "error desconocido"));
+    if (error || !data?.success) {
+      toast.error("No se pudo crear el evento: " + (data?.error || error?.message || "error desconocido"));
       setSubmitting(false);
       return;
     }
 
-    const { data: mlData, error: mlError } = await supabase.functions.invoke("create-magic-link", {
-        body: { 
-          eventId: eventData.id, 
-          email: form.organizer_email,
-          siteUrl: window.location.origin 
-        },
-      });
-
-      if (mlError) {
-        // El evento ya está creado. El magic link falló — lo registramos pero no bloqueamos.
-        console.warn("Magic Link no se pudo generar:", mlError.message);
-      } else if (mlData?.success === false) {
-        // La Edge Function devolvió { success: false } (ej: Resend no configurado)
-        console.warn("Magic Link generado sin envío de email.");
-      }
-
-    setLocation(`/exito-publicacion?id=${eventData.id}`);
+    setLocation(`/exito-publicacion?id=${data.eventId}`);
   };
 
   return (
@@ -164,6 +141,16 @@ export default function PublicarEvento() {
         </header>
 
         <form className="space-y-md" onSubmit={rhfHandleSubmit(onSubmit)}>
+          {/* Honeypot — campo oculto, invisible para humanos, los bots lo rellenan */}
+          <input
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            className="absolute -left-[9999px] w-px h-px opacity-0"
+            aria-hidden="true"
+            {...register("website")}
+          />
+
           {/* Cover Upload */}
           <div
             className="glass-card rounded-xl p-base md:p-md text-center group cursor-pointer relative overflow-hidden transition-all duration-500 hover:border-secondary/50 min-h-[220px] flex flex-col items-center justify-center border-dashed border-2 border-white/20"
@@ -235,6 +222,18 @@ export default function PublicarEvento() {
               </div>
             </div>
 
+            {/* Location (venue) */}
+            <div className="space-y-xs">
+              <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest ml-1">Lugar / Recinto *</label>
+              <input
+                className="w-full bg-surface-container-lowest border border-white/10 rounded-lg px-md py-sm text-on-surface font-body-md focus:border-primary outline-none transition-all placeholder:text-white/20"
+                placeholder="Ej: Sala Apolo, Plaza Mayor..."
+                type="text"
+                {...register("location")}
+              />
+              {errors.location && <p className="text-red-400 text-xs ml-1">{errors.location.message}</p>}
+            </div>
+
             {/* Date + Time */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
               <div className="space-y-xs">
@@ -274,7 +273,7 @@ export default function PublicarEvento() {
           <div className="glass-card rounded-xl p-md space-y-md">
             <h3 className="font-headline-md text-headline-md text-primary">Datos del Organizador</h3>
             <p className="font-body-md text-body-md text-on-surface-variant">
-              Tus datos de contacto nunca se mostrarán públicamente. El Magic Link de confirmación se enviará al email indicado.
+              Tus datos de contacto nunca se mostrarán públicamente. El enlace de confirmación se enviará al email indicado.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
               <div className="space-y-xs">
@@ -307,7 +306,7 @@ export default function PublicarEvento() {
               <div className="space-y-xs">
                 <p className="font-label-sm text-label-sm text-secondary uppercase">¿Cómo funciona?</p>
                 <p className="font-body-md text-body-md text-on-surface-variant">
-                  Tras enviar el formulario, recibirás un <strong className="text-on-surface">Magic Link</strong> en tu email. Al hacer clic en él, el evento quedará publicado automáticamente en el directorio. Caduca a los 30 días.
+                  Tras enviar el formulario, recibirás un enlace de confirmación en tu email. Al hacer clic en él, el evento quedará publicado automáticamente en el directorio. El enlace caduca en 24 horas.
                 </p>
               </div>
             </div>
