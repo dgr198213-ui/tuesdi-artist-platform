@@ -21,11 +21,11 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Acceso() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const [email, setEmail] = useState("");
 
   // Redirigir automáticamente si ya está autenticado
-  if (!isLoading && isAuthenticated) {
+  if (!loading && isAuthenticated) {
     setLocation("/dashboard");
     return null;
   }

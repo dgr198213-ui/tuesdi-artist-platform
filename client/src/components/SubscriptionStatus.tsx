@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { PLAN_UI_VALUE } from "@/lib/constants";
 
 interface SubscriptionData {
   plan: "beta" | "standard" | "pro";
@@ -31,8 +32,8 @@ export default function SubscriptionStatus({ artistId }: SubscriptionStatusProps
       try {
         const { data, error: fetchError } = await supabase
           .from("subscriptions")
-          .select("plan, status, current_period_end, canceled_at, stripe_customer_id")
-          .eq("artist_id", artistId)
+          .select("plan, status, current_period_end, cancel_at, stripe_customer_id")
+          .eq("user_id", artistId)
           .single();
 
         if (fetchError && fetchError.code !== "PGRST116") {
@@ -41,11 +42,11 @@ export default function SubscriptionStatus({ artistId }: SubscriptionStatusProps
 
         if (data) {
           setSubscription({
-            plan: data.plan || "beta",
-            status: data.status || "active",
-            currentPeriodEnd: data.current_period_end,
-            canceledAt: data.canceled_at,
-            stripeCustomerId: data.stripe_customer_id,
+            plan: (PLAN_UI_VALUE[data.plan] as SubscriptionData["plan"]) || "beta",
+            status: (data.status as SubscriptionData["status"]) || "active",
+            currentPeriodEnd: data.current_period_end ?? undefined,
+            canceledAt: data.cancel_at ?? undefined,
+            stripeCustomerId: data.stripe_customer_id ?? undefined,
           });
         } else {
           // Sin suscripción = plan beta

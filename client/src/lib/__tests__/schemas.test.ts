@@ -155,6 +155,7 @@ describe("eventFormSchema", () => {
   const validData = {
     title: "Concierto de prueba",
     category: "Concierto",
+    location: "Sala Apolo",
     city: "Barcelona",
     event_date: "2025-08-15",
     organizer_email: "org@test.com",

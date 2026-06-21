@@ -21,13 +21,12 @@ const PAGE_SIZE = 12;
 
 interface Artist {
   id: string;
-  slug: string;
+  slug: string | null;
   artist_name: string;
-  category: string;
-  city: string;
+  category: string | null;
+  city: string | null;
   starting_price: string | null;
   profile_image: string | null;
-  verified: boolean;
   plan: string | null;
 }
 
@@ -232,11 +231,6 @@ export default function ExplorarArtistas() {
                     <div className="absolute top-md left-md flex gap-xs">
                       {artist.plan === "headliner" && (
                         <span className="bg-secondary/80 backdrop-blur-md text-black text-[10px] font-bold uppercase tracking-wider px-sm py-1 rounded">Pro</span>
-                      )}
-                      {artist.verified && (
-                        <span className="bg-primary/80 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider px-sm py-1 rounded flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verificado
-                        </span>
                       )}
                     </div>
                   </div>

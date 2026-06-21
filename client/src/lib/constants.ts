@@ -45,7 +45,11 @@ export const EVENT_CATEGORIES = [
  * de UI directamente falla con un error de enum inválido.
  * Usar SIEMPRE antes de enviar `category` a Supabase.
  */
-export const CATEGORY_DB_VALUE: Record<string, string> = {
+import type { Enums } from "./database.types";
+
+type ArtistCategoryDb = Enums<"artist_category">;
+
+export const CATEGORY_DB_VALUE: Record<string, ArtistCategoryDb> = {
   // ARTIST_CATEGORIES
   "Cantante": "musica",
   "Músico": "musica",

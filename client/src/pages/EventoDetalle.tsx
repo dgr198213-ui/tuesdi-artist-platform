@@ -145,39 +145,27 @@ export default function EventoDetalle() {
                   <p className="font-headline-md text-headline-md text-on-surface capitalize">{formatFullDate(event.event_date)}</p>
                 </div>
               </div>
-              {event.event_time && (
-                <div className="flex items-center gap-sm">
-                  <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-secondary">schedule</span>
-                  </div>
-                  <div>
-                    <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Hora</p>
-                    <p className="font-headline-md text-headline-md text-on-surface">{event.event_time}</p>
-                  </div>
+              <div className="flex items-center gap-sm">
+                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-secondary">schedule</span>
                 </div>
-              )}
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Hora</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">
+                    {new Date(event.event_date).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-sm">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-primary">location_on</span>
                 </div>
                 <div>
                   <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Ciudad</p>
-                  <p className="font-headline-md text-headline-md text-on-surface">{event.city}{event.country ? `, ${event.country}` : ""}</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">{event.city}</p>
                 </div>
               </div>
             </div>
-
-            {event.organizer_name && (
-              <div className="glass-card rounded-xl p-md flex items-center gap-md">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-primary">person</span>
-                </div>
-                <div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Organizado por</p>
-                  <p className="font-headline-md text-headline-md text-on-surface">{event.organizer_name}</p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Sidebar */}
