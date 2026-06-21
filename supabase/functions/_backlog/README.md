@@ -9,6 +9,5 @@ Estas funciones están **fuera del directorio activo** de despliegue porque no s
 | `generate-image-thumbnail` | `SUPABASE_SERVICE_ROLE_KEY` | Se implemente generación automática de thumbnails en el flujo de subida de imágenes |
 | `monitoring-and-alerts` | `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY` | Se configure un cron job de monitoreo con usuarios reales en producción |
 
-> **Nota (2026-06-19):** Movidas aquí como parte del plan de correcciones v3.0.5.
 > La carpeta `_backlog` es ignorada por el CLI de Supabase al desplegar funciones
 > (solo despliega directorios con un `index.ts` en la raíz de `functions/`).

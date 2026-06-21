@@ -2,11 +2,9 @@
  * useStripeCheckout — Hook para manejar sesiones de Stripe Checkout
  * Integra con la Edge Function create-checkout-session
  *
- * @backlog (2026-06-19) — HOOK NO ACTIVO
- * Solo es importado por SubscriptionPlans.tsx, que tampoco está enrutado.
- * Requiere la Edge Function `create-checkout-session` desplegada y el
- * secret `STRIPE_SECRET_KEY` configurado en Supabase.
- * Activar cuando se habilite la monetización real con Stripe.
+ * HOOK EN DESARROLLO — NO ACTIVO
+ * Se utiliza para la integración con Stripe Checkout.
+ * Actualmente se mantiene como base para futura monetización.
  */
 
 import { useState } from "react";
