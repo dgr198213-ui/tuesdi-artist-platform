@@ -40,10 +40,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // En el esquema real, el perfil del artista ES el usuario (profiles.id = auth.users.id)
+    // Obtener datos del artista
     const { data: artist, error: artistError } = await supabase
-      .from("profiles")
-      .select("id, display_name")
+      .from("artists")
+      .select("id, artist_name, user_id")
       .eq("id", artistId)
       .single();
 
@@ -54,8 +54,8 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Verificar que el usuario existe en auth (artistId === user_id)
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(artistId);
+    // Verificar que el usuario es propietario del artista
+    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(artist.user_id);
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: "Usuario no autorizado" }),
@@ -63,13 +63,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Obtener o crear customer en Stripe (subscriptions usa user_id, no artist_id)
+    // Obtener o crear customer en Stripe
     let customerId: string;
     const { data: subscription } = await supabase
       .from("subscriptions")
       .select("stripe_customer_id")
-      .eq("user_id", artistId)
-      .maybeSingle();
+      .eq("artist_id", artistId)
+      .single();
 
     if (subscription?.stripe_customer_id) {
       customerId = subscription.stripe_customer_id;
@@ -83,8 +83,8 @@ Deno.serve(async (req: Request) => {
         },
         body: new URLSearchParams({
           email: user.email || "",
-          name: artist.display_name ?? "",
-          metadata: JSON.stringify({ user_id: artistId }),
+          name: artist.artist_name,
+          metadata: JSON.stringify({ artist_id: artistId }),
         }).toString(),
       });
 
@@ -96,22 +96,14 @@ Deno.serve(async (req: Request) => {
       customerId = customer.id;
 
       // Guardar customer_id en Supabase
-      const { data: existingSub } = await supabase
+      await supabase
         .from("subscriptions")
-        .select("id")
-        .eq("user_id", artistId)
-        .maybeSingle();
-
-      if (existingSub) {
-        await supabase
-          .from("subscriptions")
-          .update({ stripe_customer_id: customerId, plan })
-          .eq("user_id", artistId);
-      } else {
-        await supabase
-          .from("subscriptions")
-          .insert({ user_id: artistId, stripe_customer_id: customerId, plan, status: "active" });
-      }
+        .upsert({
+          artist_id: artistId,
+          stripe_customer_id: customerId,
+          plan,
+          status: "active",
+        }, { onConflict: "artist_id" });
     }
 
     // Crear sesión de Checkout
@@ -127,7 +119,7 @@ Deno.serve(async (req: Request) => {
         mode: "subscription",
         success_url: `${siteUrl}/dashboard?success=true`,
         cancel_url: `${siteUrl}/planes?canceled=true`,
-        metadata: JSON.stringify({ user_id: artistId, plan }),
+        metadata: JSON.stringify({ artist_id: artistId, plan }),
       }).toString(),
     });
 

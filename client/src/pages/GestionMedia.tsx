@@ -8,12 +8,13 @@ import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { PLAN_LIMITS, PLAN_UI_VALUE } from "@/lib/constants";
+import { PLAN_LIMITS } from "@/lib/constants";
 
 interface MediaItem {
   id: string;
-  type: "image" | "video";
+  type: "photo" | "video";
   url: string;
+  thumbnail: string | null;
   position: number;
 }
 
@@ -36,19 +37,19 @@ export default function GestionMedia() {
       setUserId(session.user.id);
 
       const { data: artist } = await supabase
-        .from("profiles")
-        .select("id, plan")
-        .eq("id", session.user.id)
+        .from("artists")
+        .select("id, subscription_plan")
+        .eq("user_id", session.user.id)
         .maybeSingle();
 
       if (!artist) { setLoading(false); return; }
       setArtistId(artist.id);
-      setPlan(PLAN_UI_VALUE[artist.plan ?? ""] || "beta");
+      setPlan(artist.subscription_plan || "beta");
 
       const { data } = await supabase
         .from("media")
-        .select("id, type, url, position")
-        .eq("user_id", artist.id)
+        .select("id, type, url, thumbnail, position")
+        .eq("artist_id", artist.id)
         .order("position", { ascending: true });
 
       setMedia((data || []) as MediaItem[]);
@@ -58,7 +59,7 @@ export default function GestionMedia() {
   }, []);
 
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.beta;
-  const photos = media.filter((m) => m.type === "image");
+  const photos = media.filter((m) => m.type === "photo");
   const videos = media.filter((m) => m.type === "video");
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,9 +95,10 @@ export default function GestionMedia() {
       if (upErr) continue;
       const { data: urlData } = supabase.storage.from("artist-media").getPublicUrl(path);
       const { data: newItem } = await supabase.from("media").insert([{
-        user_id: artistId,
-        type: "image",
+        artist_id: artistId,
+        type: "photo",
         url: urlData.publicUrl,
+        thumbnail: urlData.publicUrl,
         position: media.length + 1,
       }]).select().single();
       if (newItem) setMedia((prev) => [...prev, newItem as MediaItem]);
@@ -109,9 +111,10 @@ export default function GestionMedia() {
     if (videos.length >= limits.videos) { toast.error(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`); return; }
 
     const { data: newItem } = await supabase.from("media").insert([{
-      user_id: artistId,
+      artist_id: artistId,
       type: "video",
       url: videoUrl,
+      thumbnail: null,
       position: media.length + 1,
     }]).select().single();
 
@@ -209,7 +212,7 @@ export default function GestionMedia() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-md">
           {media.map((item) => (
             <div key={item.id} className="relative aspect-square group rounded-xl overflow-hidden glass-card">
-              {item.type === "image" ? (
+              {item.type === "photo" ? (
                 <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={item.url} alt="" />
               ) : (
                 <div className="w-full h-full bg-surface-container flex flex-col items-center justify-center gap-sm">
@@ -232,7 +235,7 @@ export default function GestionMedia() {
               </div>
               <div className="absolute top-xs left-xs">
                 <span className="bg-black/60 backdrop-blur-md px-xs py-[2px] rounded font-label-sm text-[10px] uppercase text-on-surface-variant">
-                  {item.type === "image" ? "Foto" : "Vídeo"}
+                  {item.type === "photo" ? "Foto" : "Vídeo"}
                 </span>
               </div>
             </div>

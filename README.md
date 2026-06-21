@@ -1,228 +1,414 @@
-# TUESDI — Tu Escenario Digital
+# TUESDI — Tu Escenario Digital.
 
-*Tu escaparate digital para artistas.*
+*Tu escaparate digital para artistas.**  
 Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales.
 
-🌐 **Producción:** [tuesdi-artist-platform.vercel.app](https://tuesdi-artist-platform.vercel.app)
+🌐 **Producción:** [tuesdi-artist-platform.vercel.app](https://tuesdi-artist-platform.vercel.app)  
 📦 **Repositorio:** [github.com/dgr198213-ui/tuesdi-artist-platform](https://github.com/dgr198213-ui/tuesdi-artist-platform)
-
-> ⚠️ Este README refleja el estado **real y verificado** del código y la base de datos en producción (auditado directamente contra Supabase y GitHub, con build/tests/tsc ejecutados de verdad). Si algo aquí no coincide con lo que ves en el código, este documento es la fuente de verdad — actualízalo en el mismo commit que cambie la arquitectura. Ver también `docs/adr/` para decisiones documentadas.
 
 ---
 
 ## ¿Qué es TUESDI?
 
-TUESDI es una plataforma de **visibilidad artística** diseñada para que los artistas dispongan de un perfil profesional público donde mostrar su trabajo y recibir solicitudes de contacto de forma privada y segura. Paralelamente ofrece un **directorio público de eventos culturales**, abierto a cualquiera (sin necesidad de cuenta).
+TUESDI es una plataforma de **visibilidad artística** diseñada para que los artistas dispongan de un perfil profesional público donde mostrar su trabajo y recibir solicitudes de contacto de forma privada y segura.
+
+Paralelamente ofrece un **directorio público de eventos culturales y artísticos**.
 
 ### TUESDI es:
-- Un escaparate digital para artistas
-- Un directorio de eventos culturales
+- Un escaparate digital
+- Un directorio de artistas
+- Un directorio de eventos
+- Una plataforma de visibilidad
 - Un sistema de descubrimiento de talento
 
 ### TUESDI NO es:
 - Una agencia artística ni marketplace
 - Una plataforma de reservas o contratación
-- Una red social ni sistema de mensajería pública
+- Un gestor de pagos ni intermediario comercial
+- Una red social ni sistema de mensajería
 
 ---
 
 ## Stack Tecnológico
 
-| Capa | Tecnología |
-|------|-----------|
-| Frontend | React 19 + Vite 7 |
-| Estilos | Tailwind CSS v4 |
-| Routing | Wouter |
-| Backend / DB | Supabase (PostgreSQL + Auth + Edge Functions) |
-| Tipos | `client/src/lib/database.types.ts`, generado desde el esquema real (ver ADR 001) |
-| Email transaccional | Resend |
-| Pagos | Stripe (parcialmente integrado, ver estado abajo) |
-| Hosting | Vercel |
-| CI | GitHub Actions (`pnpm check` + `test` + `build` en cada push/PR a `main`) |
-| Gestor de paquetes | pnpm |
+| Capa | Tecnología | Versión |
+|------|-----------|---------|
+| Frontend | React + Vite | React 19.2, Vite 7.1 |
+| Estilos | Tailwind CSS v4 | 4.1.14 |
+| Routing | Wouter | 3.3.5 |
+| Backend / DB | Supabase | supabase-js 2.108 |
+| Email | Resend | via Edge Functions |
+| Hosting | Vercel | — |
+| Control de versiones | GitHub | — |
+| Fuentes | Montserrat + Inter + Material Symbols | Google Fonts |
 
 ---
 
-## Base de Datos (Supabase — esquema real verificado, tipos generados)
+## Arquitectura del Proyecto
 
-**`profiles`** — Perfil de artista. `profiles.id` ES `auth.users.id` (no hay tabla `artists` separada; nunca ha existido).
-`id, slug, display_name, category (enum artist_category), city, country, bio, avatar_url, cover_url, price_from (numeric), price_note (text libre), instagram, youtube, spotify, website, rating, reviews_count, plan (enum artist_plan: spark/spotlight/headliner), is_published, requirements, organizer_name, organizer_email, organizer_phone, organizer_company, organizer_website, created_at, updated_at`
+```
+tuesdi-artist-platform/
+├── client/
+│   ├── index.html                    # Fuentes Google Fonts + Material Symbols
+│   └── src/
+│       ├── App.tsx                   # Enrutador principal (wouter Switch)
+│       ├── index.css                 # Sistema de diseño Stitch v3.0 (tokens M3)
+│       ├── lib/
+│       │   └── supabase.ts           # Cliente Supabase
+│       ├── components/
+│       │   ├── DashboardShell.tsx    # Layout sidebar + topbar del panel privado
+│       │   ├── ProtectedRoute.tsx    # HOC de rutas autenticadas
+│       │   ├── ErrorBoundary.tsx
+│       │   └── ui/                   # Componentes shadcn/ui
+│       └── pages/
+│           ├── Home.tsx              # Portada principal
+│           ├── Acceso.tsx            # Login/Registro via Magic Link
+│           ├── EnlaceEnviado.tsx     # Confirmación de envío del Magic Link
+│           ├── ExplorarArtistas.tsx  # Directorio de artistas con filtros
+│           ├── ArtistaProfile.tsx    # Perfil público individual (/artista/:slug)
+│           ├── Eventos.tsx           # Directorio de eventos con filtros
+│           ├── EventoDetalle.tsx     # Detalle de evento (/eventos/:id)
+│           ├── PublicarEvento.tsx    # Formulario anónimo de publicación
+│           ├── ExitoPublicacion.tsx  # Confirmación pendiente (Magic Link enviado)
+│           ├── ConfirmarEvento.tsx   # Validación del token (/confirmar-evento/:token)
+│           ├── Precios.tsx           # Planes Beta / Standard / Pro
+│           ├── Dashboard.tsx         # Overview del panel privado
+│           ├── EditorPerfil.tsx      # Editor de perfil artístico
+│           ├── BandejaContactos.tsx  # Solicitudes de contacto recibidas
+│           ├── GestionMedia.tsx      # Galería multimedia (fotos + vídeos)
+│           ├── Analitica.tsx         # Métricas de rendimiento del perfil
+│           ├── Contacto.tsx          # Formulario de contacto con TUESDI
+│           ├── QuienesSomos.tsx      # Página informativa
+│           ├── AvisoLegal.tsx
+│           ├── PoliticaPrivacidad.tsx
+│           ├── PoliticaCookies.tsx
+│           └── TerminosServicio.tsx
+├── supabase/
+│   ├── functions/
+│   │   ├── create-magic-link/        # Genera y envía Magic Link HMAC-SHA256 via Resend
+│   │   ├── confirm-event/            # Valida token y aprueba el evento (status → approved)
+│   │   └── send-welcome-email/       # Email de bienvenida via Resend
+│   └── migrations/
+│       ├── 001_inicial_tuesdi.sql    # Esquema principal v3.0.1
+│       ├── 002_editor_perfil.sql     # Bucket artist-media + políticas storage
+│       └── 20260524112351.sql        # Roles, profiles, handle_new_user
+├── supabase_setup_completo.sql       # Script de alineación de esquema (BDs existentes)
+├── tuesdi_fix_completo.sql           # Script de corrección completa (idempotente)
+└── vercel.json                       # SPA rewrite rule
+```
 
-**`user_roles`** — `id, user_id, role (enum app_role: admin/artist/organizer), created_at`
+---
 
-**`media`** — Galería del perfil. Relación por `user_id`, no `artist_id`.
-`id, user_id, type (enum media_type: image/video), url, storage_path, duration_seconds, position, created_at`
+## Rutas de la Aplicación
 
-**`events`** — Eventos culturales. Publicación anónima (Opción C).
-`id, organizer_id (nullable, FK auth.users), title, description, category (enum artist_category), date (timestamptz), location, city, budget_min, budget_max, image_url, is_published, organizer_email, verification_token_hash, verification_expires_at, created_at, updated_at`
+### Públicas
 
-**`event_submission_log`** — Rate limiting compartido (eventos y contacto a artistas) por IP/email.
-`id, ip, email, created_at`
+| Ruta | Página | Descripción |
+|------|--------|-------------|
+| `/` | Home | Portada con artistas destacados, eventos y planes |
+| `/acceso` | Acceso | Login y registro via Magic Link (sin contraseñas) |
+| `/enlace-enviado` | EnlaceEnviado | Confirmación de envío del Magic Link de acceso |
+| `/artistas` | ExplorarArtistas | Directorio de artistas con búsqueda y filtros |
+| `/artista/:slug` | ArtistaProfile | Perfil público del artista + formulario de contacto privado |
+| `/eventos` | Eventos | Directorio de eventos culturales |
+| `/eventos/:id` | EventoDetalle | Detalle del evento + contacto con organizador |
+| `/publicar-evento` | PublicarEvento | Formulario anónimo de publicación de eventos |
+| `/exito-publicacion` | ExitoPublicacion | Pantalla "pendiente de confirmación" |
+| `/confirmar-evento/:token` | ConfirmarEvento | Validación del Magic Link de evento |
+| `/planes` | Precios | Comparativa de planes Beta / Standard / Pro |
+| `/quienes-somos` | QuienesSomos | Información sobre TUESDI |
+| `/contacto` | Contacto | Formulario de contacto con el equipo |
+| `/aviso-legal` | AvisoLegal | Aviso legal |
+| `/politica-privacidad` | PoliticaPrivacidad | Política de privacidad |
+| `/politica-cookies` | PoliticaCookies | Política de cookies |
+| `/terminos-servicio` | TerminosServicio | Términos del servicio |
 
-**`favorites`** — `id, user_id, artist_id, created_at`
+### Privadas (requieren sesión autenticada)
 
-**`subscriptions`** — Suscripciones Stripe. Relación por `user_id`, no `artist_id`.
-`id, user_id, stripe_customer_id, stripe_subscription_id, plan (enum artist_plan), status, current_period_start, current_period_end, cancel_at, created_at, updated_at`
+| Ruta | Página | Descripción |
+|------|--------|-------------|
+| `/dashboard` | Dashboard | Overview: métricas, actividad reciente, multimedia |
+| `/dashboard/perfil` | EditorPerfil | Editor de perfil artístico + imágenes |
+| `/dashboard/contactos` | BandejaContactos | Bandeja de solicitudes de contacto recibidas |
+| `/dashboard/media` | GestionMedia | Galería de fotos y vídeos (límites por plan) |
+| `/dashboard/analitica` | Analitica | Métricas de rendimiento y tasa de conversión |
 
-**`messages`** — Mensajería interna + contacto anónimo a artistas.
-`id, sender_id (nullable — null cuando es un visitante anónimo vía contact-artist), recipient_id, sender_name, sender_email, subject, body, is_read, created_at`
+---
 
-### Enums Postgres
-- `artist_category`: musica, teatro, magia, comedia, danza, dj, circo, arte, foto_video
-- `artist_plan`: spark, spotlight, headliner *(el resto del código usa beta/standard/pro — ver `PLAN_DB_VALUE`/`PLAN_UI_VALUE` en `constants.ts`)*
-- `app_role`: admin, artist, organizer
-- `media_type`: image, video
+## Base de Datos (Supabase)
 
-⚠️ Las etiquetas de categoría en español de la UI (`"Música"`, `"Cantante"`...) **no coinciden** con los valores del enum. Usar siempre `CATEGORY_DB_VALUE` (`constants.ts`) antes de mandar `category` a Supabase.
+### Tablas principales
+
+**`artists`** — Perfiles de artistas  
+`id, user_id, slug, artist_name, bio, category, city, country, starting_price, website, instagram, youtube, spotify, tiktok, profile_image, cover_image, subscription_plan, verified, created_at, updated_at`
+
+**`contact_requests`** — Solicitudes de contacto (privadas)  
+`id, artist_id, sender_name, sender_email, sender_phone, subject, message, status (new/read/archived), created_at, updated_at`
+
+**`metrics`** — Métricas de visibilidad del artista  
+`id, artist_id, profile_views, search_impressions, contact_clicks, contacts_received, recorded_at`
+
+**`subscriptions`** — Suscripciones Stripe  
+`id, artist_id, stripe_customer_id, stripe_subscription_id, plan, status, current_period_end, created_at`
+
+**`media`** — Galería multimedia del artista  
+`id, artist_id, type (photo/video), url, thumbnail, position, created_at`
+
+**`events`** — Eventos culturales  
+`id, title, description, category, city, country, event_date, event_time, image_url, organizer_name, organizer_email, status (pending/approved/rejected/expired), expires_at, created_at`
+
+**`magic_links`** — Tokens HMAC-SHA256 para confirmación de eventos  
+`id, event_id, token_hash, email, expires_at, used, created_at`
 
 ### Storage
-**`artist-media`** — Bucket público para fotos/vídeos de perfil y eventos.
 
-### Regenerar tipos tras cualquier migración
-```bash
-npx supabase gen types typescript --project-id nbhaacqjqhpofuvfztkz --schema public > client/src/lib/database.types.ts
-```
-Sin esto, `pnpm check` no detectará referencias a columnas que ya no existen.
+**`artist-media`** — Bucket público para fotos de perfil, portadas y multimedia  
+- Lectura pública
+- Escritura restringida a la carpeta propia del usuario (`<user_id>/...`)
 
 ---
 
 ## Edge Functions
 
-| Función | Estado | Propósito |
-|---|---|---|
-| `submit-event` | ✅ Activa | Publicar evento sin cuenta (honeypot + rate limit 5/IP/día, 10/email/mes), crea evento `is_published:false` + token hasheado, envía email de verificación |
-| `verify-event` | ✅ Activa | Valida `/confirmar-evento/:token` (formato `eventId.random`) y publica el evento |
-| `contact-artist` | ✅ Activa | Formulario "Contactar Artista" sin cuenta (honeypot + rate limit 10/IP/día, 5/email/día), inserta en `messages` y notifica al artista por email |
-| `get-public-profile` | ✅ Activa | Perfil público de artista por `slug` + media + relacionados |
-| `get-events` | ✅ Activa | Lista eventos publicados con filtros (búsqueda, categoría, ciudad) |
-| `send-contact-email` | ✅ Activa | Formulario de contacto general del sitio (`/contacto`, no por artista) |
-| `send-welcome-email` | ✅ Activa | Email de bienvenida tras el primer acceso |
-| `create-checkout-session` | ✅ Activa, **UI no enrutada** | Stripe Checkout. Lista para activar (`SubscriptionPlans.tsx`/`useStripeCheckout.ts` marcados `@backlog`) |
+### `create-magic-link`
+Genera un token HMAC-SHA256 para confirmar la publicación de un evento y lo envía por email via **Resend**.
 
-`supabase/functions/_backlog/` — funciones retiradas: `create-magic-link`, `confirm-event` (sistema anterior, dependía de tabla `magic_links` que nunca existió; reemplazado por `submit-event`/`verify-event`).
+**Secrets requeridos:**
+- `MAGIC_LINK_SECRET` — Clave secreta para firmar el token
+- `RESEND_API_KEY` — Clave de la API de Resend
+- `SITE_URL` — URL base de producción
 
-**Secrets requeridos** (Supabase Dashboard → Edge Functions → Secrets):
-```
-RESEND_API_KEY=re_...
-SITE_URL=https://tuesdi-artist-platform.vercel.app
-STRIPE_SECRET_KEY=sk_test_... (solo para create-checkout-session)
-```
+### `confirm-event`
+Valida el token HMAC recibido desde `/confirmar-evento/:token`, verifica que no haya sido usado ni caducado, y actualiza el evento a `status = "approved"`.
+
+**Secrets requeridos:**
+- `MAGIC_LINK_SECRET` — Debe ser idéntico al de `create-magic-link`
 
 ---
 
 ## Flujos Principales
 
-### Autenticación (Magic Link nativo de Supabase, mismo flujo para alta y vuelta a entrar)
+### Autenticación de Artistas (Magic Link)
 ```
 Usuario → /acceso → supabase.auth.signInWithOtp({ email })
-       → Si el email no existe: Supabase lo crea automáticamente
-         (trigger on_auth_user_created → handle_new_user() crea profiles + user_roles)
-       → Si ya existe: inicia sesión sin duplicar nada
-       → emailRedirectTo FIJO a producción (no window.location.origin, ver Notas de Arquitectura)
-       → Clic en email → sesión activa → /dashboard
-       → Si ya hay sesión activa y se visita /acceso, redirige solo a /dashboard
+       → Email con enlace de Supabase Auth
+       → Clic en enlace → sesión activa → /dashboard
 ```
 
-### Publicación de Eventos — "Opción C" (sin cuenta, con validación por email)
+### Publicación de Eventos (Anónima)
 ```
-Organizador → /publicar-evento → invoke submit-event
-   → INSERT events (is_published: false) + token hasheado (SHA-256, formato eventId.random)
-   → Email con enlace /confirmar-evento/:token
-   → Clic → invoke verify-event → is_published: true → visible en /eventos
+Organizador → /publicar-evento → INSERT events (status: pending)
+           → invoke create-magic-link → Email con token HMAC
+           → /exito-publicacion (pendiente de confirmación)
+           → Clic en email → /confirmar-evento/:token
+           → invoke confirm-event → status: approved
+           → Evento visible en /eventos
 ```
 
-### Contacto con Artistas — mismo patrón (sin cuenta, con safeguards)
+### Contacto con Artistas (Privado)
 ```
-Visitante → /artista/:slug → invoke contact-artist
-   → INSERT messages (sender_id: null, sender_name/email del visitante)
-   → Notificación por email al artista (best-effort)
-   → Artista lo ve en /dashboard/contactos (RLS: solo recipient_id = auth.uid())
+Visitante → /artista/:slug → "Contactar Artista"
+         → INSERT contact_requests (privado)
+         → Artista ve el mensaje en /dashboard/contactos
+         → Artista responde por email (sin intermediación)
 ```
 
 ---
 
-## Notas de Arquitectura (decisiones deliberadas — no revertir sin leer esto)
+## Variables de Entorno
 
-- **No existe tabla `artists`.** Nunca ha existido. El perfil del artista vive en `profiles`, y `profiles.id = auth.users.id` directamente. El cliente de Supabase está tipado (`createClient<Database>`) precisamente para que esto no vuelva a pasar desapercibido — confía en los errores de `pnpm check`, no en memoria.
-- **`emailRedirectTo` en `Acceso.tsx` está hardcoded a la URL de producción**, no a `window.location.origin`. Cada deploy de Vercel genera una URL de preview aleatoria que no está en la whitelist de Supabase Auth; usar el origin dinámico rompe el login en cualquier preview.
-- **Eventos y contacto a artistas no requieren cuenta** (`events.organizer_id` y `messages.sender_id` son nullable a propósito). No reintroducir login obligatorio en estos flujos sin discutirlo — es una decisión de producto explícita.
-- **Las categorías de la UI no son los valores del enum.** Usar siempre `CATEGORY_DB_VALUE`.
-- **No hay tabla de métricas históricas real** (`profile_views`, `search_impressions`...). `Analitica.tsx`/`Dashboard.tsx` dejan esos datos vacíos deliberadamente en vez de inventarlos.
+### Vercel (variables de entorno del frontend)
+
+```env
+VITE_SUPABASE_URL=https://xseupkmaosjdrgdsdpmj.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+```
+
+### Supabase Edge Functions (secrets)
+
+```
+MAGIC_LINK_SECRET=<string aleatorio 32+ caracteres>
+RESEND_API_KEY=re_...
+SITE_URL=https://tuesdi-artist-platform.vercel.app
+```
 
 ---
 
-## Estado del Proyecto (verificado con build real, no aspiracional)
+## Sistema de Diseño
 
-| Módulo | Estado |
-|---|---|
-| Login Magic Link (Supabase nativo) | ✅ Funcional |
-| Registro de perfil de artista (`/dashboard/perfil`) | ✅ Funcional (corregido — antes ningún artista podía guardar) |
-| Directorio de Artistas / Perfil público | ✅ Funcional |
-| Directorio de Eventos | ✅ Funcional |
-| Publicación de Eventos (Opción C) | ✅ Funcional |
-| Contactar Artista (sin cuenta) | ✅ Funcional |
-| Dashboard / Multimedia / Bandeja de contactos | ✅ Funcional |
-| Analítica | 🟡 Funcional pero sin histórico real (no hay tabla de métricas) |
-| Suscripciones Stripe | 🟡 Backend listo, **UI no enrutada** — pendiente activar monetización. Precios de test en Stripe (9.99€/19.99€) no coinciden con los planeados (6€/9.99€) |
-| Roles (admin/artist/organizer) | 🟡 Tabla y enum existen, sin UI de gestión |
-| Favoritos | 🟡 Tabla existe, sin UI |
-| CI (GitHub Actions) | ✅ Activo desde 21 jun 2026 |
+TUESDI v3.0 usa el sistema de diseño **"Digital Stage"** creado con Stitch, basado en Material Design 3 con estética oscura, profesional e inspirada en escenarios en vivo.
+
+### Colores de Marca
+| Token | Color | Uso |
+|-------|-------|-----|
+| `primary` | `#0081FF` | Azul principal, botones CTA, acentos |
+| `secondary` | `#00DBFF` | Azul Capri, elementos activos, neón |
+| `background` | `#000000` | Fondo principal |
+| `on-surface` | `#E2E2E2` | Texto principal |
+
+### Tipografía
+- **Montserrat** — Titulares (`font-headline-*`)
+- **Inter** — Cuerpo de texto (`font-body-*`, `font-label-*`)
+- **Material Symbols Outlined** — Iconografía
+
+### Clases de Efecto Personalizadas
+| Clase | Efecto |
+|-------|--------|
+| `.glass-card` | Glassmorphism con backdrop-blur y borde sutil |
+| `.bloom-primary` | Resplandor azul (box-shadow) |
+| `.neon-border` | Borde con brillo cian al hover |
+| `.spotlight` | Gradiente radial de fondo |
+| `.pulse-live` | Animación de pulso para indicadores "en vivo" |
+
+---
+
+## Planes de Suscripción
+
+| Plan | Precio | Fotos | Vídeos | Métricas | Posicionamiento |
+|------|--------|-------|--------|----------|-----------------|
+| **Beta** | 0 €/mes | 1 | — | Básicas | Estándar |
+| **Standard** | 6 €/mes | 3 | 1 | Ampliadas | Mejorado |
+| **Pro** | 9,99 €/mes | 3 | 3 | Avanzadas + tendencias | Prioridad + distintivo Pro |
+
+La gestión de suscripciones se realizará vía **Stripe** (pendiente de integración en fase posterior).
 
 ---
 
 ## Configuración y Despliegue
 
-### 1. Clonar e instalar
+### 1. Clonar e instalar dependencias
+
 ```bash
 git clone https://github.com/dgr198213-ui/tuesdi-artist-platform.git
 cd tuesdi-artist-platform
 pnpm install
 ```
 
-### 2. Variables de entorno (Vercel / `.env` local)
-```env
-VITE_SUPABASE_URL=https://nbhaacqjqhpofuvfztkz.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGci...
+### 2. Variables de entorno locales
+
+```bash
+cp .env.example .env
+# Edita .env con tus valores de Supabase
 ```
 
-### 3. Edge Functions
+### 3. Ejecutar migraciones de base de datos
+
+Ejecuta en **Supabase → SQL Editor** en este orden:
+1. `supabase/migrations/001_inicial_tuesdi.sql`
+2. `supabase/migrations/002_editor_perfil.sql`
+3. `supabase_setup_completo.sql` (alineación adicional de esquema)
+
+### 4. Desplegar Edge Functions
+
 ```bash
-supabase link --project-ref nbhaacqjqhpofuvfztkz
+# Instala Supabase CLI si no lo tienes
+npm install -g supabase
+
+# Login y link al proyecto
+supabase login
+supabase link --project-ref xseupkmaosjdrgdsdpmj
+
+# Configurar secrets
+supabase secrets set MAGIC_LINK_SECRET=<tu-secreto>
 supabase secrets set RESEND_API_KEY=re_...
 supabase secrets set SITE_URL=https://tuesdi-artist-platform.vercel.app
 
-supabase functions deploy submit-event verify-event contact-artist \
-  get-public-profile get-events send-contact-email send-welcome-email create-checkout-session
+# Desplegar funciones
+supabase functions deploy create-magic-link
+supabase functions deploy confirm-event
 ```
 
-### 4. Desarrollo local y validación
+### 5. Desarrollo local
+
 ```bash
-pnpm dev      # http://localhost:5173
-pnpm check    # tsc --noEmit
-pnpm test     # vitest run
-pnpm build    # build de producción
+pnpm dev
+# Disponible en http://localhost:5173
 ```
-Estos 3 últimos comandos son los que corre CI en cada push — ejecútalos localmente antes de pushear si haces cambios manuales.
 
-### 5. Pendiente de configuración manual (Supabase Dashboard)
-- **Authentication → URL Configuration → Redirect URLs**: añadir `https://tuesdi-artist-platform.vercel.app/**`
-- **Authentication → Settings**: activar "Leaked password protection"
-- Verificar que `RESEND_API_KEY` y `SITE_URL` están en Edge Functions → Secrets
+### 6. Build de producción
+
+```bash
+pnpm build
+```
 
 ---
 
 ## Principios Irrenunciables
 
 - ✅ Sin exposición de datos personales del artista
-- ✅ Sin pagos entre usuarios ni comisiones sobre contratos
-- ✅ Sin intermediación en acuerdos entre artista y promotor
-- ✅ Publicación de eventos y contacto sin fricción: sin cuenta, sin panel, solo email
-- ✅ Métricas reales — nunca datos simulados en producción
+- ✅ Sin chat interno — comunicación directa entre partes
+- ✅ Sin pagos entre usuarios ni comisiones
+- ✅ Sin intermediación en acuerdos
+- ✅ Métricas reales — sin datos falsos
+- ✅ Magic Link obligatorio para acceso y publicación de eventos
 - ✅ Uso exclusivo para mayores de 18 años
+- ✅ Artistas y eventos como ecosistemas separados
+- ✅ El perfil artístico es el núcleo del producto
+
+---
+
+## Fases de Desarrollo
+
+### Fase 1: Seguridad y Monetización ✅
+- Corrección de políticas RLS para eventos pendientes
+- Integración completa con Stripe (webhooks, sesiones de pago, componentes)
+- Validación robusta de entrada en Edge Functions
+- Sistema de suscripciones funcional
+
+### Fase 2: Optimización de Escala ✅
+- Optimización de imágenes (compresión en cliente, transformación en tiempo real)
+- Estrategia de caché SWR en frontend
+- Índices de base de datos para búsquedas ultra-rápidas
+- Políticas de retención automática de datos
+- Monitorización y alertas de costes
+
+### Fase 3: Refinamiento de UX ✅
+- Sistema de Skeleton Loaders para estados de carga
+- Empty States ilustrados y contextuales
+- Status Messages con animaciones
+- Error Boundary mejorado con recuperación
+- Accesibilidad WCAG AA completa
+- Navegación móvil (Bottom Nav)
+- Sistema de animaciones y transiciones
+
+---
+
+## Estado del Proyecto
+
+**v3.0.4** — Fases 1-3 completadas. Optimización y refinamiento en producción.
+
+| Módulo | Estado |
+|--------|--------|
+| Sistema de diseño Stitch "Digital Stage" | ✅ Integrado |
+| Home | ✅ Integrado |
+| Acceso / Magic Link de artistas | ✅ Integrado |
+| Directorio de Artistas | ✅ Integrado |
+| Perfil Público de Artista | ✅ Integrado |
+| Directorio de Eventos | ✅ Integrado |
+| Detalle de Evento | ✅ Integrado |
+| Publicación de Eventos (Magic Link anónimo) | ✅ Integrado |
+| Dashboard Overview | ✅ Integrado |
+| Editor de Perfil | ✅ Integrado |
+| Bandeja de Contactos | ✅ Integrado |
+| Gestión Multimedia | ✅ Integrado |
+| Analítica | ✅ Integrado |
+| Páginas Legales | ✅ Integrado |
+| Suscripciones Stripe | ✅ Fase 1 Completada |
+| Optimización de Imágenes | ✅ Fase 2 Completada |
+| Caché y Rendimiento BD | ✅ Fase 2 Completada |
+| Accesibilidad (A11y) | ✅ Fase 3 Completada |
+| Componentes de UX | ✅ Fase 3 Completada |
+| Slug/rutas `/artistas` → `/explorar-artistas` | 🔜 Fase posterior |
+| Verificación de artistas | 🔜 Fase posterior |
+| Notificaciones de nuevos contactos | 🔜 Fase posterior |
 
 ---
 
 ## Autor
 
-**Daniel García**
-README actualizado tras auditoría técnica completa + tipado generado + CI — 21 junio 2026
+**Daniel García**  
+Documento Maestro Oficial TUESDI v3.0 — Junio 2026
+
+---
+
+*TUESDI aspira a convertirse en el escaparate digital de referencia para artistas independientes y profesionales.*

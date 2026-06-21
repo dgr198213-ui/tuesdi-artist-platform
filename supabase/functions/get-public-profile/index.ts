@@ -40,14 +40,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 1. Obtener perfil por slug (tabla real: profiles)
+    // 1. Obtener artista por slug
     const { data: artist, error: artistError } = await supabase
-      .from("profiles")
+      .from("artists")
       .select(
-        "id, slug, display_name, bio, category, city, country, price_from, price_note, rating, reviews_count, avatar_url, cover_url, plan, is_published, instagram, youtube, spotify, website"
+        "id, slug, artist_name, bio, category, city, country, starting_price, website, instagram, youtube, spotify, profile_image, cover_image, verified"
       )
       .eq("slug", slug.trim())
-      .eq("is_published", true)
       .maybeSingle();
 
     if (artistError || !artist) {
@@ -57,62 +56,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 2. Obtener media del perfil ordenada por posición (relación real: user_id)
+    // 2. Obtener media del artista ordenada por posición
     const { data: media, error: mediaError } = await supabase
       .from("media")
-      .select("id, type, url, position")
-      .eq("user_id", artist.id)
+      .select("id, type, url, thumbnail, position")
+      .eq("artist_id", artist.id)
       .order("position", { ascending: true });
 
     if (mediaError) throw mediaError;
 
-    // 3. Obtener perfiles relacionados (misma categoría, diferente id, publicados)
+    // 3. Obtener artistas relacionados (misma categoría, diferente id)
     const { data: related, error: relatedError } = await supabase
-      .from("profiles")
-      .select("slug, display_name, category, avatar_url")
+      .from("artists")
+      .select("slug, artist_name, category, profile_image")
       .eq("category", artist.category)
-      .eq("is_published", true)
       .neq("id", artist.id)
       .limit(4);
 
     if (relatedError) throw relatedError;
 
-    // Mapeo a los nombres de campo que espera ArtistaProfile.tsx.
-    // Campos que ya no existen en el esquema real (instagram, youtube,
-    // spotify, website, verified, country) se devuelven como null/false
-    // para que el renderizado condicional del frontend los omita sin error.
-    const artistMapped = {
-      id: artist.id,
-      slug: artist.slug,
-      artist_name: artist.display_name,
-      bio: artist.bio,
-      category: artist.category,
-      city: artist.city,
-      country: artist.country,
-      starting_price: artist.price_note ?? artist.price_from,
-      website: artist.website,
-      instagram: artist.instagram,
-      youtube: artist.youtube,
-      spotify: artist.spotify,
-      profile_image: artist.avatar_url,
-      cover_image: artist.cover_url,
-      verified: false,
-      rating: artist.rating,
-      reviews_count: artist.reviews_count,
-      plan: artist.plan,
-    };
-
-    const mediaMapped = (media ?? []).map((m) => ({ ...m, thumbnail: m.url }));
-
-    const relatedMapped = (related ?? []).map((r) => ({
-      slug: r.slug,
-      artist_name: r.display_name,
-      category: r.category,
-      profile_image: r.avatar_url,
-    }));
-
     return new Response(
-      JSON.stringify({ artist: artistMapped, media: mediaMapped, related: relatedMapped }),
+      JSON.stringify({ artist, media: media ?? [], related: related ?? [] }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

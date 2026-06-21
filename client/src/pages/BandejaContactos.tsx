@@ -8,14 +8,21 @@ import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useState } from "react";
 
-type FilterType = "all" | "new" | "read";
+type FilterType = "all" | "new" | "read" | "archived";
 
-interface ContactMessage {
+interface ContactRequest {
   id: string;
+  sender_name: string;
+  sender_email: string;
+  sender_phone: string | null;
   subject: string | null;
-  body: string;
-  is_read: boolean;
+  message: string | null;
+  status: string;
   created_at: string;
+}
+
+function initials(name: string) {
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 }
 
 function formatDate(d: string) {
@@ -29,8 +36,8 @@ function formatDate(d: string) {
 
 export default function BandejaContactos() {
   const [artistId, setArtistId] = useState<string | null>(null);
-  const [contacts, setContacts] = useState<ContactMessage[]>([]);
-  const [selected, setSelected] = useState<ContactMessage | null>(null);
+  const [contacts, setContacts] = useState<ContactRequest[]>([]);
+  const [selected, setSelected] = useState<ContactRequest | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
   const [loading, setLoading] = useState(true);
 
@@ -39,22 +46,22 @@ export default function BandejaContactos() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
-      const { data: profile } = await supabase
-        .from("profiles")
+      const { data: artist } = await supabase
+        .from("artists")
         .select("id")
-        .eq("id", session.user.id)
+        .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (!profile) { setLoading(false); return; }
-      setArtistId(profile.id);
+      if (!artist) { setLoading(false); return; }
+      setArtistId(artist.id);
 
       const { data } = await supabase
-        .from("messages")
-        .select("id, subject, body, is_read, created_at")
-        .eq("recipient_id", profile.id)
+        .from("contact_requests")
+        .select("id, sender_name, sender_email, sender_phone, subject, message, status, created_at")
+        .eq("artist_id", artist.id)
         .order("created_at", { ascending: false });
 
-      const list = (data || []) as ContactMessage[];
+      const list = (data || []) as ContactRequest[];
       setContacts(list);
       if (list.length > 0) setSelected(list[0]);
       setLoading(false);
@@ -62,24 +69,25 @@ export default function BandejaContactos() {
     load();
   }, []);
 
-  const markAsRead = async (id: string) => {
-    await supabase.from("messages").update({ is_read: true }).eq("id", id);
-    setContacts((prev) => prev.map((c) => c.id === id ? { ...c, is_read: true } : c));
-    if (selected?.id === id) setSelected((prev) => prev ? { ...prev, is_read: true } : prev);
+  const updateStatus = async (id: string, newStatus: string) => {
+    await supabase.from("contact_requests").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", id);
+    setContacts((prev) => prev.map((c) => c.id === id ? { ...c, status: newStatus } : c));
+    if (selected?.id === id) setSelected((prev) => prev ? { ...prev, status: newStatus } : prev);
   };
 
-  const handleSelect = async (contact: ContactMessage) => {
+  const handleSelect = async (contact: ContactRequest) => {
     setSelected(contact);
-    if (!contact.is_read) await markAsRead(contact.id);
+    if (contact.status === "new") await updateStatus(contact.id, "read");
   };
 
-  const filtered = filter === "all" ? contacts : filter === "new" ? contacts.filter((c) => !c.is_read) : contacts.filter((c) => c.is_read);
-  const newCount = contacts.filter((c) => !c.is_read).length;
+  const filtered = filter === "all" ? contacts : contacts.filter((c) => c.status === filter);
+  const newCount = contacts.filter((c) => c.status === "new").length;
 
   const FILTERS: { key: FilterType; label: string }[] = [
     { key: "all", label: "All" },
     { key: "new", label: "New" },
     { key: "read", label: "Read" },
+    { key: "archived", label: "Archived" },
   ];
 
   return (
@@ -130,19 +138,21 @@ export default function BandejaContactos() {
                 className={`glass-card p-md rounded-xl flex items-center gap-md group cursor-pointer transition-all ${selected?.id === c.id ? "bg-surface-container-high border-l-4 border-l-primary" : "hover:bg-surface-container/30"}`}
                 onClick={() => handleSelect(c)}
               >
-                <div className="h-12 w-12 rounded-full bg-surface-container-highest flex items-center justify-center shrink-0 border border-outline-variant/30">
-                  <span className="material-symbols-outlined">mail</span>
+                <div className="h-12 w-12 rounded-full bg-surface-container-highest flex items-center justify-center font-bold font-label-sm text-label-sm shrink-0 border border-outline-variant/30">
+                  {initials(c.sender_name)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className="font-bold text-on-surface truncate">{c.subject || "(sin asunto)"}</h4>
-                    {!c.is_read ? (
+                    <h4 className="font-bold text-on-surface truncate">{c.sender_name}</h4>
+                    {c.status === "new" ? (
                       <span className="text-[10px] text-primary uppercase font-bold tracking-widest bg-primary/10 px-xs py-[2px] rounded-full shrink-0">New</span>
+                    ) : c.status === "archived" ? (
+                      <span className="text-[10px] text-outline uppercase font-bold tracking-widest shrink-0">Archived</span>
                     ) : (
                       <span className="text-[10px] text-on-surface-variant/50 uppercase font-bold tracking-widest shrink-0">Read</span>
                     )}
                   </div>
-                  <p className="font-body-md text-sm text-on-surface-variant truncate">{c.body}</p>
+                  <p className="font-body-md text-sm text-on-surface-variant truncate">{c.subject || "(sin asunto)"}</p>
                   <p className="text-[11px] text-on-surface-variant/50 mt-[2px]">{formatDate(c.created_at)}</p>
                 </div>
               </div>
@@ -153,14 +163,21 @@ export default function BandejaContactos() {
           {selected && (
             <div className="w-[340px] shrink-0 glass-card rounded-2xl p-lg flex flex-col overflow-y-auto">
               <div className="flex justify-between items-start mb-lg">
-                <div className="h-20 w-20 rounded-2xl bg-surface-container-highest flex items-center justify-center border-2 border-primary/30">
-                  <span className="material-symbols-outlined text-3xl">mail</span>
+                <div className="h-20 w-20 rounded-2xl bg-surface-container-highest flex items-center justify-center font-bold text-2xl border-2 border-primary/30">
+                  {initials(selected.sender_name)}
                 </div>
                 <div className="flex gap-xs">
                   <button
                     className="h-10 w-10 flex items-center justify-center rounded-xl bg-surface-variant/50 hover:bg-surface-variant transition-colors text-on-surface"
+                    title="Archivar"
+                    onClick={() => updateStatus(selected.id, selected.status === "archived" ? "read" : "archived")}
+                  >
+                    <span className="material-symbols-outlined">{selected.status === "archived" ? "unarchive" : "archive"}</span>
+                  </button>
+                  <button
+                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-surface-variant/50 hover:bg-surface-variant transition-colors text-on-surface"
                     title="Marcar como leído"
-                    onClick={() => markAsRead(selected.id)}
+                    onClick={() => updateStatus(selected.id, "read")}
                   >
                     <span className="material-symbols-outlined">done_all</span>
                   </button>
@@ -168,21 +185,39 @@ export default function BandejaContactos() {
               </div>
 
               <div className="mb-lg">
-                {selected.subject && <h3 className="font-headline-md text-headline-md text-secondary">{selected.subject}</h3>}
-                <p className="font-label-sm text-[11px] text-on-surface-variant/60 mt-xs">{formatDate(selected.created_at)}</p>
+                <h3 className="font-headline-md text-headline-md text-secondary">{selected.sender_name}</h3>
+                {selected.subject && <p className="font-body-md text-body-md text-on-surface-variant mt-xs">{selected.subject}</p>}
+              </div>
+
+              <div className="space-y-sm mb-lg">
+                <div className="bg-surface-container-lowest/50 p-sm rounded-xl border border-outline-variant/10">
+                  <p className="font-label-sm text-[10px] text-primary font-bold uppercase mb-1">Email de Contacto</p>
+                  <p className="font-body-md text-sm text-on-surface">{selected.sender_email}</p>
+                </div>
+                {selected.sender_phone && (
+                  <div className="bg-surface-container-lowest/50 p-sm rounded-xl border border-outline-variant/10">
+                    <p className="font-label-sm text-[10px] text-primary font-bold uppercase mb-1">Teléfono</p>
+                    <p className="font-body-md text-sm text-on-surface">{selected.sender_phone}</p>
+                  </div>
+                )}
               </div>
 
               <div className="flex-1">
                 <p className="font-label-sm text-[10px] text-on-surface-variant font-bold uppercase mb-sm">Mensaje</p>
                 <div className="font-body-md text-body-md leading-relaxed text-on-surface/90 whitespace-pre-line">
-                  {selected.body || "(mensaje vacío)"}
+                  {selected.message || "(mensaje vacío)"}
                 </div>
               </div>
 
               <div className="mt-lg pt-lg border-t border-outline-variant/20">
-                <p className="font-label-sm text-[11px] text-on-surface-variant/60 text-center">
-                  Para responder, hazlo desde tu propio correo una vez identifiques al remitente.
-                </p>
+                <a
+                  href={`mailto:${selected.sender_email}?subject=Re: ${encodeURIComponent(selected.subject || "Tu solicitud en TUESDI")}`}
+                  className="w-full py-sm bg-primary text-on-primary font-bold rounded-xl bloom-primary transition-transform active:scale-95 hover:opacity-90 flex items-center justify-center gap-xs"
+                  onClick={() => updateStatus(selected.id, "read")}
+                >
+                  <span className="material-symbols-outlined">reply</span>
+                  Responder por Email
+                </a>
               </div>
             </div>
           )}

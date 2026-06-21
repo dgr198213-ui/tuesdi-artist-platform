@@ -37,40 +37,6 @@ export const EVENT_CATEGORIES = [
   "Otro",
 ] as const;
 
-/**
- * Mapeo de las etiquetas de categoría mostradas en la UI (español, con
- * mayúsculas/tildes) a los valores reales del enum `artist_category` en
- * Postgres (musica, teatro, magia, comedia, danza, dj, circo, arte,
- * foto_video). Sin este mapeo, cualquier INSERT/UPDATE con la etiqueta
- * de UI directamente falla con un error de enum inválido.
- * Usar SIEMPRE antes de enviar `category` a Supabase.
- */
-import type { Enums } from "./database.types";
-
-type ArtistCategoryDb = Enums<"artist_category">;
-
-export const CATEGORY_DB_VALUE: Record<string, ArtistCategoryDb> = {
-  // ARTIST_CATEGORIES
-  "Cantante": "musica",
-  "Músico": "musica",
-  "DJ": "dj",
-  "Banda": "musica",
-  "Mago": "magia",
-  "Humorista": "comedia",
-  "Actor": "teatro",
-  "Bailarín": "danza",
-  "Performer": "arte",
-  // EVENT_CATEGORIES
-  "Música": "musica",
-  "Arte": "arte",
-  "Teatro": "teatro",
-  "Danza": "danza",
-  "Magia": "magia",
-  "Humor": "comedia",
-  "Performance": "arte",
-  "Otro": "arte",
-};
-
 /** Cities available for filtering (used in ExplorarArtistas, Eventos) */
 export const FILTER_CITIES = [
   "Todas",
@@ -91,23 +57,6 @@ export const PLAN_LIMITS: Record<string, { photos: number; videos: number }> = {
   pro: { photos: 3, videos: 3 },
   standard: { photos: 3, videos: 1 },
   beta: { photos: 1, videos: 0 },
-};
-
-/**
- * El enum real `subscription_plan` en Postgres usa spark/spotlight/headliner,
- * mientras que el resto del código (PLAN_LIMITS, PLAN_PRICING, UI) usa
- * beta/standard/pro. Usar estos mapeos al leer/escribir profiles.plan.
- */
-export const PLAN_DB_VALUE: Record<string, string> = {
-  beta: "spark",
-  standard: "spotlight",
-  pro: "headliner",
-};
-
-export const PLAN_UI_VALUE: Record<string, string> = {
-  spark: "beta",
-  spotlight: "standard",
-  headliner: "pro",
 };
 
 /** Returns media limits for a given plan (falls back to beta) */

@@ -21,11 +21,11 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Acceso() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [email, setEmail] = useState("");
 
   // Redirigir automáticamente si ya está autenticado
-  if (!loading && isAuthenticated) {
+  if (!isLoading && isAuthenticated) {
     setLocation("/dashboard");
     return null;
   }
@@ -39,10 +39,7 @@ export default function Acceso() {
     setStatus("sending");
     setErrorMsg("");
 
-    // Hardcoded a producción (no window.location.origin): Supabase rechaza
-    // URLs de preview de Vercel que no estén en la whitelist, y esas URLs
-    // cambian en cada deploy. Ver decisión registrada en state.md.
-    const redirectTo = "https://tuesdi-artist-platform.vercel.app/dashboard";
+    const redirectTo = `${window.location.origin}/dashboard`;
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -78,7 +75,6 @@ export default function Acceso() {
         <div className="w-full max-w-[480px] space-y-lg">
           {/* Branding y título */}
           <div className="text-center space-y-sm">
-            <img src="/logo-tuesdi-full.png" alt="TUESDI" className="h-16 w-auto object-contain mx-auto mb-xl" />
             <div className="inline-flex items-center gap-xs px-sm py-xs bg-surface-container-highest/30 rounded-full border border-white/10 mb-md">
               <span className="w-2 h-2 rounded-full bg-secondary pulse-live"></span>
               <span className="font-label-sm text-label-sm uppercase tracking-widest text-on-surface-variant">

@@ -17,20 +17,22 @@ interface Event {
   description: string | null;
   category: string;
   city: string;
-  location: string;
+  country: string | null;
   event_date: string;
+  event_time: string | null;
   image_url: string | null;
+  organizer_name: string | null;
   organizer_email: string;
-  is_published: boolean;
+  status: string;
 }
 
 function formatFullDate(dateStr: string) {
-  const d = new Date(dateStr);
+  const d = new Date(dateStr + "T00:00:00");
   return d.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 }
 
 function formatDateBadge(dateStr: string) {
-  const d = new Date(dateStr);
+  const d = new Date(dateStr + "T00:00:00");
   const month = d.toLocaleDateString("es-ES", { month: "short" }).toUpperCase().replace(".", "");
   const day = d.getDate().toString().padStart(2, "0");
   return { month, day };
@@ -49,9 +51,8 @@ export default function EventoDetalle() {
     const load = async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("id, title, description, category, city, location, event_date:date, image_url, organizer_email, is_published")
+        .select("*")
         .eq("id", params.id)
-        .eq("is_published", true)
         .maybeSingle();
 
       if (error || !data) { setNotFound(true); setLoading(false); return; }
@@ -123,7 +124,7 @@ export default function EventoDetalle() {
             <div>
               <div className="flex flex-wrap gap-xs mb-md">
                 <span className="bg-secondary/20 text-secondary border border-secondary/30 px-sm py-1 rounded-full font-label-sm text-label-sm uppercase">{event.category}</span>
-                {event.is_published && (
+                {event.status === "approved" && (
                   <span className="bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
                     <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> Verificado
                   </span>
@@ -145,27 +146,39 @@ export default function EventoDetalle() {
                   <p className="font-headline-md text-headline-md text-on-surface capitalize">{formatFullDate(event.event_date)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-sm">
-                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-secondary">schedule</span>
+              {event.event_time && (
+                <div className="flex items-center gap-sm">
+                  <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-secondary">schedule</span>
+                  </div>
+                  <div>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Hora</p>
+                    <p className="font-headline-md text-headline-md text-on-surface">{event.event_time}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Hora</p>
-                  <p className="font-headline-md text-headline-md text-on-surface">
-                    {new Date(event.event_date).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </div>
-              </div>
+              )}
               <div className="flex items-center gap-sm">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-primary">location_on</span>
                 </div>
                 <div>
                   <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Ciudad</p>
-                  <p className="font-headline-md text-headline-md text-on-surface">{event.city}</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">{event.city}{event.country ? `, ${event.country}` : ""}</p>
                 </div>
               </div>
             </div>
+
+            {event.organizer_name && (
+              <div className="glass-card rounded-xl p-md flex items-center gap-md">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-primary">person</span>
+                </div>
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant uppercase">Organizado por</p>
+                  <p className="font-headline-md text-headline-md text-on-surface">{event.organizer_name}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

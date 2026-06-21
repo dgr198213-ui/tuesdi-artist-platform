@@ -31,7 +31,7 @@ export default function ExitoPublicacion() {
     if (!eventId) return;
     supabase
       .from("events")
-      .select("title, city, event_date:date, organizer_email")
+      .select("title, city, event_date, organizer_email")
       .eq("id", eventId)
       .maybeSingle()
       .then(({ data }) => { if (data) setEvent(data as Event); });
