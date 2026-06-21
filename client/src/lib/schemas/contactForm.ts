@@ -1,8 +1,11 @@
 /**
  * contactFormSchema — Validación del formulario de contacto
  *
- * Schema de validación para el formulario de contacto.
- * Utilizado para asegurar la integridad de los datos de contacto.
+ * @todo (2026-06-19) — SCHEMA NO INTEGRADO EN TODAS LAS PÁGINAS
+ * - Contacto.tsx: usa validación nativa HTML (`required`) sin Zod.
+ * - ArtistaProfile.tsx: usa validación manual con toast.
+ * Pendiente migrar ambas páginas a RHF + zodResolver para
+ * consistencia con EditorPerfil.tsx y PublicarEvento.tsx.
  */
 import { z } from "zod";
 
