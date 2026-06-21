@@ -13,7 +13,7 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
-import { ARTIST_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
+import { ARTIST_CATEGORIES, FILTER_CITIES, FILTER_ALL, CATEGORY_DB_VALUE } from "@/lib/constants";
 
 const CATEGORIES = [FILTER_ALL, ...ARTIST_CATEGORIES];
 const CITIES = [...FILTER_CITIES];
@@ -28,7 +28,7 @@ interface Artist {
   starting_price: string | null;
   profile_image: string | null;
   verified: boolean;
-  subscription_plan: string | null;
+  plan: string | null;
 }
 
 export default function ExplorarArtistas() {
@@ -49,14 +49,15 @@ export default function ExplorarArtistas() {
     setIsLoading(true);
     setHasError(false);
     let query = supabase
-      .from("artists")
-      .select("id, slug, artist_name, category, city, starting_price, profile_image, verified, subscription_plan")
-      .order("subscription_plan", { ascending: false })
+      .from("profiles")
+      .select("id, slug, artist_name:display_name, category, city, starting_price:price_note, profile_image:avatar_url, plan")
+      .eq("is_published", true)
+      .order("plan", { ascending: false })
       .order("created_at", { ascending: false })
       .range(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE - 1);
 
-    if (search) query = query.ilike("artist_name", `%${search}%`);
-    if (category !== "Todas") query = query.eq("category", category);
+    if (search) query = query.ilike("display_name", `%${search}%`);
+    if (category !== "Todas") query = query.eq("category", CATEGORY_DB_VALUE[category] ?? category);
     if (city !== "Todas") query = query.ilike("city", `%${city}%`);
 
     const { data, error } = await query;
@@ -229,7 +230,7 @@ export default function ExplorarArtistas() {
                       </div>
                     )}
                     <div className="absolute top-md left-md flex gap-xs">
-                      {artist.subscription_plan === "pro" && (
+                      {artist.plan === "headliner" && (
                         <span className="bg-secondary/80 backdrop-blur-md text-black text-[10px] font-bold uppercase tracking-wider px-sm py-1 rounded">Pro</span>
                       )}
                       {artist.verified && (

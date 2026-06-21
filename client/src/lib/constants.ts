@@ -89,6 +89,23 @@ export const PLAN_LIMITS: Record<string, { photos: number; videos: number }> = {
   beta: { photos: 1, videos: 0 },
 };
 
+/**
+ * El enum real `subscription_plan` en Postgres usa spark/spotlight/headliner,
+ * mientras que el resto del código (PLAN_LIMITS, PLAN_PRICING, UI) usa
+ * beta/standard/pro. Usar estos mapeos al leer/escribir profiles.plan.
+ */
+export const PLAN_DB_VALUE: Record<string, string> = {
+  beta: "spark",
+  standard: "spotlight",
+  pro: "headliner",
+};
+
+export const PLAN_UI_VALUE: Record<string, string> = {
+  spark: "beta",
+  spotlight: "standard",
+  headliner: "pro",
+};
+
 /** Returns media limits for a given plan (falls back to beta) */
 export function getPlanLimits(plan: string | null | undefined) {
   const limits = PLAN_LIMITS[plan ?? "beta"] ?? PLAN_LIMITS.beta;

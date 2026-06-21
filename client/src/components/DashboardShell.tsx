@@ -37,13 +37,13 @@ export default function DashboardShell({ active, title, children }: DashboardShe
       if (!session) return;
 
       const { data } = await supabase
-        .from("artists")
-        .select("profile_image")
-        .eq("user_id", session.user.id)
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", session.user.id)
         .maybeSingle();
 
-      if (data?.profile_image) {
-        setAvatarUrl(data.profile_image);
+      if (data?.avatar_url) {
+        setAvatarUrl(data.avatar_url);
       }
     };
 

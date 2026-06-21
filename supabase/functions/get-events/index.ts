@@ -52,21 +52,29 @@ Deno.serve(async (req: Request) => {
     // Fecha de hoy en formato YYYY-MM-DD para comparación
     const today = new Date().toISOString().split("T")[0];
 
-    // Construir query base
+    // Mapeo de etiquetas de categoría (UI, español) a valores del enum real
+    const CATEGORY_DB_VALUE: Record<string, string> = {
+      "Música": "musica", "Arte": "arte", "Teatro": "teatro", "Danza": "danza",
+      "Magia": "magia", "Humor": "comedia", "Performance": "arte", "Otro": "arte",
+    };
+
+    // Construir query base (alias event_date/event_time/country/organizer_name
+    // para mantener compatibilidad con Eventos.tsx / EventoDetalle.tsx;
+    // event_time/country/organizer_name no existen en el esquema real)
     let query = supabase
       .from("events")
       .select(
-        "id, title, description, category, city, country, event_date, event_time, image_url, organizer_name, status"
+        "id, title, description, category, city, event_date:date, image_url, status:is_published"
       )
-      .eq("status", "approved")
-      .gte("event_date", today);
+      .eq("is_published", true)
+      .gte("date", today);
 
     // Aplicar filtros opcionales
     if (search.length > 0) {
       query = query.ilike("title", `%${search}%`);
     }
     if (category.length > 0) {
-      query = query.eq("category", category);
+      query = query.eq("category", CATEGORY_DB_VALUE[category] ?? category);
     }
     if (city.length > 0) {
       query = query.ilike("city", `%${city}%`);
@@ -74,14 +82,16 @@ Deno.serve(async (req: Request) => {
 
     // Ordenar y paginar
     query = query
-      .order("event_date", { ascending: true })
+      .order("date", { ascending: true })
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
     const { data, error } = await query;
 
     if (error) throw error;
 
-    const events = data ?? [];
+    // status llega como boolean (is_published); lo convertimos al string
+    // "approved" que espera el frontend para no tocar EventoDetalle.tsx/Eventos.tsx
+    const events = (data ?? []).map((e) => ({ ...e, status: e.status ? "approved" : "pending" }));
     const hasMore = events.length === pageSize;
 
     return new Response(

@@ -6,7 +6,7 @@
  * - Carga el artista por `slug` (esquema 001_inicial_tuesdi.sql)
  * - Galería desde la tabla `media` (type: photo | video)
  * - Artistas similares: misma categoría
- * - Formulario de contacto -> inserta en `contact_requests`
+ * - Formulario de contacto -> invoca Edge Function `contact-artist`
  */
 
 import PageNav from "@/components/PageNav";
@@ -36,7 +36,7 @@ interface Artist {
 
 interface MediaItem {
   id: string;
-  type: "photo" | "video";
+  type: "image" | "video";
   url: string;
   thumbnail: string | null;
   position: number;
@@ -59,7 +59,7 @@ export default function ArtistaProfile() {
   const [notFound, setNotFound] = useState(false);
 
   const [contactOpen, setContactOpen] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "" });
+  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "", hp: "" });
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -98,25 +98,27 @@ export default function ArtistaProfile() {
       ? `Fecha estimada: ${contactForm.date}\n\n${contactForm.message}`
       : contactForm.message;
 
-    const { error } = await supabase.from("contact_requests").insert([{
-      artist_id: artist.id,
-      sender_name: contactForm.name,
-      sender_email: contactForm.email,
-      subject: contactForm.subject,
-      message,
-      status: "new",
-    }]);
+    const { data, error } = await supabase.functions.invoke("contact-artist", {
+      body: {
+        artistId: artist.id,
+        name: contactForm.name,
+        email: contactForm.email,
+        subject: contactForm.subject,
+        message,
+        website: contactForm.hp, // honeypot, debe llegar vacío
+      },
+    });
     setSending(false);
-    if (error) {
-      toast.error("No se pudo enviar la propuesta. Inténtalo de nuevo.");
+    if (error || !data?.success) {
+      toast.error(data?.error || "No se pudo enviar la propuesta. Inténtalo de nuevo.");
     } else {
       toast.success("Propuesta enviada. El artista la verá en su panel privado.");
-      setContactForm({ name: "", email: "", subject: "", date: "", message: "" });
+      setContactForm({ name: "", email: "", subject: "", date: "", message: "", hp: "" });
       setTimeout(() => { setContactOpen(false); }, 2000);
     }
   };
 
-  const photos = media.filter((m) => m.type === "photo");
+  const photos = media.filter((m) => m.type === "image");
   const videos = media.filter((m) => m.type === "video");
 
   if (loading) {
@@ -309,6 +311,15 @@ export default function ArtistaProfile() {
                 <div>
                   <label className="block font-label-sm text-label-sm text-primary uppercase mb-2">Tu Nombre</label>
                   <input className="w-full bg-surface-container border border-outline-variant rounded-lg p-sm text-white focus:border-primary outline-none transition-all" type="text" value={contactForm.name} onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })} />
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="absolute -left-[9999px] w-px h-px opacity-0"
+                  aria-hidden="true"
+                  value={contactForm.hp}
+                  onChange={(e) => setContactForm({ ...contactForm, hp: e.target.value })}
+                />
                 </div>
                 <div>
                   <label className="block font-label-sm text-label-sm text-primary uppercase mb-2">Tu Email</label>

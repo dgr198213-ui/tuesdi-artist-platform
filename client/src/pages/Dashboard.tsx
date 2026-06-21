@@ -8,13 +8,21 @@ import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { getPlanLimits } from "@/lib/constants";
+import { getPlanLimits, PLAN_UI_VALUE } from "@/lib/constants";
 
 interface ArtistData {
   id: string;
   artist_name: string;
   subscription_plan: string | null;
   profile_image: string | null;
+}
+
+interface ContactMessage {
+  id: string;
+  subject: string | null;
+  body: string;
+  created_at: string;
+  is_read: boolean;
 }
 
 interface MetricsData {
@@ -24,20 +32,10 @@ interface MetricsData {
   contacts_received: number;
 }
 
-interface ContactRequest {
-  id: string;
-  sender_name: string;
-  sender_email: string;
-  subject: string | null;
-  created_at: string;
-  status: string;
-}
-
 interface MediaItem {
   id: string;
   type: string;
   url: string;
-  thumbnail: string | null;
 }
 
 /** Barra de uso de media (fotos/vídeos) según el plan. */
@@ -72,7 +70,7 @@ function MediaUsage({ media, plan }: { media: MediaItem[]; plan: string | null |
         <div className="pt-md grid grid-cols-2 gap-sm">
           {media.slice(0, 4).map((item) => (
             <div key={item.id} className="aspect-video relative rounded-lg overflow-hidden group">
-              <img loading="lazy" className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.thumbnail || item.url} alt="" />
+              <img loading="lazy" className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={item.url} alt="" />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="material-symbols-outlined text-white">{item.type === "video" ? "play_circle" : "visibility"}</span>
               </div>
@@ -93,7 +91,7 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [artist, setArtist] = useState<ArtistData | null>(null);
   const [metrics, setMetrics] = useState<MetricsData | null>(null);
-  const [contacts, setContacts] = useState<ContactRequest[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [noProfile, setNoProfile] = useState(false);
@@ -117,39 +115,41 @@ export default function Dashboard() {
         }).catch(() => { /* fire-and-forget, no bloquea UX */ });
       }
 
-      const { data: artistData } = await supabase
-        .from("artists")
-        .select("id, artist_name, subscription_plan, profile_image")
-        .eq("user_id", session.user.id)
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, display_name, plan, avatar_url")
+        .eq("id", session.user.id)
         .maybeSingle();
 
-      if (!artistData) { setNoProfile(true); setLoading(false); return; }
-      setArtist(artistData as ArtistData);
+      if (!profileData) { setNoProfile(true); setLoading(false); return; }
+      const artistData: ArtistData = {
+        id: profileData.id,
+        artist_name: profileData.display_name,
+        subscription_plan: PLAN_UI_VALUE[profileData.plan ?? ""] || "beta",
+        profile_image: profileData.avatar_url,
+      };
+      setArtist(artistData);
 
-      const [{ data: metricsData }, { data: contactsData }, { data: mediaData }] = await Promise.all([
+      // No existe todavía una tabla de métricas históricas (profile_views,
+      // search_impressions...) en el esquema real. `metrics` se deja en
+      // null deliberadamente — el componente ya maneja este caso mostrando
+      // un guion en vez de inventar cifras falsas.
+      const [{ data: contactsData }, { data: mediaData }] = await Promise.all([
         supabase
-          .from("metrics")
-          .select("profile_views, search_impressions, contact_clicks, contacts_received")
-          .eq("artist_id", artistData.id)
-          .order("recorded_at", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        supabase
-          .from("contact_requests")
-          .select("id, sender_name, sender_email, subject, created_at, status")
-          .eq("artist_id", artistData.id)
+          .from("messages")
+          .select("id, subject, body, created_at, is_read")
+          .eq("recipient_id", artistData.id)
           .order("created_at", { ascending: false })
           .limit(5),
         supabase
           .from("media")
-          .select("id, type, url, thumbnail")
-          .eq("artist_id", artistData.id)
+          .select("id, type, url")
+          .eq("user_id", artistData.id)
           .order("position", { ascending: true })
           .limit(4),
       ]);
 
-      if (metricsData) setMetrics(metricsData as MetricsData);
-      setContacts((contactsData || []) as ContactRequest[]);
+      setContacts((contactsData || []) as ContactMessage[]);
       setMedia((mediaData || []) as MediaItem[]);
       setLoading(false);
     };
@@ -162,7 +162,7 @@ export default function Dashboard() {
   const initials = (name: string) =>
     name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
 
-  const newCount = contacts.filter((c) => c.status === "new").length;
+  const newCount = contacts.filter((c) => !c.is_read).length;
 
   if (loading) {
     return (
@@ -288,20 +288,18 @@ export default function Dashboard() {
                       <td className="py-md">
                         <div className="flex items-center gap-sm">
                           <div className="h-8 w-8 rounded-full bg-surface-container-highest flex items-center justify-center font-bold font-label-sm text-label-sm shrink-0">
-                            {initials(c.sender_name)}
+                            <span className="material-symbols-outlined text-[16px]">mail</span>
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-on-surface truncate">{c.sender_name}</p>
-                            <p className="font-label-sm text-[11px] text-outline truncate">{c.subject || c.sender_email}</p>
+                            <p className="font-bold text-on-surface truncate">{c.subject || "Sin asunto"}</p>
+                            <p className="font-label-sm text-[11px] text-outline truncate">{c.body}</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-md text-on-surface-variant font-body-md text-sm whitespace-nowrap">{formatDate(c.created_at)}</td>
                       <td className="py-md text-right">
-                        {c.status === "new" ? (
+                        {!c.is_read ? (
                           <span className="px-sm py-1 rounded-full bg-secondary-container/20 text-secondary font-label-sm text-[10px] font-bold uppercase tracking-widest">New</span>
-                        ) : c.status === "archived" ? (
-                          <span className="px-sm py-1 rounded-full bg-surface-container-highest text-outline font-label-sm text-[10px] font-bold uppercase tracking-widest">Archived</span>
                         ) : (
                           <span className="px-sm py-1 rounded-full bg-surface-container-highest text-on-surface-variant font-label-sm text-[10px] font-bold uppercase tracking-widest">Read</span>
                         )}

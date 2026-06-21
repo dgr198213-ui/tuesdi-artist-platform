@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { PLAN_UI_VALUE } from "@/lib/constants";
 
 interface MetricRow {
   profile_views: number;
@@ -18,16 +19,16 @@ interface MetricRow {
   recorded_at: string;
 }
 
-interface ContactRequest {
+interface ContactMessage {
   created_at: string;
-  status: string;
+  is_read: boolean;
 }
 
 export default function Analitica() {
   const [, setLocation] = useLocation();
   const [plan, setPlan] = useState<string>("beta");
   const [metrics, setMetrics] = useState<MetricRow[]>([]);
-  const [contacts, setContacts] = useState<ContactRequest[]>([]);
+  const [contacts, setContacts] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,31 +37,26 @@ export default function Analitica() {
       if (!session) return;
 
       const { data: artist } = await supabase
-        .from("artists")
-        .select("id, subscription_plan")
-        .eq("user_id", session.user.id)
+        .from("profiles")
+        .select("id, plan")
+        .eq("id", session.user.id)
         .maybeSingle();
 
       if (!artist) { setLoading(false); return; }
-      setPlan(artist.subscription_plan || "beta");
+      setPlan(PLAN_UI_VALUE[artist.plan ?? ""] || "beta");
 
-      const [{ data: metricsData }, { data: contactsData }] = await Promise.all([
-        supabase
-          .from("metrics")
-          .select("profile_views, search_impressions, contact_clicks, contacts_received, recorded_at")
-          .eq("artist_id", artist.id)
-          .order("recorded_at", { ascending: false })
-          .limit(30),
-        supabase
-          .from("contact_requests")
-          .select("created_at, status")
-          .eq("artist_id", artist.id)
-          .order("created_at", { ascending: false })
-          .limit(100),
-      ]);
+      // No existe todavía tabla de métricas históricas (profile_views,
+      // search_impressions...) en el esquema real. Se deja vacío
+      // deliberadamente en vez de inventar datos (principio v3.0).
+      const { data: contactsData } = await supabase
+        .from("messages")
+        .select("created_at, is_read")
+        .eq("recipient_id", artist.id)
+        .order("created_at", { ascending: false })
+        .limit(100);
 
-      setMetrics((metricsData || []) as MetricRow[]);
-      setContacts((contactsData || []) as ContactRequest[]);
+      setMetrics([]);
+      setContacts((contactsData || []) as ContactMessage[]);
       setLoading(false);
     };
     load();
@@ -81,7 +77,7 @@ export default function Analitica() {
   const totalImpressions = latest?.search_impressions ?? 0;
   const totalClicks = latest?.contact_clicks ?? 0;
   const totalContacts = contacts.length;
-  const newContacts = contacts.filter((c) => c.status === "new").length;
+  const newContacts = contacts.filter((c) => !c.is_read).length;
 
   const conversionRate = totalClicks > 0 ? ((totalContacts / totalClicks) * 100).toFixed(1) : "0.0";
 
@@ -207,19 +203,19 @@ export default function Analitica() {
                 </div>
               ) : (
                 <div className="space-y-md">
-                  {(["new", "read", "archived"] as const).map((status) => {
-                    const count = contacts.filter((c) => c.status === status).length;
+                  {([
+                    { key: "new", count: contacts.filter((c) => !c.is_read).length, color: "bg-secondary", label: "Nuevas" },
+                    { key: "read", count: contacts.filter((c) => c.is_read).length, color: "bg-primary", label: "Leídas" },
+                  ]).map(({ key, count, color, label }) => {
                     const pctVal = contacts.length > 0 ? (count / contacts.length) * 100 : 0;
-                    const colors: Record<string, string> = { new: "bg-secondary", read: "bg-primary", archived: "bg-outline" };
-                    const labels: Record<string, string> = { new: "Nuevas", read: "Leídas", archived: "Archivadas" };
                     return (
-                      <div key={status}>
+                      <div key={key}>
                         <div className="flex justify-between font-label-sm text-label-sm mb-xs">
-                          <span className="text-on-surface-variant">{labels[status]}</span>
+                          <span className="text-on-surface-variant">{label}</span>
                           <span className="font-bold text-on-surface">{count}</span>
                         </div>
                         <div className="h-2 w-full bg-surface-variant rounded-full overflow-hidden">
-                          <div className={`h-full ${colors[status]} rounded-full transition-all`} style={{ width: `${pctVal}%` }}></div>
+                          <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${pctVal}%` }}></div>
                         </div>
                       </div>
                     );

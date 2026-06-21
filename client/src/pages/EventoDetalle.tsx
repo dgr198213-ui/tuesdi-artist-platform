@@ -17,22 +17,20 @@ interface Event {
   description: string | null;
   category: string;
   city: string;
-  country: string | null;
+  location: string;
   event_date: string;
-  event_time: string | null;
   image_url: string | null;
-  organizer_name: string | null;
   organizer_email: string;
-  status: string;
+  is_published: boolean;
 }
 
 function formatFullDate(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
+  const d = new Date(dateStr);
   return d.toLocaleDateString("es-ES", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 }
 
 function formatDateBadge(dateStr: string) {
-  const d = new Date(dateStr + "T00:00:00");
+  const d = new Date(dateStr);
   const month = d.toLocaleDateString("es-ES", { month: "short" }).toUpperCase().replace(".", "");
   const day = d.getDate().toString().padStart(2, "0");
   return { month, day };
@@ -51,8 +49,9 @@ export default function EventoDetalle() {
     const load = async () => {
       const { data, error } = await supabase
         .from("events")
-        .select("*")
+        .select("id, title, description, category, city, location, event_date:date, image_url, organizer_email, is_published")
         .eq("id", params.id)
+        .eq("is_published", true)
         .maybeSingle();
 
       if (error || !data) { setNotFound(true); setLoading(false); return; }
@@ -124,7 +123,7 @@ export default function EventoDetalle() {
             <div>
               <div className="flex flex-wrap gap-xs mb-md">
                 <span className="bg-secondary/20 text-secondary border border-secondary/30 px-sm py-1 rounded-full font-label-sm text-label-sm uppercase">{event.category}</span>
-                {event.status === "approved" && (
+                {event.is_published && (
                   <span className="bg-primary/20 text-primary border border-primary/30 px-sm py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
                     <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span> Verificado
                   </span>

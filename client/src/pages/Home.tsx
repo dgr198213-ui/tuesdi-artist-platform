@@ -68,8 +68,9 @@ export default function Home() {
 
   const loadFeatured = useCallback(async () => {
     const { data: artistsData } = await supabase
-      .from("artists")
-      .select("slug, artist_name, category, bio, profile_image")
+      .from("profiles")
+      .select("slug, artist_name:display_name, category, bio, profile_image:avatar_url")
+      .eq("is_published", true)
       .order("created_at", { ascending: false })
       .limit(3);
 
@@ -80,10 +81,10 @@ export default function Home() {
     const today = new Date().toISOString().split("T")[0];
     const { data: eventsData } = await supabase
       .from("events")
-      .select("id, title, city, event_date, category")
-      .eq("status", "approved")
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
+      .select("id, title, city, event_date:date, category")
+      .eq("is_published", true)
+      .gte("date", today)
+      .order("date", { ascending: true })
       .limit(4);
 
     if (eventsData && eventsData.length > 0) {
