@@ -13,6 +13,7 @@
 
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
+import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -30,6 +31,7 @@ export default function EditorPerfil() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   const {
     register,
@@ -67,8 +69,11 @@ export default function EditorPerfil() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadProfile = async () => {
+    setLoading(true);
+    setFetchError(false);
+
+    try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setLoading(false);
@@ -76,11 +81,13 @@ export default function EditorPerfil() {
       }
       setUserId(session.user.id);
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("artists")
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle();
+
+      if (error) throw error;
 
       if (data) {
         setArtistId(data.id);
@@ -100,11 +107,16 @@ export default function EditorPerfil() {
           cover_image: data.cover_image || "",
         });
       }
-
+    } catch (err) {
+      console.error("[EditorPerfil] Error cargando perfil:", err);
+      setFetchError(true);
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
-    load();
+  useEffect(() => {
+    loadProfile();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleImageUpload = async (file: File, type: "avatar" | "cover") => {
@@ -209,7 +221,21 @@ export default function EditorPerfil() {
   if (loading) {
     return (
       <DashboardShell active="profile" title="Editar Perfil">
-        <p className="text-on-surface-variant">Cargando perfil...</p>
+        <div className="flex items-center justify-center h-64 text-on-surface-variant">
+          <span className="material-symbols-outlined animate-spin mr-sm">sync</span>
+          Cargando perfil...
+        </div>
+      </DashboardShell>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <DashboardShell active="profile" title="Editar Perfil">
+        <FetchErrorState
+          resourceLabel="tu perfil"
+          onRetry={loadProfile}
+        />
       </DashboardShell>
     );
   }

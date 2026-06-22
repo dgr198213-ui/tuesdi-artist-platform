@@ -18,7 +18,7 @@ const NAV_LINKS = [
 
 export default function PageNav({ active = null }: PageNavProps) {
   const [, setLocation] = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/10 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(0,129,255,0.15)]">
@@ -41,7 +41,9 @@ export default function PageNav({ active = null }: PageNavProps) {
           ))}
         </div>
         <div className="flex items-center gap-sm">
-          {isAuthenticated ? (
+          {loading ? (
+            <div className="w-20 h-8 animate-pulse bg-surface-container rounded-full"></div>
+          ) : isAuthenticated ? (
             <button 
               className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:scale-105 transition-transform" 
               onClick={() => setLocation("/dashboard")}

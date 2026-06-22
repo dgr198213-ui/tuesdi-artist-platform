@@ -7,6 +7,7 @@
 
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
+import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
@@ -29,22 +30,27 @@ export default function Analitica() {
   const [metrics, setMetrics] = useState<MetricRow[]>([]);
   const [contacts, setContacts] = useState<ContactRequest[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadAnalytics = async () => {
+    setLoading(true);
+    setFetchError(false);
+
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) { setLoading(false); return; }
 
-      const { data: artist } = await supabase
+      const { data: artist, error: artistErr } = await supabase
         .from("artists")
         .select("id, subscription_plan")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
+      if (artistErr) throw artistErr;
       if (!artist) { setLoading(false); return; }
       setPlan(artist.subscription_plan || "beta");
 
-      const [{ data: metricsData }, { data: contactsData }] = await Promise.all([
+      const [{ data: metricsData, error: metricsErr }, { data: contactsData, error: contactsErr }] = await Promise.all([
         supabase
           .from("metrics")
           .select("profile_views, search_impressions, contact_clicks, contacts_received, recorded_at")
@@ -59,11 +65,21 @@ export default function Analitica() {
           .limit(100),
       ]);
 
+      if (metricsErr) console.error("[Analitica] Error cargando métricas:", metricsErr);
+      if (contactsErr) console.error("[Analitica] Error cargando contactos:", contactsErr);
+
       setMetrics((metricsData || []) as MetricRow[]);
       setContacts((contactsData || []) as ContactRequest[]);
+    } catch (err) {
+      console.error("[Analitica] Error cargando analíticas:", err);
+      setFetchError(true);
+    } finally {
       setLoading(false);
-    };
-    load();
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics();
   }, []);
 
   const isBasic = plan === "beta";
@@ -141,6 +157,11 @@ export default function Analitica() {
             <div key={i} className="glass-card rounded-xl h-40 animate-pulse"></div>
           ))}
         </div>
+      ) : fetchError ? (
+        <FetchErrorState
+          resourceLabel="tus analíticas"
+          onRetry={loadAnalytics}
+        />
       ) : (
         <>
           {/* Stat Cards */}

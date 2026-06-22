@@ -6,6 +6,7 @@
 
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
+import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -174,17 +175,10 @@ export default function Eventos() {
         {/* Grid */}
         <section className="max-w-7xl mx-auto px-margin pb-xl">
           {hasError ? (
-            <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
-              <span className="material-symbols-outlined text-[64px] mb-md block text-error">error_outline</span>
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">No se pudieron cargar los eventos</h3>
-              <p className="font-body-md text-body-md mb-lg">Hubo un problema al conectar con el servidor. Inténtalo de nuevo.</p>
-              <button
-                className="bg-primary text-on-primary px-lg py-sm rounded-lg font-bold bloom-primary"
-                onClick={() => fetchEvents(0, true)}
-              >
-                Reintentar
-              </button>
-            </div>
+            <FetchErrorState
+              resourceLabel="los eventos"
+              onRetry={() => fetchEvents(0, true)}
+            />
           ) : isLoading && events.length === 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-md">
               {Array.from({ length: 8 }).map((_, i) => (

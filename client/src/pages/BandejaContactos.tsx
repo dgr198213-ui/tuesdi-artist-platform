@@ -6,6 +6,7 @@
 
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
+import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useState } from "react";
 
 type FilterType = "all" | "new" | "read" | "archived";
@@ -40,33 +41,47 @@ export default function BandejaContactos() {
   const [selected, setSelected] = useState<ContactRequest | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadContacts = async () => {
+    setLoading(true);
+    setFetchError(false);
+
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) { setLoading(false); return; }
 
-      const { data: artist } = await supabase
+      const { data: artist, error: artistErr } = await supabase
         .from("artists")
         .select("id")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
+      if (artistErr) throw artistErr;
       if (!artist) { setLoading(false); return; }
       setArtistId(artist.id);
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("contact_requests")
         .select("id, sender_name, sender_email, sender_phone, subject, message, status, created_at")
         .eq("artist_id", artist.id)
         .order("created_at", { ascending: false });
 
+      if (error) throw error;
+
       const list = (data || []) as ContactRequest[];
       setContacts(list);
       if (list.length > 0) setSelected(list[0]);
+    } catch (err) {
+      console.error("[BandejaContactos] Error cargando contactos:", err);
+      setFetchError(true);
+    } finally {
       setLoading(false);
-    };
-    load();
+    }
+  };
+
+  useEffect(() => {
+    loadContacts();
   }, []);
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -119,7 +134,15 @@ export default function BandejaContactos() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-64 text-on-surface-variant">Cargando...</div>
+        <div className="flex items-center justify-center h-64 text-on-surface-variant">
+          <span className="material-symbols-outlined animate-spin mr-sm">sync</span>
+          Cargando bandeja...
+        </div>
+      ) : fetchError ? (
+        <FetchErrorState
+          resourceLabel="la bandeja de contactos"
+          onRetry={loadContacts}
+        />
       ) : contacts.length === 0 ? (
         <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
           <span className="material-symbols-outlined text-[64px] block mb-md">inbox</span>

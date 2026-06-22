@@ -6,6 +6,7 @@
 
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
+import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { getPlanLimits } from "@/lib/constants";
@@ -97,11 +98,15 @@ export default function Dashboard() {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [noProfile, setNoProfile] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadDashboard = async () => {
+    setLoading(true);
+    setFetchError(false);
+
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) { setLoading(false); return; }
 
       // Detectar primer acceso: si el usuario fue creado hace menos de 2 minutos
       // es un registro nuevo → disparar email de bienvenida (fire-and-forget)
@@ -117,16 +122,18 @@ export default function Dashboard() {
         }).catch(() => { /* fire-and-forget, no bloquea UX */ });
       }
 
-      const { data: artistData } = await supabase
+      const { data: artistData, error: artistError } = await supabase
         .from("artists")
         .select("id, artist_name, subscription_plan, profile_image")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
+      if (artistError) throw artistError;
+
       if (!artistData) { setNoProfile(true); setLoading(false); return; }
       setArtist(artistData as ArtistData);
 
-      const [{ data: metricsData }, { data: contactsData }, { data: mediaData }] = await Promise.all([
+      const [{ data: metricsData, error: metricsErr }, { data: contactsData, error: contactsErr }, { data: mediaData, error: mediaErr }] = await Promise.all([
         supabase
           .from("metrics")
           .select("profile_views, search_impressions, contact_clicks, contacts_received")
@@ -148,12 +155,24 @@ export default function Dashboard() {
           .limit(4),
       ]);
 
+      // Los errores individuales en queries secundarias no bloquean la UX
+      if (metricsErr) console.error("[Dashboard] Error cargando métricas:", metricsErr);
+      if (contactsErr) console.error("[Dashboard] Error cargando contactos:", contactsErr);
+      if (mediaErr) console.error("[Dashboard] Error cargando media:", mediaErr);
+
       if (metricsData) setMetrics(metricsData as MetricsData);
       setContacts((contactsData || []) as ContactRequest[]);
       setMedia((mediaData || []) as MediaItem[]);
       setLoading(false);
-    };
-    load();
+    } catch (err) {
+      console.error("[Dashboard] Error cargando dashboard:", err);
+      setFetchError(true);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboard();
   }, []);
 
   const formatDate = (d: string) =>
@@ -167,7 +186,21 @@ export default function Dashboard() {
   if (loading) {
     return (
       <DashboardShell active="overview" title="Overview">
-        <div className="flex items-center justify-center h-64 text-on-surface-variant">Cargando...</div>
+        <div className="flex items-center justify-center h-64 text-on-surface-variant">
+          <span className="material-symbols-outlined animate-spin mr-sm">sync</span>
+          Cargando panel de control...
+        </div>
+      </DashboardShell>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <DashboardShell active="overview" title="Overview">
+        <FetchErrorState
+          resourceLabel="el panel de control"
+          onRetry={loadDashboard}
+        />
       </DashboardShell>
     );
   }

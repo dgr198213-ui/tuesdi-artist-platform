@@ -41,17 +41,19 @@
 - [x] Dashboard del artista (estadísticas, eventos, consultas, perfil)
 - [x] Landing de campaña Beta (`/escaparate`)
 
-## 🔴 Pendiente Activo (Fase 2 — Error Handling)
+## ✅ Fase 2 Completada — Error Handling (Junio 2026)
 
-- [ ] Estados de `fetchError` en componentes de datos
-- [ ] Distinción entre error de conexión vs. recurso no encontrado (404)
-- [ ] `try/catch` en la carga del Dashboard
+- [x] Estados de `fetchError` en componentes de datos
+- [x] Distinción entre error de conexión vs. recurso no encontrado (404)
+- [x] `try/catch` en la carga del Dashboard
+- [x] Componente `FetchErrorState` reutilizable (error + retry)
+- [x] Aplicado a: Dashboard, Home, EditorPerfil, BandejaContactos, GestionMedia, Analitica, ArtistaProfile, ExplorarArtistas, Eventos
 
 ## Mantenimiento / Deuda Técnica
 
-- [ ] Reconciliar cambios automáticos del agente Manus (IDs de Stripe hardcodeados, conflictos de esquema, modificaciones a Magic Link) antes de cada merge a `main`
-- [ ] Mantener este archivo como fuente de verdad única — eliminar referencias a stacks descartados (Express/tRPC/Drizzle/MySQL/Manus OAuth no forman parte de esta arquitectura)
+- [x] ~~Reconciliar cambios automáticos del agente Manus~~ — Limpiado (Junio 2026)
+- [x] ~~Referencias a stacks descartados (Express/tRPC/Drizzle/MySQL/Manus OAuth)~~ — Eliminadas
 
 ## ESTADO ACTUAL: 🟡 BETA ABIERTA — EN DESARROLLO ACTIVO
 
-No es un proyecto "completado": está en validación con artistas reales antes de activar planes de pago (objetivo ~25-30 artistas activos). Próximo hito: cerrar Fase 2 de manejo de errores.
+No es un proyecto "completado": está en validación con artistas reales antes de activar planes de pago (objetivo ~25-30 artistas activos). **Fase 2 (Manejo de errores) completada.**

@@ -166,7 +166,6 @@ Todos los cambios significativos en este proyecto se documentan en este archivo.
 
 ## Contribuyentes
 
-- **Manus AI** — CTO Senior, Implementación de Fases 1-3
 - **Daniel García** — Concepto original y dirección del proyecto
 
 ---

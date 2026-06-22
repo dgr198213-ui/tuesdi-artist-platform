@@ -6,6 +6,7 @@
 
 import { supabase } from "@/lib/supabase";
 import DashboardShell from "@/components/DashboardShell";
+import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { PLAN_LIMITS } from "@/lib/constants";
@@ -23,6 +24,7 @@ export default function GestionMedia() {
   const [plan, setPlan] = useState<string>("beta");
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState("");
@@ -30,32 +32,44 @@ export default function GestionMedia() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const load = async () => {
+  const loadMedia = async () => {
+    setLoading(true);
+    setFetchError(false);
+
+    try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) { setLoading(false); return; }
       setUserId(session.user.id);
 
-      const { data: artist } = await supabase
+      const { data: artist, error: artistErr } = await supabase
         .from("artists")
         .select("id, subscription_plan")
         .eq("user_id", session.user.id)
         .maybeSingle();
 
+      if (artistErr) throw artistErr;
       if (!artist) { setLoading(false); return; }
       setArtistId(artist.id);
       setPlan(artist.subscription_plan || "beta");
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("media")
         .select("id, type, url, thumbnail, position")
         .eq("artist_id", artist.id)
         .order("position", { ascending: true });
 
+      if (error) throw error;
       setMedia((data || []) as MediaItem[]);
+    } catch (err) {
+      console.error("[GestionMedia] Error cargando galería:", err);
+      setFetchError(true);
+    } finally {
       setLoading(false);
-    };
-    load();
+    }
+  };
+
+  useEffect(() => {
+    loadMedia();
   }, []);
 
   const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.beta;
@@ -196,6 +210,11 @@ export default function GestionMedia() {
             <div key={i} className="aspect-square glass-card rounded-xl animate-pulse bg-surface-container"></div>
           ))}
         </div>
+      ) : fetchError ? (
+        <FetchErrorState
+          resourceLabel="tu galería multimedia"
+          onRetry={loadMedia}
+        />
       ) : media.length === 0 ? (
         <div className="glass-card rounded-xl p-xl text-center text-on-surface-variant">
           <span className="material-symbols-outlined text-[64px] block mb-md text-primary/30">photo_library</span>

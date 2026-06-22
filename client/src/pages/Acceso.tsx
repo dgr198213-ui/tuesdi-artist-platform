@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function Acceso() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
@@ -20,10 +20,10 @@ export default function Acceso() {
 
   // Redirección segura si ya está autenticado
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!loading && isAuthenticated) {
       setLocation("/dashboard");
     }
-  }, [isLoading, isAuthenticated, setLocation]);
+  }, [loading, isAuthenticated, setLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +56,24 @@ export default function Acceso() {
       `/enlace-enviado?email=${encodeURIComponent(email)}`
     );
   };
+
+  // Mientras verifica la sesión, mostrar spinner
+  if (loading) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Si ya está autenticado, no mostrar el formulario (la redirección ya está en curso)
+  if (isAuthenticated) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="text-on-surface antialiased flex flex-col min-h-screen bg-background">

@@ -11,6 +11,7 @@
 
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
+import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
@@ -57,6 +58,7 @@ export default function ArtistaProfile() {
   const [related, setRelated] = useState<RelatedArtist[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [fetchError, setFetchError] = useState(false);
 
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "" });
@@ -68,20 +70,34 @@ export default function ArtistaProfile() {
     setNotFound(false);
 
     const load = async () => {
-      const { data, error } = await supabase.functions.invoke("get-public-profile", {
-        body: { slug: params.slug },
-      });
+      try {
+        const { data, error } = await supabase.functions.invoke("get-public-profile", {
+          body: { slug: params.slug },
+        });
 
-      if (error || !data?.artist) {
-        setNotFound(true);
+        if (error) {
+          // HTTP-level error (network, edge function crash, etc.)
+          console.error("[ArtistaProfile] Error de red/edge function:", error);
+          setFetchError(true);
+          setLoading(false);
+          return;
+        }
+
+        if (!data?.artist) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
+
+        setArtist(data.artist as Artist);
+        setMedia((data.media || []) as MediaItem[]);
+        setRelated((data.related || []) as RelatedArtist[]);
+      } catch (err) {
+        console.error("[ArtistaProfile] Error inesperado:", err);
+        setFetchError(true);
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setArtist(data.artist as Artist);
-      setMedia((data.media || []) as MediaItem[]);
-      setRelated((data.related || []) as RelatedArtist[]);
-      setLoading(false);
     };
 
     load();
@@ -118,6 +134,22 @@ export default function ArtistaProfile() {
 
   const photos = media.filter((m) => m.type === "photo");
   const videos = media.filter((m) => m.type === "video");
+
+  if (fetchError) {
+    return (
+      <div className="bg-background min-h-screen flex items-center justify-center px-margin">
+        <FetchErrorState
+          resourceLabel="el perfil del artista"
+          isNetworkError
+          onRetry={() => {
+            setFetchError(false);
+            setLoading(true);
+            window.location.reload();
+          }}
+        />
+      </div>
+    );
+  }
 
   if (loading) {
     return (

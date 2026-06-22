@@ -8,6 +8,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
+import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
 import { useLocation } from "wouter";
 import { useState, useEffect, useCallback } from "react";
@@ -65,29 +66,43 @@ export default function Home() {
   const { isAuthenticated } = useAuth();
   const [artists, setArtists] = useState<FeaturedArtist[]>([]);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
+  const [fetchError, setFetchError] = useState(false);
+  const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
 
   const loadFeatured = useCallback(async () => {
-    const { data: artistsData } = await supabase
-      .from("artists")
-      .select("slug, artist_name, category, bio, profile_image")
-      .order("created_at", { ascending: false })
-      .limit(3);
+    setIsLoadingFeatured(true);
+    setFetchError(false);
 
-    if (artistsData && artistsData.length > 0) {
-      setArtists(artistsData as FeaturedArtist[]);
-    }
+    try {
+      const { data: artistsData, error: artistsErr } = await supabase
+        .from("artists")
+        .select("slug, artist_name, category, bio, profile_image")
+        .order("created_at", { ascending: false })
+        .limit(3);
 
-    const today = new Date().toISOString().split("T")[0];
-    const { data: eventsData } = await supabase
-      .from("events")
-      .select("id, title, city, event_date, category")
-      .eq("status", "approved")
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
-      .limit(4);
+      if (artistsErr) console.error("[Home] Error cargando artistas destacados:", artistsErr);
+      if (artistsData && artistsData.length > 0) {
+        setArtists(artistsData as FeaturedArtist[]);
+      }
 
-    if (eventsData && eventsData.length > 0) {
-      setEvents(eventsData as UpcomingEvent[]);
+      const today = new Date().toISOString().split("T")[0];
+      const { data: eventsData, error: eventsErr } = await supabase
+        .from("events")
+        .select("id, title, city, event_date, category")
+        .eq("status", "approved")
+        .gte("event_date", today)
+        .order("event_date", { ascending: true })
+        .limit(4);
+
+      if (eventsErr) console.error("[Home] Error cargando eventos próximos:", eventsErr);
+      if (eventsData && eventsData.length > 0) {
+        setEvents(eventsData as UpcomingEvent[]);
+      }
+    } catch (err) {
+      console.error("[Home] Error cargando destacados:", err);
+      setFetchError(true);
+    } finally {
+      setIsLoadingFeatured(false);
     }
   }, []);
 
