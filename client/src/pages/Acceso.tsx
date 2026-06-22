@@ -39,7 +39,9 @@ export default function Acceso() {
     setStatus("sending");
     setErrorMsg("");
 
-    const redirectTo = `${window.location.origin}/dashboard`;
+    // Hardcoded a producción: window.location.origin genera URLs de preview
+    // de Vercel que Supabase rechaza si no están en la whitelist.
+    const redirectTo = "https://tuesdi-artist-platform.vercel.app/dashboard";
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
