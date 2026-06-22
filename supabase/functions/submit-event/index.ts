@@ -119,7 +119,7 @@ Deno.serve(async (req: Request) => {
         method: "POST",
         headers: { "Authorization": `Bearer ${resendKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          from: "TUESDI <hola@tuesdi.com>",
+          from: "TUESDI <onboarding@resend.dev>",
           to: [organizer_email],
           subject: "Confirma tu evento en TUESDI",
           html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
