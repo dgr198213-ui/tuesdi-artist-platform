@@ -45,6 +45,9 @@ export default function ExplorarArtistas() {
   const [category, setCategory] = useState("Todas");
   const [city, setCity] = useState("Todas");
   const [activeFilters, setActiveFilters] = useState<{ type: string; value: string }[]>([]);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const markImgError = (key: string) => setImgErrors((prev) => ({ ...prev, [key]: true }));
 
   const fetchArtists = useCallback(async (currentPage: number, reset: boolean) => {
     setIsLoading(true);
@@ -215,8 +218,8 @@ export default function ExplorarArtistas() {
               {artists.map((artist) => (
                 <div key={artist.id} className="glass-card rounded-xl overflow-hidden group flex flex-col h-full cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
                   <div className="relative h-64 overflow-hidden bg-surface-container">
-                    {artist.profile_image ? (
-                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={artist.profile_image} alt={artist.artist_name} />
+                    {artist.profile_image && !imgErrors[artist.id] ? (
+                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={artist.profile_image} alt={artist.artist_name} onError={() => markImgError(artist.id)} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                         <span className="material-symbols-outlined text-[64px]">person</span>

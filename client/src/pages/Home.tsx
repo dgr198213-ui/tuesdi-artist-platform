@@ -68,6 +68,9 @@ export default function Home() {
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const [fetchError, setFetchError] = useState(false);
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const markImgError = (key: string) => setImgErrors((prev) => ({ ...prev, [key]: true }));
 
   const loadFeatured = useCallback(async () => {
     setIsLoadingFeatured(true);
@@ -227,8 +230,8 @@ export default function Home() {
             {displayArtists.map((artist) => (
               <div key={artist.slug} className="glass-card group rounded-xl overflow-hidden cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
                 <div className="aspect-[4/5] relative overflow-hidden">
-                  {artist.profile_image ? (
-                    <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={artist.profile_image} alt={artist.artist_name} />
+                  {artist.profile_image && !imgErrors[artist.slug] ? (
+                    <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={artist.profile_image} alt={artist.artist_name} onError={() => markImgError(artist.slug)} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-surface-container text-on-surface-variant">
                       <span className="material-symbols-outlined text-[64px]">person</span>

@@ -63,6 +63,9 @@ export default function ArtistaProfile() {
   const [contactOpen, setContactOpen] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "", date: "", message: "" });
   const [sending, setSending] = useState(false);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
+
+  const markImgError = (key: string) => setImgErrors((prev) => ({ ...prev, [key]: true }));
 
   useEffect(() => {
     if (!params?.slug) return;
@@ -179,13 +182,23 @@ export default function ArtistaProfile() {
       {/* Hero */}
       <header className="relative w-full h-[716px] md:h-[870px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div>
-        {artist.cover_image ? (
-          <img className="absolute inset-0 w-full h-full object-cover" src={artist.cover_image} alt={artist.artist_name} />
+        {artist.cover_image && !imgErrors["cover"] ? (
+          <img className="absolute inset-0 w-full h-full object-cover" src={artist.cover_image} alt={artist.artist_name} onError={() => markImgError("cover")} />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface to-secondary/10 spotlight"></div>
         )}
         <div className="relative z-20 h-full max-w-7xl mx-auto px-margin flex flex-col justify-end pb-xl">
-          <div className="flex flex-wrap items-center gap-xs mb-sm">
+          <div className="flex items-end gap-md mb-sm">
+            <div className="w-28 h-28 md:w-36 md:h-36 rounded-2xl overflow-hidden border-4 border-black/50 shadow-2xl bg-surface-container flex-shrink-0">
+              {artist.profile_image && !imgErrors["profile"] ? (
+                <img className="w-full h-full object-cover" src={artist.profile_image} alt={artist.artist_name} onError={() => markImgError("profile")} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
+                  <span className="material-symbols-outlined text-[48px] md:text-[56px]">person</span>
+                </div>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-xs">
             <span className="bg-secondary/20 text-secondary border border-secondary/30 px-sm py-1 rounded-full font-label-sm text-label-sm uppercase">{artist.category}</span>
             <span className="bg-white/10 text-white border border-white/20 px-sm py-1 rounded-full font-label-sm text-label-sm flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">location_on</span> {artist.city}
@@ -195,6 +208,7 @@ export default function ArtistaProfile() {
                 <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Verificado
               </span>
             )}
+          </div>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-white mb-xs tracking-tight">{artist.artist_name}</h1>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
@@ -262,7 +276,11 @@ export default function ArtistaProfile() {
                 <div className={`grid gap-md ${photos.length >= 3 ? "grid-cols-1 md:grid-cols-3 md:h-[600px]" : "grid-cols-1 md:grid-cols-2"}`}>
                   {photos.slice(0, 3).map((item, idx) => (
                     <div key={item.id} className={`relative group overflow-hidden rounded-xl ${idx === 0 && photos.length >= 3 ? "md:col-span-2 aspect-video md:aspect-auto" : "aspect-square md:aspect-auto"}`}>
-                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={item.url} alt={artist.artist_name} />
+                      {!imgErrors[`photo-${item.id}`] ? (
+                        <img loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src={item.url} alt={artist.artist_name} onError={() => markImgError(`photo-${item.id}`)} />
+                      ) : (
+                        <div className="w-full h-full bg-surface-container flex items-center justify-center"><span className="material-symbols-outlined text-[48px] text-on-surface-variant">broken_image</span></div>
+                      )}
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
                     </div>
                   ))}
@@ -277,8 +295,8 @@ export default function ArtistaProfile() {
                           <span className="material-symbols-outlined !text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
                         </div>
                       </div>
-                      {item.thumbnail ? (
-                        <img loading="lazy" className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} />
+                      {item.thumbnail && !imgErrors[`thumb-${item.id}`] ? (
+                        <img loading="lazy" className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} onError={() => markImgError(`thumb-${item.id}`)} />
                       ) : (
                         <div className="w-full h-full bg-surface-container"></div>
                       )}
@@ -303,8 +321,8 @@ export default function ArtistaProfile() {
               {related.map((r) => (
                 <div key={r.slug} className="glass-card rounded-xl overflow-hidden group hover:border-primary transition-colors cursor-pointer" onClick={() => setLocation(`/artista/${r.slug}`)}>
                   <div className="aspect-square overflow-hidden bg-surface-container">
-                    {r.profile_image ? (
-                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={r.profile_image} alt={r.artist_name} />
+                    {r.profile_image && !imgErrors[`rel-${r.slug}`] ? (
+                      <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={r.profile_image} alt={r.artist_name} onError={() => markImgError(`rel-${r.slug}`)} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-on-surface-variant">
                         <span className="material-symbols-outlined text-[48px]">person</span>
