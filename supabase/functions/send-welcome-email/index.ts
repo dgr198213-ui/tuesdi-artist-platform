@@ -166,7 +166,7 @@ Deno.serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "TUESDI <noreply@tuesdi.es>",
+        from: "TUESDI <hola@tuesdi.com>",
         to: [email],
         subject: "⚡ Tu escenario en TUESDI ya está listo. Toma el control.",
         html,
