@@ -53,6 +53,12 @@ export default function PageNav({ active = null }: PageNavProps) {
           ) : (
             <>
               <button 
+                className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-all hidden sm:inline"
+                onClick={() => setLocation("/publicar-evento")}
+              >
+                Publicar Evento
+              </button>
+              <button 
                 className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all" 
                 onClick={() => setLocation("/acceso")}
               >
