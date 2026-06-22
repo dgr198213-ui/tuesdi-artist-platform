@@ -8,7 +8,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") || "https://tuesdi-artist-platform.vercel.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
@@ -30,6 +30,29 @@ Deno.serve(async (req: Request) => {
     const supabaseServiceKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // S-02 FIX: Verificar que el caller es el propietario del artista
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "No autorizado: falta token de autenticación" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Crear cliente con el token del usuario (no service role) para verificar identidad
+    const anonSupabase = createClient(
+      supabaseUrl,
+      Deno.env.get("SUPABASE_ANON_KEY") || "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: { user: caller }, error: authError } = await anonSupabase.auth.getUser();
+    if (authError || !caller) {
+      return new Response(
+        JSON.stringify({ error: "Sesión inválida o expirada" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { priceId, plan, artistId } = await req.json();
 
@@ -54,14 +77,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Verificar que el usuario es propietario del artista
-    const { data: { user }, error: userError } = await supabase.auth.admin.getUserById(artist.user_id);
-    if (userError || !user) {
+    // S-02 FIX: Verificar que el caller es el propietario del artista
+    if (artist.user_id !== caller.id) {
       return new Response(
-        JSON.stringify({ error: "Usuario no autorizado" }),
+        JSON.stringify({ error: "No autorizado: no eres el propietario de este perfil" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const user = caller;
 
     // Obtener o crear customer en Stripe
     let customerId: string;

@@ -46,12 +46,14 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
 
       // Obtener dimensiones originales
       const dimensions = await getImageDimensions(file);
-      console.log(`Dimensiones originales: ${dimensions.width}x${dimensions.height}`);
+      if (import.meta.env.DEV) console.debug(`Dimensiones originales: ${dimensions.width}x${dimensions.height}`);
 
       // Comprimir imagen
       const compressedFile = await compressImage(file, maxWidth, maxHeight, quality);
-      console.log(`Tamaño original: ${(file.size / 1024).toFixed(2)} KB`);
-      console.log(`Tamaño comprimido: ${(compressedFile.size / 1024).toFixed(2)} KB`);
+      if (import.meta.env.DEV) {
+        console.debug(`Tamaño original: ${(file.size / 1024).toFixed(2)} KB`);
+        console.debug(`Tamaño comprimido: ${(compressedFile.size / 1024).toFixed(2)} KB`);
+      }
 
       // Generar ruta de almacenamiento
       const ext = compressedFile.name.split(".").pop() || "webp";
