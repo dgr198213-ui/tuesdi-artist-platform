@@ -91,6 +91,7 @@ export default function Acceso() {
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-[340px] mx-auto opacity-80">
               Introduce tu email para recibir un enlace de acceso.
+              Sin contraseñas, simple y seguro.
             </p>
           </div>
 
@@ -125,6 +126,9 @@ export default function Acceso() {
                   ? "Enviando..."
                   : "Enviar enlace mágico"}
               </button>
+              <p className="text-center text-on-surface-variant font-label-sm text-[12px] mt-sm">
+                ¿Primera vez aquí? Tu cuenta se crea automáticamente.
+              </p>
             </form>
           </div>
 

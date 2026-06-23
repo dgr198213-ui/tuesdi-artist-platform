@@ -55,18 +55,21 @@ export default function PageNav({ active = null }: PageNavProps) {
             </button>
           ) : (
             <>
+              {/* Publicar Evento — visible en desktop, en móvil está en la home */}
               <button 
-                className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-all hidden sm:inline"
+                className="font-label-sm text-label-sm text-on-surface-variant hover:text-secondary transition-all hidden md:inline"
                 onClick={() => setLocation("/publicar-evento")}
               >
                 Publicar Evento
               </button>
+              {/* Acceso — para artistas que ya tienen cuenta */}
               <button 
                 className="font-label-sm text-label-sm text-primary hover:opacity-80 transition-all" 
                 onClick={() => setLocation("/acceso")}
               >
                 Acceso
               </button>
+              {/* Crear Perfil — CTA principal para nuevos artistas */}
               <button
                 className="bg-primary text-on-primary font-label-sm text-label-sm px-md py-xs rounded-full bloom-primary hover:scale-105 transition-transform"
                 onClick={() => setLocation("/acceso")}
