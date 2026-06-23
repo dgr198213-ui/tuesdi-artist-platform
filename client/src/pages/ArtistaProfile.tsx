@@ -345,8 +345,8 @@ export default function ArtistaProfile() {
 
       {/* Contact Modal */}
       {contactOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-md bg-black/80 backdrop-blur-sm">
-          <div className="glass-card w-full max-w-lg rounded-2xl p-lg relative">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-md bg-black/80 backdrop-blur-sm">
+          <div className="glass-card w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl p-lg relative max-h-[90vh] overflow-y-auto">
             <button className="absolute top-base right-base text-on-surface-variant hover:text-white" onClick={() => setContactOpen(false)}>
               <span className="material-symbols-outlined">close</span>
             </button>

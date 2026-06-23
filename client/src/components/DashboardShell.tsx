@@ -194,6 +194,14 @@ export default function DashboardShell({
         "
       >
         <div className="flex items-center gap-md">
+          {/* Botón volver a la home — solo en móvil */}
+          <button
+            className="md:hidden text-on-surface-variant hover:text-primary transition-colors"
+            onClick={() => setLocation("/")}
+            aria-label="Volver al inicio"
+          >
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
           <span className="font-headline-md text-xl md:text-headline-md font-bold text-secondary">
             {title}
           </span>

@@ -27,7 +27,7 @@ export default function PageNav({ active = null }: PageNavProps) {
           <img
             src="/logo-tuesdi-full.png"
             alt="TUESDI — Tu Escenario Digital"
-            className="h-10 w-auto object-contain"
+            className="h-12 w-auto object-contain"
           />
         </button>
         <div className="hidden md:flex items-center gap-md">

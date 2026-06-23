@@ -121,7 +121,7 @@ Deno.serve(async (req: Request) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "TUESDI <noreply@tuesdi.es>",
+          from: "TUESDI <onboarding@resend.dev>",
           to: [email],
           subject: "Confirma tu evento en TUESDI",
           html: `
