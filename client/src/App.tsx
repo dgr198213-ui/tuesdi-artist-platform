@@ -36,6 +36,8 @@ const Precios = lazy(() => import("./pages/Precios"));
 // The HOC is applied inside the `.then()` so ProtectedRoute receives a plain
 // React.ComponentType rather than a LazyExoticComponent (avoids TS errors).
 // ---------------------------------------------------------------------------
+const SystemPanel = lazy(() => import("./pages/system/SystemPanel"));
+
 const Dashboard = lazy(() =>
   import("./pages/Dashboard").then((m) => ({
     default: ProtectedRoute(m.default),
@@ -147,6 +149,8 @@ function Router() {
 
         {/* 404 */}
         <Route path="/404" component={NotFound} />
+        {/* /system — panel admin, acceso verificado dentro del propio componente */}
+        <Route path="/system" component={SystemPanel} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
