@@ -207,7 +207,15 @@ export default function DashboardShell({
           </span>
         </div>
 
-        <div className="flex items-center gap-md">
+        <div className="flex items-center gap-sm">
+          {/* Cerrar sesión — solo en móvil */}
+          <button
+            className="md:hidden text-on-surface-variant hover:text-red-400 transition-colors p-1"
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+          >
+            <span className="material-symbols-outlined text-[20px]">logout</span>
+          </button>
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/30 bg-surface-container flex items-center justify-center">
             {avatarUrl ? (
               <img
@@ -237,11 +245,12 @@ export default function DashboardShell({
           px-4
           md:px-8
           md:ml-64
-          max-w-[1200px]
-          mx-auto
+          min-h-screen
         "
       >
-        {children}
+        <div className="max-w-[900px] mx-auto">
+          {children}
+        </div>
       </main>
 
       {/* =========================
