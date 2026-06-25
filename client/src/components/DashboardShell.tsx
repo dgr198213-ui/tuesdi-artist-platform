@@ -239,6 +239,7 @@ export default function DashboardShell({
       ========================== */}
       <main
         className="
+          w-full
           pt-24
           pb-28
           md:pb-8
@@ -248,7 +249,7 @@ export default function DashboardShell({
           min-h-screen
         "
       >
-        <div className="max-w-[900px] mx-auto">
+        <div className="w-full max-w-[900px] md:mx-auto">
           {children}
         </div>
       </main>
