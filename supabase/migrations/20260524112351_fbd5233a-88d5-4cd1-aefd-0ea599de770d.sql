@@ -1,0 +1,1 @@
+-- migration applied directly in Supabase Dashboard
