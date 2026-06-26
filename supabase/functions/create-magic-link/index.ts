@@ -28,32 +28,47 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Validar todas las env vars al inicio, antes de cualquier operación
+    // Validar env vars primero
     const supabaseUrl = getRequiredEnv("SUPABASE_URL");
     const supabaseServiceKey = getRequiredEnv("SUPABASE_SERVICE_ROLE_KEY");
     const magicLinkSecret = getRequiredEnv("MAGIC_LINK_SECRET");
-    const siteUrl = clientSiteUrl ?? Deno.env.get("SITE_URL") ?? "https://tuesdi-artist-platform.vercel.app";
     const resendKey = Deno.env.get("RESEND_API_KEY");
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // --- Leer y validar body ---
+    const body = await req.json();
+    const { eventId, email, promoterName, siteUrl: clientSiteUrl } = body;
 
-    const { eventId, email, promoterName, siteUrl: clientSiteUrl } = await req.json();
-
-    if (!eventId || !email) {
+    if (!eventId || typeof eventId !== "string") {
       return new Response(
-        JSON.stringify({ error: "eventId y email son requeridos" }),
+        JSON.stringify({ error: "eventId es requerido y debe ser un string" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return new Response(
+        JSON.stringify({ error: "email es requerido y debe ser válido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ✅ AHORA SÍ: clientSiteUrl ya está definido
+    const siteUrl = clientSiteUrl || Deno.env.get("SITE_URL") || "https://tuesdi-artist-platform.vercel.app";
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // --- Validar que el evento existe y está en estado pending ---
     const { data: eventData, error: eventCheckError } = await supabase
       .from("events")
       .select("id, status, organizer_email")
       .eq("id", eventId)
-      .single();
+      .maybeSingle();
 
-    if (eventCheckError || !eventData) {
+    if (eventCheckError) {
+      throw eventCheckError;
+    }
+
+    if (!eventData) {
       return new Response(
         JSON.stringify({ error: "Evento no encontrado" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -75,15 +90,30 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // --- Invalidar magic links previos para este evento (evita acumulación) ---
+    const { error: invalidateError } = await supabase
+      .from("magic_links")
+      .update({ used: true })
+      .eq("event_id", eventId)
+      .eq("used", false);
+
+    if (invalidateError) {
+      console.error("Error invalidando links previos:", invalidateError);
+      // No lanzamos error aquí; es no-crítico
+    }
+
     // --- Generar token seguro ---
     const timestamp = Date.now().toString();
     const payload = `${eventId}:${email}:${timestamp}`;
 
     // HMAC-SHA256 usando Web Crypto API (disponible en Deno)
     const encoder = new TextEncoder();
-    const keyData = encoder.encode(magicLinkSecret);
     const cryptoKey = await crypto.subtle.importKey(
-      "raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+      "raw",
+      encoder.encode(magicLinkSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
     );
     const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(payload));
     const signature = Array.from(new Uint8Array(signatureBuffer))
@@ -91,7 +121,10 @@ Deno.serve(async (req: Request) => {
       .join("");
 
     // Token = base64url(payload) + "." + signature
-    const tokenPayload = btoa(payload).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const tokenPayload = btoa(payload)
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
     const token = `${tokenPayload}.${signature}`;
 
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString(); // 30 min
@@ -114,7 +147,7 @@ Deno.serve(async (req: Request) => {
 
     // --- Enviar email con Resend ---
     if (resendKey) {
-      await fetch("https://api.resend.com/emails", {
+      const resendResponse = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${resendKey}`,
@@ -137,6 +170,14 @@ Deno.serve(async (req: Request) => {
           `,
         }),
       });
+
+      if (!resendResponse.ok) {
+        const resendError = await resendResponse.text();
+        console.error("Error enviando email con Resend:", resendError);
+        // No lanzamos error; el token ya está creado y el usuario puede reenviar
+      }
+    } else {
+      console.warn("RESEND_API_KEY no configurada. Email no enviado, pero token generado.");
     }
 
     return new Response(
@@ -145,10 +186,18 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error("Error in create-magic-link:", error);
+    console.error("create-magic-link error:", error);
+
     return new Response(
-      JSON.stringify({ error: "Error interno del servidor" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });
