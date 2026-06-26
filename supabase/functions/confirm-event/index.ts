@@ -3,8 +3,8 @@
 // marca el evento como "approved" y el enlace como usado.
 //
 // Variables de entorno requeridas (Supabase Dashboard -> Edge Functions -> Secrets):
-//   MAGIC_LINK_SECRET   — el MISMO secreto usado en create-magic-link
-//   (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY los inyecta Supabase automáticamente)
+// MAGIC_LINK_SECRET — el MISMO secreto usado en create-magic-link
+// (SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY los inyecta Supabase automáticamente)
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -18,6 +18,18 @@ function getRequiredEnv(key: string): string {
   const value = Deno.env.get(key);
   if (!value) throw new Error(`Variable de entorno requerida: ${key} no está configurada.`);
   return value;
+}
+
+/** Comparación constante en tiempo para evitar timing attacks.
+ *  Compatible con Supabase Edge Runtime (Deno). */
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i];
+  }
+  return diff === 0;
 }
 
 Deno.serve(async (req: Request) => {
@@ -40,7 +52,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const [tokenPayload, signature] = token.split(".");
+    // --- Validar que el token tenga exactamente dos partes ---
+    const parts = token.split(".");
+    if (parts.length !== 2) {
+      return new Response(
+        JSON.stringify({ error: "Formato de token inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    const [tokenPayload, signature] = parts;
 
     // --- Decodificar el payload (base64url) ---
     let payload: string;
@@ -63,9 +83,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // --- Validar que el timestamp sea un número válido ---
+    const issuedAt = Number(timestamp);
+    if (!Number.isFinite(issuedAt)) {
+      return new Response(
+        JSON.stringify({ error: "Timestamp inválido" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Validar que el timestamp del token no es más antiguo que 35 minutos
     // (el token expira en 30 min, damos 5 min de margen por relojes desincronizados)
-    const tokenAge = Date.now() - parseInt(timestamp, 10);
+    const tokenAge = Date.now() - issuedAt;
     if (tokenAge > 35 * 60 * 1000) {
       return new Response(
         JSON.stringify({ error: "El enlace ha caducado." }),
@@ -76,17 +105,21 @@ Deno.serve(async (req: Request) => {
     // --- Verificar firma HMAC ---
     const encoder = new TextEncoder();
     const cryptoKey = await crypto.subtle.importKey(
-      "raw", encoder.encode(magicLinkSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+      "raw",
+      encoder.encode(magicLinkSecret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"]
     );
     const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(payload));
     const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-    // Comparación constante en tiempo para evitar timing attacks
+    // Comparación constante en tiempo personalizada (compatible con Edge Runtime)
     const sigBuf = new TextEncoder().encode(signature);
     const expectedBuf = new TextEncoder().encode(expectedSignature);
-    if (sigBuf.length !== expectedBuf.length || !crypto.subtle.timingSafeEqual(sigBuf, expectedBuf)) {
+    if (!timingSafeEqual(sigBuf, expectedBuf)) {
       return new Response(
         JSON.stringify({ error: "Token inválido o manipulado" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -126,24 +159,34 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Publicar el evento ---
-    // CORRECCIÓN v3.0.1: status debe ser "approved" (el CHECK constraint
-    // solo permite 'pending', 'approved', 'rejected', 'expired').
+    // CORRECCIÓN: usamos .maybeSingle() para evitar error 500 si el evento no existe.
     const { data: eventData, error: eventError } = await supabase
       .from("events")
       .update({ status: "approved" })
       .eq("id", eventId)
       .select()
-      .single();
+      .maybeSingle();
 
-    if (eventError || !eventData) {
-      throw eventError || new Error("No se pudo actualizar el evento");
+    if (eventError) {
+      throw eventError;
+    }
+
+    if (!eventData) {
+      return new Response(
+        JSON.stringify({ error: "Evento no encontrado" }),
+        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // --- Marcar el enlace como usado ---
-    await supabase
+    const { error: updateMagicError } = await supabase
       .from("magic_links")
       .update({ used: true })
       .eq("id", linkData.id);
+
+    if (updateMagicError) {
+      throw updateMagicError;
+    }
 
     return new Response(
       JSON.stringify({ success: true, event: eventData }),
@@ -151,10 +194,21 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error("Error in confirm-event:", error);
+    // Registro detallado del error real en los logs
+    console.error("confirm-event error:", error);
+
+    // En desarrollo devolvemos el mensaje y stack para facilitar debugging.
+    // En producción puedes cambiar esto a un mensaje genérico.
     return new Response(
-      JSON.stringify({ error: "Error interno del servidor" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      }),
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      }
     );
   }
 });
