@@ -110,7 +110,7 @@ export default function Escaparate() {
 
         {/* CTA Form */}
         {status === "sent" ? (
-          <div className="glass-card max-w-md mx-auto rounded-2xl p-lg text-center">
+          <div className="glass-card max-w-[28rem] mx-auto rounded-2xl p-lg text-center">
             <span className="material-symbols-outlined text-secondary text-[48px] block mb-md" style={{ fontVariationSettings: "'FILL' 1" }}>mark_email_read</span>
             <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">¡Enlace enviado!</h3>
             <p className="font-body-md text-body-md text-on-surface-variant">
@@ -121,7 +121,7 @@ export default function Escaparate() {
             </p>
           </div>
         ) : (
-          <form className="max-w-md mx-auto" onSubmit={handleSubmit}>
+          <form className="max-w-[28rem] mx-auto" onSubmit={handleSubmit}>
             <div className="glass-card rounded-2xl p-md bloom-primary space-y-md">
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-outline">mail</span>
@@ -233,7 +233,7 @@ export default function Escaparate() {
       {status !== "sent" && (
         <section className="relative z-10 py-xl px-margin text-center">
           <div className="absolute inset-0 spotlight opacity-20 pointer-events-none"></div>
-          <div className="relative max-w-xl mx-auto space-y-md">
+          <div className="relative max-w-[36rem] mx-auto space-y-md">
             <h2 className="font-headline-xl text-[32px] md:text-headline-xl text-on-surface">Tu escenario te espera.</h2>
             <p className="font-body-lg text-body-lg text-on-surface-variant">Gratis. Sin contraseñas. Sin compromisos.</p>
             <button

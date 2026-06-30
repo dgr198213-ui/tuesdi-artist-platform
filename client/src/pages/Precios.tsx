@@ -52,7 +52,7 @@ export default function Precios() {
             <br />
             <span className="text-primary">Sin límites ahora.</span>
           </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-xl mx-auto">
+          <p className="font-body-lg text-body-lg text-on-surface-variant max-w-[36rem] mx-auto">
             Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita. Sin
             tarjeta. Sin fecha de caducidad.
           </p>

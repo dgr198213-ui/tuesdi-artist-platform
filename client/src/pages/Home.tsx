@@ -279,7 +279,7 @@ export default function Home() {
               <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest leading-none">Beta Abierta Activa</span>
             </div>
             <h2 className="font-headline-lg text-headline-lg text-on-surface">Empieza Gratis. Sin Límites.</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-xl mx-auto mt-sm">
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-[36rem] mx-auto mt-sm">
               Durante la Beta Abierta, accedes a todo lo que ofrece TUESDI de forma completamente gratuita.
             </p>
           </div>

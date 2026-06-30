@@ -39,7 +39,7 @@ export default function EmptyState({
 
       {/* Description */}
       {description && (
-        <p className="font-body-md text-body-md text-on-surface-variant mb-lg max-w-sm">
+        <p className="font-body-md text-body-md text-on-surface-variant mb-lg max-w-[24rem]">
           {description}
         </p>
       )}

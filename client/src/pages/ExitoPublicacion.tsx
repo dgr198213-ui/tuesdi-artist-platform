@@ -63,7 +63,7 @@ export default function ExitoPublicacion() {
       <PageNav />
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
-        <div className="w-full max-w-xl text-center space-y-xl">
+        <div className="w-full max-w-[36rem] text-center space-y-xl">
 
           {/* Icon con glow */}
           <div className="relative inline-block mx-auto">
@@ -83,7 +83,7 @@ export default function ExitoPublicacion() {
             <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight">
               ¡Evento Recibido!
             </h1>
-            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto leading-relaxed">
+            <p className="font-body-lg text-body-lg text-on-surface-variant max-w-[28rem] mx-auto leading-relaxed">
               Hemos enviado un <strong className="text-on-surface">enlace de validación</strong> a{" "}
               {event?.organizer_email
                 ? <span className="text-secondary">{event.organizer_email}</span>
@@ -94,7 +94,7 @@ export default function ExitoPublicacion() {
 
           {/* Info del evento */}
           {event && (
-            <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-sm">
+            <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-[24rem]">
               <div>
                 <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Evento</p>
                 <p className="font-headline-md text-headline-md text-on-surface">{event.title}</p>
@@ -148,7 +148,7 @@ export default function ExitoPublicacion() {
             <p className="font-label-sm text-label-sm text-on-surface-variant/40">
               💡 ¿No ves el correo? Revisa tu carpeta de spam o promociones.
             </p>
-            <p className="font-label-sm text-label-sm text-on-surface-variant/40 max-w-xs mx-auto">
+            <p className="font-label-sm text-label-sm text-on-surface-variant/40 max-w-[20rem] mx-auto">
               Nota: Como promotor anónimo, el evento no es editable tras su publicación. Si hay algún error grave, contacta con <a href="mailto:hola@tuesdi.com" className="text-secondary hover:underline">hola@tuesdi.com</a>
             </p>
           </div>

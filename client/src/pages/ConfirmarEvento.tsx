@@ -60,7 +60,7 @@ export default function ConfirmarEvento() {
       <PageNav />
 
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin py-xl">
-        <div className="w-full max-w-md text-center space-y-xl">
+        <div className="w-full max-w-[28rem] text-center space-y-xl">
 
           {/* Loading */}
           {status === "loading" && (
@@ -93,7 +93,7 @@ export default function ConfirmarEvento() {
               </div>
 
               {event && (
-                <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-sm">
+                <div className="glass-card rounded-xl p-md text-left space-y-sm mx-auto max-w-[24rem]">
                   <div>
                     <p className="font-label-sm text-label-sm text-on-surface-variant uppercase mb-1">Evento</p>
                     <p className="font-headline-md text-headline-md text-on-surface">{event.title}</p>

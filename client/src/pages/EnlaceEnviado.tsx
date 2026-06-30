@@ -27,7 +27,7 @@ export default function EnlaceEnviado() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-grow flex items-center justify-center px-margin">
-        <div className="w-full max-w-xl text-center space-y-lg">
+        <div className="w-full max-w-[36rem] text-center space-y-lg">
           {/* Animated Icon */}
           <div className="relative inline-block">
             <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">

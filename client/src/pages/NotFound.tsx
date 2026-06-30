@@ -14,7 +14,7 @@ export default function NotFound() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
       </div>
 
-      <Card className="w-full max-w-lg relative border-white/5 bg-card/50 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
+      <Card className="w-full max-w-[32rem] relative border-white/5 bg-card/50 backdrop-blur-md shadow-2xl rounded-3xl overflow-hidden">
         <CardContent className="pt-12 pb-12 text-center">
           <div className="flex justify-center mb-8">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
@@ -28,7 +28,7 @@ export default function NotFound() {
             Escenario no encontrado
           </h2>
 
-          <p className="text-muted-foreground mb-10 leading-relaxed max-w-sm mx-auto">
+          <p className="text-muted-foreground mb-10 leading-relaxed max-w-[24rem] mx-auto">
             Lo sentimos, la página que buscas no existe o ha sido movida a otro escenario digital.
           </p>
 

@@ -214,7 +214,7 @@ export default function Dashboard() {
           </div>
           <div>
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-sm">Crea tu perfil artístico</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant max-w-sm">
+            <p className="font-body-md text-body-md text-on-surface-variant max-w-[24rem]">
               Aún no tienes un perfil en TUESDI. Crea el tuyo en menos de 2 minutos.
             </p>
           </div>

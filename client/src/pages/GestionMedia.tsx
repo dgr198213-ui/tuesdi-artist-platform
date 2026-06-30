@@ -298,7 +298,7 @@ export default function GestionMedia() {
       {/* Delete confirmation modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-md">
-          <div className="glass-card rounded-2xl p-lg w-full max-w-sm relative">
+          <div className="glass-card rounded-2xl p-lg w-full max-w-[24rem] relative">
             <h3 className="font-headline-md text-headline-md text-on-surface mb-sm">Eliminar archivo</h3>
             <p className="font-body-md text-body-md text-on-surface-variant mb-lg">¿Estás seguro? Esta acción no se puede deshacer.</p>
             <div className="flex gap-sm justify-end">
@@ -312,7 +312,7 @@ export default function GestionMedia() {
       {/* Add video modal */}
       {showAddVideo && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-md">
-          <div className="glass-card rounded-2xl p-lg w-full max-w-md relative">
+          <div className="glass-card rounded-2xl p-lg w-full max-w-[28rem] relative">
             <button className="absolute top-base right-base text-on-surface-variant hover:text-white" onClick={() => setShowAddVideo(false)}>
               <span className="material-symbols-outlined">close</span>
             </button>
