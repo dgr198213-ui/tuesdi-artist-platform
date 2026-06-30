@@ -135,9 +135,9 @@ export default function Home() {
             <img
               src="/gallery/concierto-confeti-luces.jpg"
               alt=""
-              className="w-full h-full object-cover opacity-20"
+              className="w-full h-full object-cover opacity-45"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20"></div>
           </div>
           <div className="max-w-4xl text-center z-10">
             <div className="inline-flex items-center gap-sm px-sm py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-md">
@@ -347,8 +347,8 @@ export default function Home() {
         {/* Final CTA */}
         <section className="py-2xl relative overflow-hidden text-center">
           <div className="absolute inset-0 z-0">
-            <img src="/gallery/artista-guitarrista-luces.jpg" alt="" className="w-full h-full object-cover opacity-15" />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/50"></div>
+            <img src="/gallery/artista-guitarrista-luces.jpg" alt="" className="w-full h-full object-cover opacity-35" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-background/35"></div>
           </div>
           <div className="max-w-4xl mx-auto px-margin z-10 relative">
             <h2 className="font-headline-lg text-headline-lg text-on-surface mb-md">Haz que tu talento sea imposible de ignorar.</h2>

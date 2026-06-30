@@ -79,7 +79,7 @@ export default function DashboardShell({
             <img
               src="/logo-tuesdi-full.png"
               alt="TUESDI"
-              className="h-8 w-auto object-contain mb-xs"
+              className="h-10 w-auto object-contain mb-xs"
             />
           </button>
 
