@@ -34,22 +34,22 @@ export default function ProductShowcase() {
       <ShowcaseCard
         title="Perfil Público"
         description="Tu portfolio profesional impecable."
-        image="/showcase/perfil-publico.png"
+        image="/showcase/perfil-publico.jpg"
       />
       <ShowcaseCard
         title="Panel de Control"
         description="Métricas y gestión en tiempo real."
-        image="/showcase/panel-control.png"
+        image="/showcase/panel-control.jpg"
       />
       <ShowcaseCard
         title="Galería Inteligente"
         description="Sube fotos y vídeos según tu plan."
-        image="/showcase/galeria.png"
+        image="/showcase/galeria.jpg"
       />
       <ShowcaseCard
         title="Buzón Seguro"
         description="Propuestas directas y privadas."
-        image="/showcase/buzon.png"
+        image="/showcase/buzon.jpg"
       />
     </div>
   );
