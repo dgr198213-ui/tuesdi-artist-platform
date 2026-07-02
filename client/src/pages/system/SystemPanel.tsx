@@ -74,9 +74,11 @@ export default function SystemPanel() {
           .from("events")
           .select("organizer_email, created_at")
           .order("created_at", { ascending: false });
-        const unique = [...new Map((evData ?? []).map(e => [e.organizer_email, {
-          id: e.organizer_email, email: e.organizer_email, created_at: e.created_at
-        }])).values()];
+        const unique = Array.from(
+          new Map((evData ?? []).map(e => [e.organizer_email, {
+            id: e.organizer_email, email: e.organizer_email, created_at: e.created_at
+          }])).values()
+        );
         setUsers(unique);
       }
 
