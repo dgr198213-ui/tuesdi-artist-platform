@@ -70,6 +70,7 @@ const Analitica = lazy(() =>
 const TerminosServicio = lazy(() => import("./pages/TerminosServicio"));
 const PoliticaPrivacidad = lazy(() => import("./pages/PoliticaPrivacidad"));
 const AvisoLegal = lazy(() => import("./pages/AvisoLegal"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 const PoliticaCookies = lazy(() => import("./pages/PoliticaCookies"));
 const QuienesSomos = lazy(() => import("./pages/QuienesSomos"));
 const Contacto = lazy(() => import("./pages/Contacto"));
@@ -124,6 +125,7 @@ function Router() {
         <Route path="/quienes-somos" component={QuienesSomos} />
         <Route path="/contacto" component={Contacto} />
         <Route path="/aviso-legal" component={AvisoLegal} />
+        <Route path="/faq" component={FAQ} />
         <Route path="/politica-privacidad" component={PoliticaPrivacidad} />
         <Route path="/politica-cookies" component={PoliticaCookies} />
         <Route path="/terminos-servicio" component={TerminosServicio} />

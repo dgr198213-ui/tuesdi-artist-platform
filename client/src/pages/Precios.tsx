@@ -130,7 +130,7 @@ export default function Precios() {
               <div className="mb-lg">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Standard</h2>
                 <p className="font-body-md text-body-md text-on-surface-variant">
-                  Para artistas que quieren destacar.
+                  Más espacio para mostrar tu trabajo.
                 </p>
               </div>
               <div className="mb-lg">
@@ -182,7 +182,7 @@ export default function Precios() {
               <div className="mb-lg">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">Pro</h2>
                 <p className="font-body-md text-body-md text-on-surface-variant">
-                  Máxima visibilidad y promoción activa.
+                  Presentación completa, máxima presencia.
                 </p>
               </div>
               <div className="mb-lg">

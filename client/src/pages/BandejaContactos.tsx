@@ -110,7 +110,7 @@ export default function BandejaContactos() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-md mb-lg">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs flex items-center gap-sm">
-            Bandeja de Contactos
+            Bandeja de Solicitudes
             {newCount > 0 && (
               <span className="bg-secondary text-black font-label-sm text-label-sm font-bold px-sm py-1 rounded-full">{newCount}</span>
             )}

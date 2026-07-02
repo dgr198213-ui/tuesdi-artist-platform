@@ -147,10 +147,10 @@ export default function Home() {
               </span>
             </div>
             <h1 className="font-headline-xl text-[40px] md:text-headline-xl text-on-surface mb-md leading-tight max-w-3xl mx-auto">
-              Tu escenario digital para mostrar tu trabajo o publicar tu evento.
+              Tu talento. Tus datos. Tus decisiones.
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-md max-w-2xl mx-auto">
-              Conectamos artistas independientes y promotores culturales en un espacio soberano. Sin algoritmos que oculten tu alcance, sin comisiones ocultas y con absoluta privacidad.
+              Un escaparate profesional para artistas independientes. Perfil público, solicitudes privadas, sin intermediarios ni comisiones. Tú siempre decides quién te contacta y si respondes.
             </p>
             <div className="flex flex-col md:flex-row gap-md justify-center mb-sm">
               <button
@@ -181,7 +181,7 @@ export default function Home() {
               </div>
               <h3 className="font-headline-lg text-headline-lg text-white mb-sm">Para Artistas</h3>
               <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
-                Construye tu portafolio profesional en minutos, sube material multimedia según tu plan y recibe propuestas de contratación en tu bandeja privada sin exponer tu email ni tu teléfono.
+                Construye tu portafolio profesional en minutos, sube material multimedia según tu plan y recibe propuestas privadas en tu bandeja sin exponer tu email ni tu teléfono.
               </p>
               <span className="text-primary font-bold flex items-center gap-xs group-hover:gap-sm transition-all">
                 Empezar como artista <span className="material-symbols-outlined">arrow_forward</span>
@@ -199,6 +199,32 @@ export default function Home() {
                 Publicar evento gratis <span className="material-symbols-outlined">arrow_forward</span>
               </span>
             </div>
+          </div>
+        </section>
+
+        {/* Cómo funciona */}
+        <section className="py-xl px-margin max-w-5xl mx-auto">
+          <div className="text-center mb-xl">
+            <h2 className="font-headline-lg text-headline-lg text-on-surface">¿Cómo funciona?</h2>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-xs">
+              Sin comisiones. Sin intermediarios. Sin chat interno.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-md">
+            {[
+              { icon: "search", text: "Descubre un artista" },
+              { icon: "mail", text: "Envía una propuesta privada" },
+              { icon: "inbox", text: "El artista la recibe" },
+              { icon: "task_alt", text: "Decide si responder" },
+              { icon: "handshake", text: "Seguís la conversación directamente" },
+            ].map((step, i) => (
+              <div key={i} className="flex sm:flex-col items-center sm:text-center gap-md sm:gap-sm">
+                <div className="w-12 h-12 shrink-0 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary">{step.icon}</span>
+                </div>
+                <p className="text-sm text-on-surface-variant">{step.text}</p>
+              </div>
+            ))}
           </div>
         </section>
 

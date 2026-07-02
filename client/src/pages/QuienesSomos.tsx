@@ -9,23 +9,23 @@ export default function QuienesSomos() {
   const values = [
     {
       icon: Handshake,
-      title: "Conectividad",
-      description: "Conectamos artistas con oportunidades reales sin intermediarios."
+      title: "Sin intermediarios",
+      description: "Facilitamos el primer contacto. La negociación y el trabajo siempre son directos entre vosotros."
     },
     {
       icon: Eye,
-      title: "Transparencia",
-      description: "Sin comisiones ocultas, sin sorpresas. Todo es claro."
+      title: "Privacidad por diseño",
+      description: "Tu email y tu teléfono nunca se muestran públicamente. Tú decides qué compartir y cuándo."
     },
     {
       icon: Zap,
-      title: "Visibilidad",
-      description: "Damos a los artistas la plataforma que merecen."
+      title: "Control del artista",
+      description: "Tú decides qué muestras, quién te contacta y si respondes. Siempre."
     },
     {
       icon: Heart,
-      title: "Pasión",
-      description: "Creemos en el talento en vivo y su poder transformador."
+      title: "Sin comisiones",
+      description: "No cobramos por tus acuerdos. Tu trabajo y tu tarifa son solo tuyos."
     }
   ];
 
@@ -51,9 +51,17 @@ export default function QuienesSomos() {
         <div className="space-y-12">
           {/* Mission */}
           <section>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Por qué existe TUESDI</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              La mayoría de plataformas quieren quedarse en medio de la relación entre artistas y organizadores: cobran comisión, procesan pagos, gestionan las conversaciones. Nosotros creemos justo lo contrario. Creemos que un artista debe decidir con quién trabaja y cómo. TUESDI existe para facilitar ese primer contacto sin convertirse en intermediario.
+            </p>
+          </section>
+
+          {/* Mission */}
+          <section>
             <h2 className="text-3xl font-bold text-foreground mb-4">Nuestra Misión</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              TUESDI existe para democratizar la visibilidad artística. Creemos que el talento en vivo no debería estar limitado por intermediarios, comisiones o fricción. Nuestro objetivo es crear un espacio donde artistas de cualquier disciplina puedan mostrar su trabajo y conectar directamente con oportunidades reales.
+              Dar a los artistas un espacio profesional donde mostrar su trabajo y recibir oportunidades sin perder el control sobre sus datos ni sobre sus relaciones profesionales.
             </p>
           </section>
 
@@ -93,13 +101,13 @@ export default function QuienesSomos() {
             <h2 className="text-3xl font-bold text-foreground mb-4">Nuestra Historia</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                TUESDI nace de una observación simple: el talento en vivo está fragmentado. Los artistas luchan por visibilidad, los promotores tienen dificultades para encontrar talento, y los intermediarios se llevan una parte del pastel.
+                TUESDI no nació para convertirse en un marketplace, ni en una agencia, ni en una plataforma de contratación. Nació de una observación simple: la mayoría de plataformas del sector controlan toda la relación entre dos personas — cobran comisión, procesan pagos, almacenan conversaciones, actúan como intermediarios.
               </p>
               <p>
-                Decidimos construir una plataforma diferente. Una donde no hay comisiones, no hay intermediarios, no hay fricción. Solo artistas, eventos, y oportunidades directas.
+                Decidimos construir algo distinto. La función de TUESDI termina en el momento en que el artista recibe una solicitud. A partir de ahí, el artista decide si responder, negocia directamente y trabaja directamente. Nosotros solo facilitamos ese primer contacto.
               </p>
               <p>
-                Hoy, TUESDI conecta artistas de todas las disciplinas con promotores que buscan talento auténtico. Somos una plataforma pequeña, pero con un propósito claro: democratizar el acceso a oportunidades artísticas.
+                Hoy, TUESDI conecta artistas de todas las disciplinas con promotores que buscan talento auténtico, sin quedarnos nunca en medio del acuerdo.
               </p>
             </div>
           </section>

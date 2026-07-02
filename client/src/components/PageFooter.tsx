@@ -11,6 +11,7 @@ const LINKS = [
   { label: "Eventos",         path: "/eventos" },
   { label: "Planes",          path: "/planes" },
   { label: "Quiénes Somos",   path: "/quienes-somos" },
+  { label: "FAQ",             path: "/faq" },
   { label: "Contacto",        path: "/contacto" },
 ];
 

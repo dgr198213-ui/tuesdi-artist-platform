@@ -241,24 +241,32 @@ export default function Dashboard() {
   return (
     <DashboardShell active="overview" title="Overview">
       {/* Welcome */}
-      <section className="flex flex-col md:flex-row justify-between items-start md:items-end mb-xl gap-md">
+      <section className="flex flex-col md:flex-row justify-between items-start md:items-end mb-md gap-md">
         <div>
           <h2 className="font-headline-lg text-headline-lg mb-xs">
-            Welcome back, {artist?.artist_name?.split(" ")[0] ?? "Artista"}
+            Hola de nuevo, {artist?.artist_name?.split(" ")[0] ?? "Artista"}
           </h2>
           <p className="text-on-surface-variant font-body-md">
             {newCount > 0
-              ? `Tienes ${newCount} solicitud${newCount > 1 ? "es" : ""} de contacto sin leer.`
-              : "Todo al día — sin mensajes nuevos pendientes."}
+              ? `Tienes ${newCount} solicitud${newCount > 1 ? "es" : ""} sin leer.`
+              : "Todo al día — sin solicitudes nuevas pendientes."}
           </p>
         </div>
         <div className="px-md py-sm bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-sm shrink-0">
           <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
           <div>
-            <p className="font-label-sm text-label-sm uppercase tracking-tighter text-outline">Current Plan</p>
+            <p className="font-label-sm text-label-sm uppercase tracking-tighter text-outline">Plan actual</p>
             <p className="font-bold text-primary">{planLabel}</p>
           </div>
         </div>
+      </section>
+
+      {/* Recordatorio de filosofía */}
+      <section className="mb-xl bg-secondary/5 border border-secondary/15 rounded-lg px-md py-sm flex items-center gap-sm">
+        <span className="material-symbols-outlined text-secondary text-[20px]">lock</span>
+        <p className="text-sm text-on-surface-variant">
+          Tu perfil está activo. Recibirás solicitudes privadas — <span className="text-on-surface font-medium">solo tú decides si responder</span>.
+        </p>
       </section>
 
       {/* Metric Bento Grid */}

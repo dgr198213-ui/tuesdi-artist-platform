@@ -249,15 +249,15 @@ export default function ArtistaProfile() {
                 <span className="font-label-sm text-label-sm text-secondary uppercase tracking-widest">Disponible para reservas</span>
               </div>
               <p className="font-body-md text-body-md text-on-surface-variant mb-md">
-                Contacta directamente con {artist.artist_name} para consultar disponibilidad y presupuestos personalizados.
+                Envía una propuesta privada a {artist.artist_name}. Tu email nunca se publica: solo {artist.artist_name} decide si responder.
               </p>
               <button
                 className="w-full bg-primary text-on-primary py-md rounded-lg font-headline-md text-headline-md hover:opacity-90 transition-all duration-300"
                 onClick={() => setContactOpen(true)}
               >
-                Contactar Artista
+                Enviar Propuesta
               </button>
-              <p className="mt-md text-center font-label-sm text-label-sm text-on-surface-variant/60">Privacidad garantizada por el sistema TUESDI</p>
+              <p className="mt-md text-center font-label-sm text-label-sm text-on-surface-variant/60">Tu correo permanece privado · Solo tú decides responder</p>
             </div>
           </div>
         </section>
@@ -350,7 +350,7 @@ export default function ArtistaProfile() {
             <button className="absolute top-base right-base text-on-surface-variant hover:text-white" onClick={() => setContactOpen(false)}>
               <span className="material-symbols-outlined">close</span>
             </button>
-            <h2 className="font-headline-md text-headline-md text-white mb-sm">Contactar con {artist.artist_name}</h2>
+            <h2 className="font-headline-md text-headline-md text-white mb-sm">Enviar propuesta a {artist.artist_name}</h2>
             <p className="font-body-md text-body-md text-on-surface-variant mb-lg">
               Tu información de contacto se mantendrá privada hasta que el artista responda.
             </p>

@@ -133,7 +133,7 @@ export default function Analitica() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-xl gap-md">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface">Analítica de Rendimiento</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">Datos reales sobre tu visibilidad en TUESDI.</p>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">No medimos popularidad. Medimos oportunidades reales.</p>
         </div>
         {isBasic && (
           <div className="glass-card rounded-xl px-md py-sm flex items-center gap-sm border-secondary/30 shrink-0">

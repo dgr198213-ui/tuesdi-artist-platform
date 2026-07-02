@@ -11,7 +11,7 @@ const NAV_ITEMS: { key: DashboardSection; icon: string; label: string; path: str
   { key: "overview", icon: "dashboard", label: "Overview", path: "/dashboard" },
   { key: "profile", icon: "account_circle", label: "Perfil", path: "/dashboard/perfil" },
   { key: "media", icon: "perm_media", label: "Media", path: "/dashboard/media" },
-  { key: "contacts", icon: "contacts", label: "Contactos", path: "/dashboard/contactos" },
+  { key: "contacts", icon: "contacts", label: "Solicitudes", path: "/dashboard/contactos" },
   { key: "analytics", icon: "analytics", label: "Analítica", path: "/dashboard/analitica" },
 ];
 

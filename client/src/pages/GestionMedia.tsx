@@ -151,7 +151,7 @@ export default function GestionMedia() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-xl gap-md">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface">Gestión Multimedia</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">Gestiona tus fotos y vídeos del perfil público.</p>
+          <p className="font-body-md text-body-md text-on-surface-variant mt-xs">La calidad de tu perfil influye directamente en la confianza que generas.</p>
         </div>
         <div className="flex gap-sm">
           <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handlePhotoUpload} />

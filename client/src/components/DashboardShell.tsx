@@ -19,7 +19,7 @@ const NAV_ITEMS: {
   { key: "overview", icon: "dashboard", label: "Overview", path: "/dashboard" },
   { key: "profile", icon: "account_circle", label: "Profile", path: "/dashboard/perfil" },
   { key: "media", icon: "perm_media", label: "Media", path: "/dashboard/media" },
-  { key: "contacts", icon: "contacts", label: "Contacts", path: "/dashboard/contactos" },
+  { key: "contacts", icon: "contacts", label: "Solicitudes", path: "/dashboard/contactos" },
   { key: "analytics", icon: "analytics", label: "Analytics", path: "/dashboard/analitica" },
 ];
 

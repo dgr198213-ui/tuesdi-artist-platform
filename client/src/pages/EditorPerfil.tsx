@@ -446,10 +446,10 @@ export default function EditorPerfil() {
 
           {/* Caché */}
           <div className="glass-card rounded-xl p-md">
-            <h3 className="font-headline-md text-headline-md mb-md text-primary">Contratación (Caché)</h3>
+            <h3 className="font-headline-md text-headline-md mb-md text-primary">Caché Orientativo</h3>
             <div className="flex flex-col md:flex-row gap-md items-start">
               <div className="w-full md:w-1/3">
-                <label className="font-label-sm text-on-surface-variant block mb-base">Caché orientativo</label>
+                <label className="font-label-sm text-on-surface-variant block mb-base">Rango económico</label>
                 <div className="relative">
                   <span className="absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant">€</span>
                   <input
@@ -464,10 +464,11 @@ export default function EditorPerfil() {
                 <div className="flex items-start gap-sm">
                   <span className="material-symbols-outlined text-secondary-container">info</span>
                   <div>
-                    <p className="font-label-sm text-secondary-container uppercase mb-xs">Nota sobre privacidad</p>
+                    <p className="font-label-sm text-secondary-container uppercase mb-xs">Solo orientativo</p>
                     <p className="text-sm text-on-surface-variant leading-tight">
-                      Este valor es solo orientativo para los organizadores. No se mostrará públicamente de forma
-                      explícita, sino que ayudará al algoritmo a emparejarte con eventos adecuados a tu rango.
+                      Este dato únicamente ayuda a los organizadores a saber si existe compatibilidad económica.
+                      Nunca se muestra públicamente ni implica contratación dentro de TUESDI: la negociación final
+                      siempre ocurre directamente entre vosotros.
                     </p>
                   </div>
                 </div>
