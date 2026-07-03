@@ -43,7 +43,7 @@ export default function EnlaceEnviado() {
               Enlace enviado
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant">
-              Hemos enviado un enlace de confirmación a:
+              Hemos enviado un enlace de acceso a:
             </p>
             <p className="font-headline-md text-headline-md text-primary mt-sm">{email}</p>
           </div>
@@ -56,8 +56,8 @@ export default function EnlaceEnviado() {
             <ol className="space-y-sm font-body-md text-body-md text-on-surface-variant list-decimal list-inside">
               <li>Abre tu correo electrónico</li>
               <li>Busca el email de TUESDI</li>
-              <li>Haz clic en el enlace de confirmación</li>
-              <li>¡Listo! Tu evento será publicado</li>
+              <li>Haz clic en el enlace de acceso</li>
+              <li>¡Listo! Entrarás directamente a tu panel de artista</li>
             </ol>
           </div>
 
