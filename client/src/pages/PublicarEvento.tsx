@@ -97,9 +97,17 @@ export default function PublicarEvento() {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
-    const { data: eventData, error: insertError } = await supabase
+    // Generamos el id en el cliente: el evento nace en status "pending" y
+    // sin artist_id, así que no es visible bajo ninguna política SELECT
+    // hasta que se aprueba. Si usáramos INSERT ... RETURNING (.select()),
+    // Postgres rechaza la operación por RLS al no poder devolver la fila
+    // recién creada. Generando el id aquí evitamos necesitar RETURNING.
+    const newEventId = crypto.randomUUID();
+
+    const { error: insertError } = await supabase
       .from("events")
       .insert([{
+        id: newEventId,
         title: form.title.trim(),
         description: form.description.trim() || null,
         category: form.category,
@@ -112,19 +120,17 @@ export default function PublicarEvento() {
         organizer_email: form.organizer_email.trim(),
         status: "pending",
         expires_at: expiresAt.toISOString(),
-      }])
-      .select()
-      .single();
+      }]);
 
-    if (insertError || !eventData) {
-      toast.error("No se pudo crear el evento: " + (insertError?.message || "error desconocido"));
+    if (insertError) {
+      toast.error("No se pudo crear el evento: " + insertError.message);
       setSubmitting(false);
       return;
     }
 
     const { data: mlData, error: mlError } = await supabase.functions.invoke("create-magic-link", {
         body: { 
-          eventId: eventData.id, 
+          eventId: newEventId, 
           email: form.organizer_email,
           siteUrl: window.location.origin 
         },
@@ -138,7 +144,7 @@ export default function PublicarEvento() {
         console.warn("Magic Link generado sin envío de email.");
       }
 
-    setLocation(`/exito-publicacion?id=${eventData.id}`);
+    setLocation(`/exito-publicacion?id=${newEventId}`);
   };
 
   return (
