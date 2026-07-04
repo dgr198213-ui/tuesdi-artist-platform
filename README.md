@@ -3,8 +3,38 @@
 *Tu escaparate digital para artistas.**  
 Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin exponer tus datos personales.
 
-🌐 **Producción:** [tuesdi-artist-platform.vercel.app](https://tuesdi-artist-platform.vercel.app)  
+🌐 **Producción:** [tuesdi.com](https://tuesdi.com) · [tuesdi-artist-platform.vercel.app](https://tuesdi-artist-platform.vercel.app)  
 📦 **Repositorio:** [github.com/dgr198213-ui/tuesdi-artist-platform](https://github.com/dgr198213-ui/tuesdi-artist-platform)
+
+---
+
+## Estado del Proyecto
+
+**Fase actual:** Beta Abierta (acceso completo gratuito) · En producción.
+
+| Área | Estado |
+|------|--------|
+| **Dominio propio** | ✅ `tuesdi.com` con SSL (Vercel) |
+| **Correo** | ✅ Envío vía Resend (`noreply@tuesdi.com`) · Buzón `hola@tuesdi.com` (Nominalia) |
+| **Autenticación** | ✅ Magic Link (HMAC-SHA256, sin contraseñas) |
+| **Publicación de eventos** | ✅ Flujo anónimo completo (crear → email → confirmar → publicar) |
+| **Perfiles de artista** | ✅ Editor, multimedia, analítica, bandeja de solicitudes |
+| **Panel admin** (`/system`) | ✅ Privado, solo owner |
+| **CI/CD** | ✅ GitHub Actions (typecheck + tests + build) en cada push |
+| **Seguridad** | ✅ 4 críticos de auditoría cerrados (phishing, rate limiting, stack traces, fuga de emails) |
+| **Rendimiento** | ✅ Imágenes optimizadas (−96%, dist ~1.8 MB) |
+| **Pagos (Stripe)** | ⏳ Integrado en modo test, sin activar |
+
+### Pendiente
+- Branch protection sobre `main` exigiendo el check de CI (configurar en GitHub).
+- Tests para las Edge Functions (HMAC, expiración de tokens).
+- Reducir el bundle `vendor` (~610 KB) con code-splitting.
+- Limpiar SQL suelto en la raíz del repo.
+
+### Norma de trabajo con la base de datos
+Los cambios de esquema se escriben **primero como archivo de migración** en `supabase/migrations/` (con timestamp) y se aplican desde ahí. Evita la desincronización repo ↔ BD que da error en el check de Supabase Preview.
+
+> ⚠️ Un agente automatizado (Manus) tiene acceso de colaborador al repo. Revisar cada uno de sus commits antes de aceptarlos; el CI actúa como primera barrera.
 
 ---
 
@@ -179,10 +209,24 @@ Genera un token HMAC-SHA256 para confirmar la publicación de un evento y lo env
 - `SITE_URL` — URL base de producción
 
 ### `confirm-event`
-Valida el token HMAC recibido desde `/confirmar-evento/:token`, verifica que no haya sido usado ni caducado, y actualiza el evento a `status = "approved"`.
+Valida el token HMAC recibido desde `/confirmar-evento/:token`, verifica que no haya sido usado ni caducado, y actualiza el evento a `status = "approved"`. Comparación en tiempo constante (`safeEqual`) y `verify_jwt: false` (el enlace se abre desde email sin sesión).
 
 **Secrets requeridos:**
 - `MAGIC_LINK_SECRET` — Debe ser idéntico al de `create-magic-link`
+
+### `send-contact-email`
+Procesa el formulario de contacto público. Honeypot anti-bot, rate limiting por IP, sanitización HTML. Entrega a `hola@tuesdi.com`.
+
+### `send-welcome-email`
+Email de bienvenida al registrarse un artista.
+
+### `get-events` · `get-public-profile`
+Lectura pública de eventos aprobados y perfiles de artista (para el directorio y las páginas públicas).
+
+### `resend-email`
+Reenvío del enlace de confirmación de evento.
+
+> **Nota de seguridad:** `create-magic-link` usa **siempre** el `SITE_URL` de entorno para construir el enlace del email — nunca acepta una URL del cliente (previene phishing con la marca). Los errores internos se registran solo en `console.error`; al cliente se le devuelve un mensaje genérico. La creación de eventos está limitada por un trigger de BD (3/email/hora, 20 globales/hora).
 
 ---
 
