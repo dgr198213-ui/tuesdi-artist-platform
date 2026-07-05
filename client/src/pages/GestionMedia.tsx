@@ -120,17 +120,28 @@ export default function GestionMedia() {
     setUploading(false);
   };
 
+  const VIDEO_URL_PATTERN = /^https:\/\/((www\.)?youtube\.com|youtu\.be|(www\.)?vimeo\.com)\//i;
+
   const handleAddVideo = async () => {
     if (!videoUrl || !artistId) return;
     if (videos.length >= limits.videos) { toast.error(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`); return; }
+    if (!VIDEO_URL_PATTERN.test(videoUrl.trim())) {
+      toast.error("Solo se admiten enlaces de YouTube o Vimeo.");
+      return;
+    }
 
-    const { data: newItem } = await supabase.from("media").insert([{
+    const { data: newItem, error } = await supabase.from("media").insert([{
       artist_id: artistId,
       type: "video",
-      url: videoUrl,
+      url: videoUrl.trim(),
       thumbnail: null,
       position: media.length + 1,
     }]).select().single();
+
+    if (error) {
+      toast.error(error.message || "No se pudo añadir el vídeo.");
+      return;
+    }
 
     if (newItem) {
       setMedia((prev) => [...prev, newItem as MediaItem]);
