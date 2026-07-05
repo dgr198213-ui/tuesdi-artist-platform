@@ -23,13 +23,13 @@ Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin 
 | **CI/CD** | ✅ GitHub Actions + branch protection en `main` |
 | **Seguridad** | ✅ 4 críticos de auditoría cerrados (phishing, rate limiting, stack traces, fuga de emails) |
 | **Rendimiento** | ✅ Imágenes optimizadas (−96%, dist ~1.8 MB) |
-| **Migraciones** | ✅ Repo ↔ BD sincronizados (17 = 17) |
+| **Testing** | ✅ 69 tests (incl. HMAC/expiración de magic links en `_shared/magic-token`) |
+| **Migraciones** | ✅ Repo ↔ BD sincronizados (18 = 18) |
 | **Pagos (Stripe)** | ⏳ Integrado en modo test, sin activar |
 
-*Última auditoría completa: 05-jul-2026 — tsc limpio · 54/54 tests · build OK · RLS verificado (anon solo ve contenido aprobado).*
+*Última auditoría completa: 05-jul-2026 — tsc limpio · 69/69 tests · build OK · RLS verificado (anon solo ve contenido aprobado).*
 
 ### Pendiente
-- Tests para las Edge Functions (HMAC, expiración de tokens).
 - Reducir el bundle `vendor` (~610 KB) con code-splitting (recharts + supabase-js).
 - Activar Stripe (precios reales) cuando se decida monetizar.
 
@@ -196,7 +196,8 @@ tuesdi-artist-platform/
 
 **`artist-media`** — Bucket público para fotos de perfil, portadas y multimedia  
 - Lectura pública
-- Escritura restringida a la carpeta propia del usuario (`<user_id>/...`)
+- Escritura de usuarios autenticados restringida a su carpeta propia (`<user_id>/...`)
+- Escritura anónima permitida solo bajo el prefijo `events/...` (para que los promotores anónimos puedan adjuntar la imagen de su evento desde `/publicar-evento`)
 
 ---
 
