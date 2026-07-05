@@ -82,6 +82,12 @@ export default function TerminosServicio() {
             <p className="text-muted-foreground leading-relaxed">
               Las suscripciones de artistas se gestionan exclusivamente a través de Stripe. TUESDI no almacena datos de tarjetas de crédito. Stripe gestiona renovaciones, cancelaciones y facturación.
             </p>
+            <p className="text-muted-foreground leading-relaxed mt-3">
+              Los planes tienen una validez de un mes desde su activación y se renuevan mensualmente. Cada plan determina el número máximo de fotografías y vídeos que puede contener el perfil del artista.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mt-3">
+              <strong className="text-foreground">Ajuste de contenido al cambiar de plan:</strong> si un plan pasa a otro con límites inferiores (por cambio voluntario, cancelación o impago), el contenido que exceda los límites del nuevo plan será <strong className="text-foreground">eliminado automáticamente</strong>, comenzando por los elementos más antiguos y conservando siempre los más recientes. Esta eliminación es definitiva. Recomendamos al artista conservar copias propias de su material y revisar su galería antes de cambiar de plan.
+            </p>
           </section>
 
           <section>

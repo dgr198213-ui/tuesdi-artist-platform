@@ -113,11 +113,13 @@ flowchart LR
     C -- cancela --> B
 ```
 
-**Regla de downgrade (decidir antes de activar):** si un Pro con 3 vídeos baja
-a Standard (límite 1), NO se borra nada automáticamente: los vídeos 2 y 3
-quedan **ocultos** del perfil público (no eliminados) y se le avisa para que
-elija cuál conservar visible. Borrar contenido de un usuario sin su acción
-contradice el ADN de control del artista.
+**Regla de downgrade (DECIDIDA · implementada en trigger `prune_media_on_plan_change`):**
+los planes tienen validez mensual desde su activación. Al cambiar a un plan con
+límites inferiores (cambio voluntario, cancelación o impago → beta), el contenido
+que exceda el nuevo límite se **elimina automáticamente**, borrando primero los
+elementos más antiguos y conservando siempre los más recientes (el último se
+asume el más actual). Es definitivo y está recogido en las Condiciones de Uso
+(sección 6), que recomiendan al artista conservar copias propias.
 
 ---
 
