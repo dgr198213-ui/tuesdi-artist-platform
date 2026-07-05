@@ -288,20 +288,37 @@ export default function ArtistaProfile() {
               )}
               {videos.length > 0 && (
                 <div className="mt-md grid grid-cols-1 md:grid-cols-2 gap-md">
-                  {videos.map((item) => (
-                    <a key={item.id} href={item.url} target="_blank" rel="noreferrer" className="aspect-video w-full rounded-xl overflow-hidden glass-card relative group block">
-                      <div className="absolute inset-0 flex items-center justify-center z-10">
-                        <div className="w-20 h-20 bg-primary/90 text-on-primary rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
-                          <span className="material-symbols-outlined !text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                  {videos.map((item) => {
+                    const isNative = item.url.includes(".supabase.co/storage/");
+                    if (isNative) {
+                      return (
+                        <div key={item.id} className="aspect-video w-full rounded-xl overflow-hidden glass-card">
+                          {/* preload="none": el vídeo no se descarga hasta que el visitante pulsa play (control de coste) */}
+                          <video
+                            className="w-full h-full object-cover bg-black"
+                            controls
+                            preload="none"
+                            playsInline
+                            src={item.url}
+                          />
                         </div>
-                      </div>
-                      {item.thumbnail && !imgErrors[`thumb-${item.id}`] ? (
-                        <img loading="lazy" className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} onError={() => markImgError(`thumb-${item.id}`)} />
-                      ) : (
-                        <div className="w-full h-full bg-surface-container"></div>
-                      )}
-                    </a>
-                  ))}
+                      );
+                    }
+                    return (
+                      <a key={item.id} href={item.url} target="_blank" rel="noreferrer" className="aspect-video w-full rounded-xl overflow-hidden glass-card relative group block">
+                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                          <div className="w-20 h-20 bg-primary/90 text-on-primary rounded-full flex items-center justify-center transition-transform group-hover:scale-110">
+                            <span className="material-symbols-outlined !text-[40px]" style={{ fontVariationSettings: "'FILL' 1" }}>play_arrow</span>
+                          </div>
+                        </div>
+                        {item.thumbnail && !imgErrors[`thumb-${item.id}`] ? (
+                          <img loading="lazy" className="w-full h-full object-cover opacity-60" src={item.thumbnail} alt={artist.artist_name} onError={() => markImgError(`thumb-${item.id}`)} />
+                        ) : (
+                          <div className="w-full h-full bg-surface-container"></div>
+                        )}
+                      </a>
+                    );
+                  })}
                 </div>
               )}
             </>

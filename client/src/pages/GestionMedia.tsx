@@ -31,6 +31,7 @@ export default function GestionMedia() {
   const [showAddVideo, setShowAddVideo] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const loadMedia = async () => {
     setLoading(true);
@@ -122,6 +123,60 @@ export default function GestionMedia() {
 
   const VIDEO_URL_PATTERN = /^https:\/\/((www\.)?youtube\.com|youtu\.be|(www\.)?vimeo\.com)\//i;
 
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !userId || !artistId) return;
+
+    if (videos.length >= limits.videos) {
+      toast.error(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`);
+      return;
+    }
+
+    const allowedTypes = ["video/mp4", "video/webm", "video/quicktime"];
+    const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Formato no permitido (solo MP4, WebM o MOV).");
+      return;
+    }
+    if (file.size > MAX_VIDEO_SIZE) {
+      toast.error("El vídeo excede los 100 MB. Comprímelo o recórtalo antes de subirlo.");
+      return;
+    }
+
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "mp4";
+    const path = `${userId}/videos/video-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("artist-media")
+      .upload(path, file, { upsert: true, contentType: file.type });
+
+    if (upErr) {
+      setUploading(false);
+      toast.error("No se pudo subir el vídeo: " + upErr.message);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage.from("artist-media").getPublicUrl(path);
+    const { data: newItem, error } = await supabase.from("media").insert([{
+      artist_id: artistId,
+      type: "video",
+      url: urlData.publicUrl,
+      thumbnail: null,
+      position: media.length + 1,
+    }]).select().single();
+
+    setUploading(false);
+    if (error) {
+      toast.error(error.message || "No se pudo guardar el vídeo.");
+      return;
+    }
+    if (newItem) {
+      setMedia((prev) => [...prev, newItem as MediaItem]);
+      toast.success("Vídeo subido correctamente.");
+    }
+  };
+
   const handleAddVideo = async () => {
     if (!videoUrl || !artistId) return;
     if (videos.length >= limits.videos) { toast.error(`Tu plan ${plan} solo permite ${limits.videos} vídeo(s).`); return; }
@@ -175,14 +230,25 @@ export default function GestionMedia() {
             {uploading ? "Subiendo..." : "Subir Foto"}
           </button>
           {limits.videos > 0 && (
-            <button
-              className="bg-primary text-on-primary px-md py-sm rounded-lg font-bold bloom-primary hover:opacity-90 transition-all flex items-center gap-xs disabled:opacity-50"
-              onClick={() => setShowAddVideo(true)}
-              disabled={videos.length >= limits.videos}
-            >
-              <span className="material-symbols-outlined">video_call</span>
-              Añadir Vídeo
-            </button>
+            <>
+              <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" onChange={handleVideoFileUpload} />
+              <button
+                className="bg-primary text-on-primary px-md py-sm rounded-lg font-bold bloom-primary hover:opacity-90 transition-all flex items-center gap-xs disabled:opacity-50"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={uploading || videos.length >= limits.videos}
+              >
+                <span className="material-symbols-outlined">upload</span>
+                Subir Vídeo
+              </button>
+              <button
+                className="neon-border text-primary px-md py-sm rounded-lg font-bold hover:bg-primary/10 transition-all flex items-center gap-xs disabled:opacity-50"
+                onClick={() => setShowAddVideo(true)}
+                disabled={videos.length >= limits.videos}
+              >
+                <span className="material-symbols-outlined">video_call</span>
+                Añadir Enlace
+              </button>
+            </>
           )}
         </div>
       </div>
