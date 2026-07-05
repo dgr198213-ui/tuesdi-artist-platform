@@ -1,5 +1,6 @@
 // supabase/functions/create-magic-link/index.ts
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generateToken } from "../_shared/magic-token.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -52,16 +53,9 @@ Deno.serve(async (req: Request) => {
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const timestamp = Date.now().toString();
-    const payload = `${eventId}:${email}:${timestamp}`;
-    const encoder = new TextEncoder();
-    const keyData = encoder.encode(magicLinkSecret);
-    const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-    const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, encoder.encode(payload));
-    const signature = Array.from(new Uint8Array(signatureBuffer)).map((b) => b.toString(16).padStart(2, "0")).join("");
-    const tokenPayload = btoa(payload).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-    const token = `${tokenPayload}.${signature}`;
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Generación de token con firma HMAC (lógica pura, testeada en _shared)
+    const { token, expiresAt } = await generateToken(eventId, email, magicLinkSecret);
+    const signature = token.slice(token.lastIndexOf(".") + 1);
 
     const { error: insertError } = await supabase.from("magic_links").insert({
       event_id: eventId, token_hash: signature, email, expires_at: expiresAt, used: false,
