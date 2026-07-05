@@ -91,6 +91,11 @@ export default function PublicarEvento() {
       if (!uploadError) {
         const { data: urlData } = supabase.storage.from("artist-media").getPublicUrl(path);
         image_url = urlData.publicUrl;
+      } else {
+        // La imagen no se pudo subir, pero no bloqueamos la publicación del evento.
+        // Avisamos al usuario para que sepa que su evento saldrá sin foto.
+        console.error("Error subiendo imagen del evento:", uploadError);
+        toast.error("No se pudo subir la imagen, pero el evento se publicará sin ella.");
       }
     }
 
