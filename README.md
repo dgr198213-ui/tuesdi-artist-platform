@@ -24,7 +24,8 @@ Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin 
 | **Seguridad** | ✅ 4 críticos de auditoría cerrados (phishing, rate limiting, stack traces, fuga de emails) |
 | **Rendimiento** | ✅ Imágenes optimizadas (−96%, dist ~1.8 MB) |
 | **Testing** | ✅ 69 tests (incl. HMAC/expiración de magic links en `_shared/magic-token`) |
-| **Migraciones** | ✅ Repo ↔ BD sincronizados (18 = 18) |
+| **Migraciones** | ✅ Repo ↔ BD sincronizados (21 = 21) |
+| **Planes** | ✅ Preparados: límites aplicados en BD, vídeo nativo (≤100 MB) + enlaces, poda automática en downgrade, cláusula en Términos. Falta solo Stripe live |
 | **Pagos (Stripe)** | ⏳ Integrado en modo test, sin activar |
 
 *Última auditoría completa: 05-jul-2026 — tsc limpio · 69/69 tests · build OK · RLS verificado (anon solo ve contenido aprobado).*
@@ -317,7 +318,9 @@ TUESDI v3.0 usa el sistema de diseño **"Digital Stage"** creado con Stitch, bas
 | **Standard** | 6 €/mes | 3 | 1 | Ampliadas | Mejorado |
 | **Pro** | 9,99 €/mes | 3 | 3 | Avanzadas + tendencias | Prioridad + distintivo Pro |
 
-La gestión de suscripciones se realizará vía **Stripe** (pendiente de integración en fase posterior).
+- **Vídeos:** subida **nativa** (MP4/WebM/MOV, máx. 100 MB, reproducidos dentro de TUESDI con `preload="none"`) o enlace de YouTube/Vimeo. Límites y dominios validados en la BD (trigger `check_media_plan_limit`).
+- **Downgrade:** los planes tienen validez mensual; al bajar de plan (o cancelar → beta), el contenido sobrante se **elimina automáticamente** conservando los elementos más recientes (trigger `prune_media_on_plan_change`; recogido en Condiciones de Uso §6).
+- La gestión de cobros se realizará vía **Stripe** (integrado en modo test, pendiente de activar en live). Especificación completa en `docs/TUESDI_planes_y_videos.md`.
 
 ---
 

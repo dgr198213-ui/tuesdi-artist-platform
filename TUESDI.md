@@ -93,8 +93,9 @@ nacen sin ser visibles bajo las políticas SELECT (ej. eventos `pending` sin
 `crypto.randomUUID()` y no pedir RETURNING.
 
 ### 4.3 Storage
-Bucket `artist-media`, público en lectura. Usuarios autenticados escriben en su
-carpeta `<user_id>/...`; los promotores anónimos solo bajo el prefijo `events/...`.
+Bucket `artist-media`, público en lectura, **límite 100 MB/archivo (server-side)**.
+Usuarios autenticados escriben en su carpeta `<user_id>/...` (fotos y vídeos
+nativos en `<user_id>/videos/`); los promotores anónimos solo bajo `events/...`.
 
 ### 4.4 Git / despliegue
 - Rama `main` con **branch protection** (exige el check de CI `build-and-test`).
@@ -112,6 +113,18 @@ mismo commit (evita `ERR_PNPM_OUTDATED_LOCKFILE`).
 Hay un agente colaborador (Manus) con acceso al repo con historial de conflictos
 (force-push, cambió pnpm→npm, reintrodujo deps muertas). Revisar cada commit
 suyo; el CI es la primera barrera.
+
+### 4.7 Planes y media (decisiones de producto cerradas)
+- Límites por plan (espejo en cliente y **trigger de BD** `check_media_plan_limit`):
+  Beta 1 foto/0 vídeos · Standard 3/1 · Pro 3/3. Admins exentos.
+- **Vídeo:** subida nativa (MP4/WebM/MOV, ≤100 MB, servido con `preload="none"`
+  para no consumir egress hasta el play) **o** enlace YouTube/Vimeo. Ningún otro
+  dominio se acepta (validado en el trigger).
+- **Downgrade:** planes con validez mensual; al bajar de plan o cancelar (→ beta),
+  el trigger `prune_media_on_plan_change` **elimina** el contenido sobrante
+  conservando los elementos más recientes. Es definitivo y está en las
+  Condiciones de Uso (§6). No cambiar sin decisión explícita de Dani.
+- Especificación completa: `docs/TUESDI_planes_y_videos.md`.
 
 ---
 
@@ -163,13 +176,15 @@ suyo; el CI es la primera barrera.
 | Seguridad | ✅ 4 críticos de auditoría cerrados |
 | CI + branch protection | ✅ |
 | Testing | ✅ 69 tests (incl. HMAC/expiración) |
-| Migraciones repo↔BD | ✅ 18 = 18 |
+| Migraciones repo↔BD | ✅ 21 = 21 |
 | Rendimiento | ✅ imágenes −96%, dist ~1.8 MB |
+| Planes | ✅ preparados: límites en BD, vídeo nativo ≤100 MB + enlaces, poda en downgrade, Términos §6 |
 | Pagos Stripe | ⏳ modo test, sin activar |
 
 ### Pendiente
+- Activar Stripe live + tabla visual de `/planes` según la spec.
 - Code-splitting del bundle `vendor` (~610 KB): separar recharts + supabase-js.
-- Activar Stripe (precios reales) cuando se decida monetizar.
+- Vigilar egress de vídeo en Supabase (Dashboard → Usage) cuando haya uso real.
 
 ---
 
