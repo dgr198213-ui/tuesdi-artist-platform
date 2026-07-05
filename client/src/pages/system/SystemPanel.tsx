@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { supabase } from "@/lib/supabase";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 type Artist = {
   id: string;
@@ -34,6 +35,7 @@ type EventRow = {
   organizer_name: string | null;
   organizer_email: string | null;
   status: string;
+  image_url: string | null;
   created_at: string;
 };
 
@@ -43,6 +45,7 @@ const CATEGORIES = ["Música", "Teatro", "Danza", "Magia", "Comedia", "DJ", "Cir
 const EMPTY_FORM = {
   title: "", description: "", category: "Música", city: "", country: "España",
   event_date: "", event_time: "", organizer_name: "", organizer_email: "", status: "approved",
+  image_url: "",
 };
 
 export default function SystemPanel() {
@@ -61,6 +64,8 @@ export default function SystemPanel() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [saving, setSaving] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { uploadImage, loading: uploading } = useImageUpload({ bucket: "artist-media" });
 
   const flash = (text: string, kind: "ok" | "err" = "ok") => {
     setMsg({ text, kind });
@@ -75,6 +80,7 @@ export default function SystemPanel() {
       const { data } = await supabase
         .from("admin_users").select("user_id").eq("user_id", session.user.id).maybeSingle();
       if (!data) { setLocation("/404"); return; }
+      setUserId(session.user.id);
       setIsAdmin(true);
       setChecking(false);
     })();
@@ -87,7 +93,7 @@ export default function SystemPanel() {
     if (tab === "events") {
       const { data } = await supabase
         .from("events")
-        .select("id, title, description, category, city, country, event_date, event_time, organizer_name, organizer_email, status, created_at")
+        .select("id, title, description, category, city, country, event_date, event_time, organizer_name, organizer_email, status, image_url, created_at")
         .order("created_at", { ascending: false });
       setEvents(data ?? []);
     } else {
@@ -139,8 +145,20 @@ export default function SystemPanel() {
       city: e.city ?? "", country: e.country ?? "España", event_date: e.event_date ?? "",
       event_time: e.event_time ?? "", organizer_name: e.organizer_name ?? "",
       organizer_email: e.organizer_email ?? "", status: e.status ?? "approved",
+      image_url: e.image_url ?? "",
     });
     setShowForm(true);
+  };
+
+  const handleImagePick = async (file: File) => {
+    if (!userId) return flash("Sesión no válida.", "err");
+    const url = await uploadImage(file, userId, `event-${Date.now()}`);
+    if (url) {
+      setForm(f => ({ ...f, image_url: url }));
+      flash("Imagen subida.");
+    } else {
+      flash("No se pudo subir la imagen.", "err");
+    }
   };
 
   const saveEvent = async () => {
@@ -159,6 +177,7 @@ export default function SystemPanel() {
       organizer_name: form.organizer_name.trim() || null,
       organizer_email: form.organizer_email.trim() || "admin@tuesdi.com",
       status: form.status,
+      image_url: form.image_url || null,
     };
 
     if (editingId) {
@@ -370,6 +389,33 @@ export default function SystemPanel() {
                   <input value={form.organizer_email} onChange={e => setForm({ ...form, organizer_email: e.target.value })} className={inputCls} placeholder="opcional" />
                 </Field>
               </div>
+
+              {/* Imagen del evento */}
+              <Field label="Imagen del evento">
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-lg bg-black border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                    {form.image_url
+                      ? <img src={form.image_url} alt="" className="w-full h-full object-cover" />
+                      : <span className="text-white/20 text-[10px]">sin foto</span>}
+                  </div>
+                  <div className="flex-1">
+                    <label className="inline-block text-xs bg-white/10 hover:bg-white/15 text-white/80 rounded px-3 py-2 cursor-pointer transition-colors">
+                      {uploading ? "Subiendo..." : form.image_url ? "Cambiar foto" : "Subir foto"}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        disabled={uploading}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) handleImagePick(f); }}
+                      />
+                    </label>
+                    {form.image_url && (
+                      <button onClick={() => setForm(f => ({ ...f, image_url: "" }))} className="ml-2 text-xs text-red-400/60 hover:text-red-400">quitar</button>
+                    )}
+                    <p className="text-[10px] text-white/30 mt-1">JPG, PNG o WebP · máx 5 MB</p>
+                  </div>
+                </div>
+              </Field>
             </div>
 
             <div className="flex gap-2 mt-5">
