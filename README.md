@@ -19,17 +19,19 @@ Muestra tu talento, aumenta tu visibilidad y recibe solicitudes de contacto sin 
 | **Autenticación** | ✅ Magic Link (HMAC-SHA256, sin contraseñas) |
 | **Publicación de eventos** | ✅ Flujo anónimo completo (crear → email → confirmar → publicar) |
 | **Perfiles de artista** | ✅ Editor, multimedia, analítica, bandeja de solicitudes |
-| **Panel admin** (`/system`) | ✅ Privado, solo owner |
-| **CI/CD** | ✅ GitHub Actions (typecheck + tests + build) en cada push |
+| **Panel admin** (`/system`) | ✅ Gestión completa: eventos (crear/editar/aprobar/borrar, con foto) y artistas |
+| **CI/CD** | ✅ GitHub Actions + branch protection en `main` |
 | **Seguridad** | ✅ 4 críticos de auditoría cerrados (phishing, rate limiting, stack traces, fuga de emails) |
 | **Rendimiento** | ✅ Imágenes optimizadas (−96%, dist ~1.8 MB) |
+| **Migraciones** | ✅ Repo ↔ BD sincronizados (17 = 17) |
 | **Pagos (Stripe)** | ⏳ Integrado en modo test, sin activar |
 
+*Última auditoría completa: 05-jul-2026 — tsc limpio · 54/54 tests · build OK · RLS verificado (anon solo ve contenido aprobado).*
+
 ### Pendiente
-- Branch protection sobre `main` exigiendo el check de CI (configurar en GitHub).
 - Tests para las Edge Functions (HMAC, expiración de tokens).
-- Reducir el bundle `vendor` (~610 KB) con code-splitting.
-- Limpiar SQL suelto en la raíz del repo.
+- Reducir el bundle `vendor` (~610 KB) con code-splitting (recharts + supabase-js).
+- Activar Stripe (precios reales) cuando se decida monetizar.
 
 ### Norma de trabajo con la base de datos
 Los cambios de esquema se escriben **primero como archivo de migración** en `supabase/migrations/` (con timestamp) y se aplican desde ahí. Evita la desincronización repo ↔ BD que da error en el check de Supabase Preview.
