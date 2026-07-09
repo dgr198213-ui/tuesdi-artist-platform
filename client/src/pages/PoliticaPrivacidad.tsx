@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 export default function PoliticaPrivacidad() {
+  useSeo({ title: "Política de privacidad", path: "/politica-privacidad" });
   const [, setLocation] = useLocation();
 
   return (

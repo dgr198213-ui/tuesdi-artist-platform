@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 export default function TerminosServicio() {
+  useSeo({ title: "Términos del servicio", path: "/terminos-servicio" });
   const [, setLocation] = useLocation();
 
   return (

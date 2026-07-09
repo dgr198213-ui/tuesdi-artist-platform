@@ -17,8 +17,10 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { eventFormSchema, type EventForm } from "@/lib/schemas/eventForm";
 import { toast } from "sonner";
+import { useSeo } from "@/lib/seo";
 
 export default function PublicarEvento() {
+  useSeo({ title: "Publicar un evento", description: "Publica tu evento cultural gratis en TUESDI y llega a artistas independientes de toda España.", path: "/publicar-evento" });
   const [, setLocation] = useLocation();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 export default function AvisoLegal() {
+  useSeo({ title: "Aviso legal", path: "/aviso-legal" });
   const [, setLocation] = useLocation();
 
   return (

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 export default function PoliticaCookies() {
+  useSeo({ title: "Política de cookies", path: "/politica-cookies" });
   const [, setLocation] = useLocation();
 
   return (

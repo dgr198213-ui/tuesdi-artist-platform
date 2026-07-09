@@ -11,6 +11,7 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 const PAIN_POINTS = [
   {
@@ -46,6 +47,7 @@ const FEATURES = [
 ];
 
 export default function Escaparate() {
+  useSeo({ title: "Escaparate", description: "Así se ve un perfil profesional en TUESDI. Tu escenario digital, listo en minutos.", path: "/escaparate" });
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");

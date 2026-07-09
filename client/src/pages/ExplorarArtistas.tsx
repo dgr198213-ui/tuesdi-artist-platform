@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { ARTIST_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
+import { useSeo } from "@/lib/seo";
 
 const CATEGORIES = [FILTER_ALL, ...ARTIST_CATEGORIES];
 const CITIES = [...FILTER_CITIES];
@@ -33,6 +34,7 @@ interface Artist {
 }
 
 export default function ExplorarArtistas() {
+  useSeo({ title: "Explorar artistas", description: "Descubre artistas independientes por categoría y ciudad. Músicos, DJs, cantantes y más. Contacto directo, sin comisiones.", path: "/artistas" });
   const [, setLocation] = useLocation();
   const [artists, setArtists] = useState<Artist[]>([]);
   const [isLoading, setIsLoading] = useState(true);

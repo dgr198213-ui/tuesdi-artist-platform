@@ -9,8 +9,10 @@
 import { useLocation, useSearch } from "wouter";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
+import { useSeo } from "@/lib/seo";
 
 export default function EnlaceEnviado() {
+  useSeo({ title: "Enlace enviado", noIndex: true });
   const [, setLocation] = useLocation();
   const search = useSearch();
   const email = new URLSearchParams(search).get("email");

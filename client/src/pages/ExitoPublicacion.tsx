@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useSearch } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 interface Event {
   title: string;
@@ -22,6 +23,7 @@ interface Event {
 }
 
 export default function ExitoPublicacion() {
+  useSeo({ title: "Evento publicado", noIndex: true });
   const [, setLocation] = useLocation();
   const search = useSearch();
   const [event, setEvent] = useState<Event | null>(null);

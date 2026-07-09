@@ -2,8 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { Heart, Zap, Eye, Handshake } from "lucide-react";
+import { useSeo } from "@/lib/seo";
 
 export default function QuienesSomos() {
+  useSeo({ title: "Quiénes somos", description: "TUESDI conecta artistas independientes con quienes buscan talento. Sin intermediación, sin comisiones, con el control siempre del artista.", path: "/quienes-somos" });
   const [, setLocation] = useLocation();
 
   const values = [

@@ -7,6 +7,7 @@
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
+import { useSeo } from "@/lib/seo";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRoute, useLocation } from "wouter";
@@ -45,6 +46,52 @@ export default function EventoDetalle() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [liked, setLiked] = useState(false);
+
+  useSeo({
+    title: event ? `${event.title} · ${event.city}` : undefined,
+    description: event
+      ? (event.description?.trim().slice(0, 155) ||
+         `${event.title}, evento de ${event.category} en ${event.city} el ${formatFullDate(event.event_date)}.`)
+      : undefined,
+    path: params?.id ? `/eventos/${params.id}` : undefined,
+    image: event?.image_url ?? undefined,
+    noIndex: notFound,
+  });
+
+  // Datos estructurados de evento: habilitan resultados enriquecidos en Google.
+  // Se omite organizer.email a propósito: no se publica en el marcado.
+  useEffect(() => {
+    if (!event) return;
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Event",
+      name: event.title,
+      startDate: event.event_time
+        ? `${event.event_date}T${event.event_time}`
+        : event.event_date,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      location: {
+        "@type": "Place",
+        name: event.city,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: event.city,
+          addressCountry: event.country ?? "ES",
+        },
+      },
+      ...(event.description ? { description: event.description } : {}),
+      ...(event.image_url ? { image: [event.image_url] } : {}),
+      ...(event.organizer_name
+        ? { organizer: { "@type": "Organization", name: event.organizer_name } }
+        : {}),
+      url: `https://tuesdi.com/eventos/${event.id}`,
+    });
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [event]);
 
   useEffect(() => {
     if (!params?.id) return;

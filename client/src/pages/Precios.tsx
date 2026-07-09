@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import { PLAN_LIMITS } from "@/lib/constants";
+import { useSeo } from "@/lib/seo";
 
 const CHECK = (
   <span
@@ -30,6 +31,7 @@ const DOT = (
 );
 
 export default function Precios() {
+  useSeo({ title: "Planes y precios", description: "Planes de TUESDI para artistas: Beta gratuita durante la fase de lanzamiento. Sin comisiones por contacto, nunca.", path: "/planes" });
   const [, setLocation] = useLocation();
 
   return (

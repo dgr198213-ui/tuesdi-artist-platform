@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Rutas privadas o sin valor en buscadores.
+Disallow: /system
+Disallow: /dashboard
+Disallow: /acceso
+Disallow: /enlace-enviado
+Disallow: /confirmar-evento/
+Disallow: /exito-publicacion
+
+Sitemap: https://tuesdi.com/sitemap.xml

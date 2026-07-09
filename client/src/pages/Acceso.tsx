@@ -9,8 +9,10 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useSeo } from "@/lib/seo";
 
 export default function Acceso() {
+  useSeo({ title: "Acceso", path: "/acceso", noIndex: true });
   const [, setLocation] = useLocation();
   const { isAuthenticated, loading } = useAuth();
 

@@ -13,6 +13,7 @@ import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
+import { useSeo } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { toast } from "sonner";
@@ -58,6 +59,17 @@ export default function ArtistaProfile() {
   const [related, setRelated] = useState<RelatedArtist[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  useSeo({
+    title: artist ? `${artist.artist_name} · ${artist.city}` : undefined,
+    description: artist
+      ? (artist.bio?.trim().slice(0, 155) ||
+         `Descubre a ${artist.artist_name}, artista de ${artist.category} en ${artist.city}. Contacta sin intermediarios ni comisiones en TUESDI.`)
+      : undefined,
+    path: params?.slug ? `/artista/${params.slug}` : undefined,
+    image: artist?.cover_image ?? artist?.profile_image ?? undefined,
+    noIndex: notFound,
+  });
   const [fetchError, setFetchError] = useState(false);
 
   const [contactOpen, setContactOpen] = useState(false);

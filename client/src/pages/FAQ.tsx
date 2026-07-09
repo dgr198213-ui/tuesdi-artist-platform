@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useSeo } from "@/lib/seo";
 
 const FAQS = [
   {
@@ -32,6 +33,7 @@ const FAQS = [
 ];
 
 export default function FAQ() {
+  useSeo({ title: "Preguntas frecuentes", description: "Cómo funciona TUESDI: alta de artistas, publicación de eventos, privacidad del contacto y planes.", path: "/faq" });
   const [, setLocation] = useLocation();
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 

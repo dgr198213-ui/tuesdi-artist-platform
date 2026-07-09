@@ -12,10 +12,12 @@ import PageFooter from "@/components/PageFooter";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useRoute, useLocation } from "wouter";
+import { useSeo } from "@/lib/seo";
 
 type Status = "loading" | "success" | "error";
 
 export default function ConfirmarEvento() {
+  useSeo({ title: "Confirmar evento", noIndex: true });
   const [, params] = useRoute("/confirmar-evento/:token");
   const [, setLocation] = useLocation();
   const [status, setStatus] = useState<Status>("loading");

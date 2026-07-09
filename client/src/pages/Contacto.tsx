@@ -17,8 +17,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail, MapPin, Clock, Send, MessageCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useSeo } from "@/lib/seo";
 
 export default function Contacto() {
+  useSeo({ title: "Contacto", description: "¿Dudas sobre TUESDI? Escríbenos a hola@tuesdi.com y te respondemos.", path: "/contacto" });
   const [, setLocation] = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({

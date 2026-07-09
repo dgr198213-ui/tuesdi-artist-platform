@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { EVENT_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
+import { useSeo } from "@/lib/seo";
 
 const CATEGORIES = [FILTER_ALL, ...EVENT_CATEGORIES];
 const CITIES = [...FILTER_CITIES];
@@ -38,6 +39,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function Eventos() {
+  useSeo({ title: "Eventos culturales", description: "Agenda de eventos culturales en España. Conciertos, actuaciones y espectáculos publicados por organizadores independientes.", path: "/eventos" });
   const [, setLocation] = useLocation();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);

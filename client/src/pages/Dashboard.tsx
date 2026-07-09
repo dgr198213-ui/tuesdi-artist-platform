@@ -10,6 +10,7 @@ import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { getPlanLimits } from "@/lib/constants";
+import { useSeo } from "@/lib/seo";
 
 interface ArtistData {
   id: string;
@@ -91,6 +92,7 @@ function MediaUsage({ media, plan }: { media: MediaItem[]; plan: string | null |
 }
 
 export default function Dashboard() {
+  useSeo({ title: "Panel", noIndex: true });
   const [, setLocation] = useLocation();
   const [artist, setArtist] = useState<ArtistData | null>(null);
   const [metrics, setMetrics] = useState<MetricsData | null>(null);
