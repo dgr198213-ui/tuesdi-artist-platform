@@ -24,6 +24,15 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
+            // React y su ecosistema base: cambia poco, se cachea a largo plazo.
+            if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) {
+              return "react";
+            }
+            // Cliente de Supabase: se actualiza a su propio ritmo.
+            if (id.includes("node_modules/@supabase/")) {
+              return "supabase";
+            }
+            // Resto de librerías (radix, lucide, zod, sonner...).
             return "vendor";
           }
         },
