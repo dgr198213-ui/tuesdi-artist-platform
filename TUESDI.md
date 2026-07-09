@@ -165,7 +165,7 @@ suyo; el CI es la primera barrera.
 
 ## 7. Estado actual (actualizar al cambiar)
 
-*Actualizado: 05-jul-2026.*
+*Actualizado: 09-jul-2026.*
 
 | Área | Estado |
 |------|--------|
@@ -177,14 +177,19 @@ suyo; el CI es la primera barrera.
 | CI + branch protection | ✅ |
 | Testing | ✅ 69 tests (incl. HMAC/expiración) |
 | Migraciones repo↔BD | ✅ 21 = 21 |
-| Rendimiento | ✅ imágenes −96%, dist ~1.8 MB |
+| Rendimiento | ✅ imágenes −96%; vendor dividido en chunks react/supabase/vendor (~60/53/67 KB gz); 32 deps muertas eliminadas |
+| Docs operativos | ✅ consolidados en `docs/` (OPERACIONES, INCIDENTES, DNS) — regla: nada inventado |
+| Headers/CSP | ✅ aplicados a todas las rutas; CSP cerrado (commit `ddb2259`) |
 | Planes | ✅ preparados: límites en BD, vídeo nativo ≤100 MB + enlaces, poda en downgrade, Términos §6 |
 | Pagos Stripe | ⏳ modo test, sin activar |
 
 ### Pendiente
 - Activar Stripe live + tabla visual de `/planes` según la spec.
-- Code-splitting del bundle `vendor` (~610 KB): separar recharts + supabase-js.
+- Configurar monitorización mínima (UptimeRobot) según `docs/OPERACIONES.md` §3.
 - Vigilar egress de vídeo en Supabase (Dashboard → Usage) cuando haya uso real.
+- Rotar credenciales expuestas el 09-jul (token GitHub, claves Stripe test,
+  sb_secret de Supabase, MAGIC_LINK_SECRET) y borrar el email "lista de la
+  compra" de Gmail.
 
 ---
 
