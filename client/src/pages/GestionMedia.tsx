@@ -109,19 +109,39 @@ export default function GestionMedia() {
       const { error: upErr } = await supabase.storage.from("artist-media").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) continue;
       const { data: urlData } = supabase.storage.from("artist-media").getPublicUrl(path);
-      const { data: newItem } = await supabase.from("media").insert([{
+      const { data: newItem, error: insErr } = await supabase.from("media").insert([{
         artist_id: artistId,
         type: "photo",
         url: urlData.publicUrl,
         thumbnail: urlData.publicUrl,
         position: media.length + 1,
       }]).select().single();
+      if (insErr) {
+        // El trigger de BD rechazó la fila (p. ej. límite del plan): borrar
+        // el archivo recién subido para no dejar huérfanos en Storage.
+        await supabase.storage.from("artist-media").remove([path]);
+        toast.error(insErr.message || `${file.name}: no se pudo guardar.`);
+        continue;
+      }
       if (newItem) setMedia((prev) => [...prev, newItem as MediaItem]);
     }
     setUploading(false);
   };
 
   const VIDEO_URL_PATTERN = /^https:\/\/((www\.)?youtube\.com|youtu\.be|(www\.)?vimeo\.com)\//i;
+
+  /**
+   * Si la URL apunta a un archivo del bucket artist-media, devuelve su ruta
+   * interna (p. ej. "user-id/videos/video-123.mp4"); si es un enlace externo
+   * (YouTube/Vimeo), devuelve null. Permite borrar el archivo físico junto a
+   * la fila de la galería y no dejar huérfanos ocupando storage.
+   */
+  const storagePathFromUrl = (url: string): string | null => {
+    const marker = "/storage/v1/object/public/artist-media/";
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(url.slice(idx + marker.length));
+  };
 
   const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,6 +188,10 @@ export default function GestionMedia() {
 
     setUploading(false);
     if (error) {
+      // El trigger de BD puede rechazar el INSERT (p. ej. límite del plan
+      // alcanzado desde otra pestaña). El archivo ya está en Storage: borrarlo
+      // para no dejar un huérfano invisible ocupando espacio.
+      await supabase.storage.from("artist-media").remove([path]);
       toast.error(error.message || "No se pudo guardar el vídeo.");
       return;
     }
@@ -206,8 +230,23 @@ export default function GestionMedia() {
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("media").delete().eq("id", id);
+    const item = media.find((m) => m.id === id);
+    const { error } = await supabase.from("media").delete().eq("id", id);
+    if (error) {
+      toast.error("No se pudo eliminar el elemento.");
+      return;
+    }
     setMedia((prev) => prev.filter((m) => m.id !== id));
+
+    // Si era un archivo propio (foto o vídeo nativo), borrar también el
+    // objeto del bucket para no dejar huérfanos ocupando storage. Si falla,
+    // no molestamos al usuario: la galería ya está correcta y el archivo
+    // huérfano solo cuesta espacio, no visibilidad.
+    const path = item ? storagePathFromUrl(item.url) : null;
+    if (path) {
+      const { error: rmErr } = await supabase.storage.from("artist-media").remove([path]);
+      if (rmErr) console.warn("[GestionMedia] Fila borrada pero el archivo quedó en Storage:", path, rmErr.message);
+    }
   };
 
   const planLabel = plan === "pro" ? "Pro" : plan === "standard" ? "Standard" : "Beta";
