@@ -70,6 +70,35 @@ export default function ArtistaProfile() {
     image: artist?.cover_image ?? artist?.profile_image ?? undefined,
     noIndex: notFound,
   });
+
+  // Datos estructurados: el perfil es una entidad artística, no una página
+  // genérica (auditoría SEO jul-2026, F05). ProfilePage + Person permiten a
+  // Google entender "quién es" y habilitan resultados de entidad.
+  useEffect(() => {
+    if (!artist) return;
+    const sameAs = [artist.website, artist.instagram, artist.youtube, artist.spotify]
+      .filter((u): u is string => !!u);
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      mainEntity: {
+        "@type": "Person",
+        name: artist.artist_name,
+        ...(artist.bio ? { description: artist.bio } : {}),
+        ...(artist.profile_image ? { image: artist.profile_image } : {}),
+        url: `https://tuesdi.com/artista/${artist.slug}`,
+        ...(sameAs.length ? { sameAs } : {}),
+        homeLocation: {
+          "@type": "Place",
+          name: artist.country ? `${artist.city}, ${artist.country}` : artist.city,
+        },
+      },
+    });
+    document.head.appendChild(script);
+    return () => { script.remove(); };
+  }, [artist]);
   const [fetchError, setFetchError] = useState(false);
 
   const [contactOpen, setContactOpen] = useState(false);
@@ -195,7 +224,7 @@ export default function ArtistaProfile() {
       <header className="relative w-full h-[716px] md:h-[870px] overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10"></div>
         {artist.cover_image && !imgErrors["cover"] ? (
-          <img className="absolute inset-0 w-full h-full object-cover" src={artist.cover_image} alt={artist.artist_name} onError={() => markImgError("cover")} />
+          <img className="absolute inset-0 w-full h-full object-cover" src={artist.cover_image} alt={artist.artist_name} fetchPriority="high" decoding="async" onError={() => markImgError("cover")} />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-surface to-secondary/10 spotlight"></div>
         )}

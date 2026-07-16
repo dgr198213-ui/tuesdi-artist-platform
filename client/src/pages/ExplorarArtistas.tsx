@@ -13,7 +13,7 @@ import PageFooter from "@/components/PageFooter";
 import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ARTIST_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
 import { useSeo } from "@/lib/seo";
 
@@ -218,7 +218,7 @@ export default function ExplorarArtistas() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
               {artists.map((artist) => (
-                <div key={artist.id} className="glass-card rounded-xl overflow-hidden group flex flex-col h-full cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
+                <Link key={artist.id} href={`/artista/${artist.slug}`} className="glass-card rounded-xl overflow-hidden group flex flex-col h-full cursor-pointer">
                   <div className="relative h-64 overflow-hidden bg-surface-container">
                     {artist.profile_image && !imgErrors[artist.id] ? (
                       <img loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src={artist.profile_image} alt={artist.artist_name} onError={() => markImgError(artist.id)} />
@@ -256,12 +256,12 @@ export default function ExplorarArtistas() {
                           </div>
                         )}
                       </div>
-                      <button className="w-full py-sm rounded-lg border border-white/10 hover:border-primary hover:text-primary transition-all font-bold text-white bg-white/5">
+                      <span className="block text-center w-full py-sm rounded-lg border border-white/10 group-hover:border-primary group-hover:text-primary transition-all font-bold text-white bg-white/5">
                         Ver Perfil
-                      </button>
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
 

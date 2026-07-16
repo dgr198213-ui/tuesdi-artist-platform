@@ -5,6 +5,7 @@
  */
 
 import { supabase } from "@/lib/supabase";
+import { compressImage } from "@/lib/imageCompression";
 import DashboardShell from "@/components/DashboardShell";
 import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useRef, useState } from "react";
@@ -103,8 +104,10 @@ export default function GestionMedia() {
     const toUpload = validFiles.slice(0, available);
 
     setUploading(true);
-    for (const file of toUpload) {
-      const ext = file.name.split(".").pop() || "jpg";
+    for (const original of toUpload) {
+      // Comprimir en el navegador (máx. 1920 px, WebP): las fotos de móvil
+      // pesan 4-8 MB y eran la causa del LCP de ~29 s en el perfil.
+      const { file, ext } = await compressImage(original);
       const path = `${userId}/media-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from("artist-media").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) continue;

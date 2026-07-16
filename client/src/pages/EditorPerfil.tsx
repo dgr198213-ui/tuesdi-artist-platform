@@ -12,6 +12,7 @@
  */
 
 import { supabase } from "@/lib/supabase";
+import { compressImage } from "@/lib/imageCompression";
 import DashboardShell from "@/components/DashboardShell";
 import FetchErrorState from "@/components/FetchErrorState";
 import { useEffect, useRef, useState } from "react";
@@ -124,12 +125,14 @@ export default function EditorPerfil() {
     const setUploading = type === "avatar" ? setUploadingAvatar : setUploadingCover;
     setUploading(true);
 
-    const ext = file.name.split(".").pop() || "jpg";
+    // Comprimir antes de subir: la portada es el elemento LCP del perfil
+    // público; una foto de móvil sin tratar (4-8 MB) arruina la carga.
+    const { file: compressed, ext } = await compressImage(file);
     const path = `${userId}/${type}-${Date.now()}.${ext}`;
 
-    const { error } = await supabase.storage.from("artist-media").upload(path, file, {
+    const { error } = await supabase.storage.from("artist-media").upload(path, compressed, {
       upsert: true,
-      contentType: file.type,
+      contentType: compressed.type,
     });
 
     if (error) {

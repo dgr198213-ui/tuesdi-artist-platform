@@ -9,7 +9,7 @@ import PageFooter from "@/components/PageFooter";
 import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState, useCallback } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { EVENT_CATEGORIES, FILTER_CITIES, FILTER_ALL } from "@/lib/constants";
 import { useSeo } from "@/lib/seo";
 
@@ -215,10 +215,10 @@ export default function Eventos() {
                 {events.map((event) => {
                   const { month, day } = formatDate(event.event_date);
                   return (
-                    <div
+                    <Link
                       key={event.id}
+                      href={`/eventos/${event.id}`}
                       className="glass-card rounded-xl overflow-hidden flex flex-col group cursor-pointer"
-                      onClick={() => setLocation(`/eventos/${event.id}`)}
                     >
                       <div className="relative h-48 overflow-hidden bg-surface-container">
                         {event.image_url ? (
@@ -254,7 +254,7 @@ export default function Eventos() {
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>

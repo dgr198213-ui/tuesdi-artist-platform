@@ -3,7 +3,7 @@
  * Barra inferior (bottom nav) para dispositivos móviles
  */
 
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 type DashboardSection = "overview" | "profile" | "media" | "contacts" | "analytics";
 
@@ -20,16 +20,15 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ active }: MobileNavProps) {
-  const [, setLocation] = useLocation();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-surface-container-low border-t border-outline-variant/10 flex justify-around items-center h-20 z-40 md:hidden">
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
         return (
-          <button
+          <Link
             key={item.key}
-            onClick={() => setLocation(item.path)}
+            href={item.path}
             className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors ${
               isActive
                 ? "text-primary"
@@ -47,7 +46,7 @@ export default function MobileNav({ active }: MobileNavProps) {
             <span className="text-[10px] font-label-sm uppercase tracking-widest">
               {item.label}
             </span>
-          </button>
+          </Link>
         );
       })}
     </nav>

@@ -10,7 +10,7 @@ import PageNav from "@/components/PageNav";
 import PageFooter from "@/components/PageFooter";
 import FetchErrorState from "@/components/FetchErrorState";
 import { supabase } from "@/lib/supabase";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState, useEffect, useCallback } from "react";
 import ProductShowcase from "@/components/ProductShowcase";
 
@@ -248,13 +248,13 @@ export default function Home() {
                 Descubre perfiles profesionales con portfolio verificado, categoría y contacto privado directo.
               </p>
             </div>
-            <button className="font-label-sm text-label-sm text-primary flex items-center gap-xs" onClick={() => setLocation("/artistas")}>
+            <Link href="/artistas" className="font-label-sm text-label-sm text-primary flex items-center gap-xs">
               Ver todos <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
             {displayArtists.map((artist) => (
-              <div key={artist.slug} className="glass-card group rounded-xl overflow-hidden cursor-pointer" onClick={() => setLocation(`/artista/${artist.slug}`)}>
+              <Link key={artist.slug} href={`/artista/${artist.slug}`} className="glass-card group rounded-xl overflow-hidden cursor-pointer block">
                 <div className="aspect-[4/5] relative overflow-hidden">
                   {artist.profile_image && !imgErrors[artist.slug] ? (
                     <img className="w-full h-full object-cover" src={artist.profile_image} alt={artist.artist_name} onError={() => markImgError(artist.slug)} />
@@ -267,9 +267,9 @@ export default function Home() {
                 <div className="p-md">
                   <h3 className="font-headline-md text-headline-md text-on-surface mb-xs">{artist.artist_name}</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant mb-md line-clamp-2">{artist.bio || "Artista en TUESDI"}</p>
-                  <button className="w-full py-xs border border-white/10 rounded-lg font-label-sm text-label-sm hover:bg-primary hover:text-on-primary transition-all">Ver Portafolio</button>
+                  <span className="block text-center w-full py-xs border border-white/10 rounded-lg font-label-sm text-label-sm group-hover:bg-primary group-hover:text-on-primary transition-all">Ver Portafolio</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </section>
@@ -278,9 +278,9 @@ export default function Home() {
         <section className="py-xl px-margin max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-lg">
             <h2 className="font-headline-lg text-headline-lg text-on-surface">Próximos eventos</h2>
-            <button className="font-label-sm text-label-sm text-secondary flex items-center gap-xs" onClick={() => setLocation("/eventos")}>
+            <Link href="/eventos" className="font-label-sm text-label-sm text-secondary flex items-center gap-xs">
               Ver agenda <span className="material-symbols-outlined">arrow_forward</span>
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md">
             {displayEvents.map((event) => (
