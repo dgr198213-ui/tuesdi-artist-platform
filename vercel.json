@@ -67,6 +67,17 @@
   ],
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tuesdi-artist-platform.vercel.app"
+        }
+      ],
+      "destination": "https://tuesdi.com/$1",
+      "permanent": true
+    },
+    {
       "source": "/login",
       "destination": "/acceso",
       "permanent": true
